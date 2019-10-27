@@ -1,14 +1,10 @@
 from flask import Flask, request, make_response, jsonify
 
-from reader import PdfBookParser
-from book import Book
-
+from page_parser import HtmlParser
 
 app = Flask(__name__)
 
-pdf_book_parser = PdfBookParser()
-
-book = Book(pdf_book_parser)
+parser = HtmlParser()
 
 
 # default route
@@ -22,7 +18,7 @@ def results():
     # build a request object
     req = request.get_json(force=True)
 
-    return jsonify(book.get_response(req))
+    return jsonify(parser.get_response(req))
 
 
 # create a route for webhook
