@@ -24,7 +24,8 @@ class HtmlParser:
     def get_title(self, url):
         response = self.http.request('GET', url)
         self.soup = BeautifulSoup(response.data, 'html.parser')
-        return self.soup.title.string
+        title = self.soup.title.string
+        return title
 
 
 parser = HtmlParser()
