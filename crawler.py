@@ -1,5 +1,6 @@
 from queue import SimpleQueue, Empty
 import re
+import time
 
 from bs4 import BeautifulSoup
 import urllib3
@@ -28,11 +29,13 @@ def remove_invalid_links(links):
 
 
 class Crawler:
-    def __init__(self, max_level):
-        self.http = urllib3.PoolManager()
+    def __init__(self, max_level=1, only_local=True):
+        self.http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=5.0, read=5.0))
         self.max_level = max_level
+        # If true, the crawler crawls only on the local website.
+        self.only_local = only_local
         # Nodes yet to visit.
-        self.nodes = SimpleQueue()
+        self.nodes_queue = SimpleQueue()
         # Visited_nodes has structure {URL, Node}.
         self.visited_nodes = dict()
         # Visited_urls contains strings of URLs already visited.
@@ -42,13 +45,14 @@ class Crawler:
         # Create index node.
         index_node = Node(index_url, 0, None)
         # Add index node to nodes.
-        self.nodes.put(index_node)
+        self.nodes_queue.put(index_node)
+        self.visited_nodes
 
         end_of_queue = False
         while not end_of_queue:
             try:
-                node = self.nodes.get(block=False)
-                print("Elements in queue: %d" % self.nodes.qsize())
+                node = self.nodes_queue.get(block=False)
+                print("Elements in queue: %d" % self.nodes_queue.qsize())
                 self.parse_node(node)
             except Empty:
                 end_of_queue = True
@@ -56,6 +60,12 @@ class Crawler:
         return
 
     def parse_node(self, node):
+        # Check if I have already visited the node.
+        if node.url in self.visited_urls:
+            # Node already visited, increment counter, skip visitation.
+            self.visited_nodes[node.url].times_visited += 1
+            return
+
         # Add node to the list of visited ones.
         self.visited_urls.append(node.url)
         self.visited_nodes[node.url] = node
@@ -76,7 +86,6 @@ class Crawler:
         print("Visiting %s" % node.url)
 
         if node.level == self.max_level:
-            print("Max depth reached, I'll ignore the links in this page!")
             return
 
         links = soup.find_all('a')
@@ -90,16 +99,23 @@ class Crawler:
             hostname = re.search("^(?:https?://)?(?:[^@/\n]+@)?(?:www\.)?([^:/?\n]+)", node.url)
             link = urljoin(hostname[0], link)
 
+            if self.only_local and not link.startswith(hostname[0]):
+                # Skip links redirecting to external websites.
+                continue
+
             # Create a node for each link in the page.
-            if link in self.visited_urls:
-                # Page already visited, increment counter.
-                print("Node already visited. %s" % link)
-                self.visited_nodes[link].times_visited += 1
-            else:
-                # Page not visited yet, create new node.
-                child_node = Node(link, node.level + 1, node)
-                self.nodes.put(child_node)
+            child_node = Node(link, node.level + 1, node)
+            self.nodes_queue.put(child_node)
+
+    def get_most_visited(self):
+        nodes = list(self.visited_nodes.values())
+        most_visited_nodes = sorted(nodes, key=lambda x: x.times_visited, reverse=True)
+        print("Stop")
 
 
+start_time = time.time()
 crawler = Crawler(2)
-crawler.start("http://www.polo-lecco.polimi.it/en/")
+crawler.start("http://www.polimi.it")
+print("Time elapsed: %.2f s" % (time.time() - start_time))
+crawler.get_most_visited()
+
