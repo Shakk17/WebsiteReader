@@ -13,6 +13,7 @@ class Node:
         self.level = level
         self.times_visited = 1
         self.father = father
+        self.soup = None
 
 
 def remove_invalid_links(links):
@@ -46,7 +47,6 @@ class Crawler:
         index_node = Node(index_url, 0, None)
         # Add index node to nodes.
         self.nodes_queue.put(index_node)
-        self.visited_nodes
 
         end_of_queue = False
         while not end_of_queue:
@@ -81,14 +81,14 @@ class Crawler:
             return
 
         # Parse page.
-        soup = BeautifulSoup(response.data, 'html5lib')
+        node.soup = BeautifulSoup(response.data, 'html5lib')
 
         print("Visiting %s" % node.url)
 
         if node.level == self.max_level:
             return
 
-        links = soup.find_all('a')
+        links = node.soup.find_all('a')
 
         links = remove_invalid_links(links)
 
@@ -110,12 +110,13 @@ class Crawler:
     def get_most_visited(self):
         nodes = list(self.visited_nodes.values())
         most_visited_nodes = sorted(nodes, key=lambda x: x.times_visited, reverse=True)
-        print("Stop")
+        for node in most_visited_nodes[:30]:
+            print("Visits: %d - %s - %s" % (node.times_visited, node.soup.title.string, node.url))
 
 
 start_time = time.time()
 crawler = Crawler(2)
-crawler.start("http://www.polimi.it")
-print("Time elapsed: %.2f s" % (time.time() - start_time))
+crawler.start("https://www.independent.co.uk/")
 crawler.get_most_visited()
+print("Time elapsed: %.2f s" % (time.time() - start_time))
 
