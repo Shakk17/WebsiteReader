@@ -1,10 +1,10 @@
 from flask import Flask, request, make_response, jsonify
 
-from page_parser import HtmlParser
+from open_reader import OpenReader
 
 app = Flask(__name__)
 
-parser = HtmlParser()
+parser = OpenReader()
 
 
 # default route
