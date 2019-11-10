@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response, jsonify
+import json
 
 from open_reader import OpenReader
 
@@ -15,10 +16,12 @@ def index():
 
 # function for responses
 def results():
-    # build a request object
+    # Parse JSON request into readable object.
     req = request.get_json(force=True)
 
-    return jsonify(parser.get_response(req))
+    obj_response = parser.get_response(req)
+
+    return jsonify(obj_response)
 
 
 # create a route for webhook
