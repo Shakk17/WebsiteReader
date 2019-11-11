@@ -1,11 +1,11 @@
 from flask import Flask, request, make_response, jsonify
 import json
 
-from open_reader import OpenReader
+from request_handler import RequestHandler
 
 app = Flask(__name__)
 
-parser = OpenReader()
+parser = RequestHandler()
 
 
 # default route
