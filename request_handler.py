@@ -40,7 +40,7 @@ class RequestHandler:
             context_article = 0
 
         if action == "VisitPage":
-            return self.visit_page(request)
+            return self.visit_page(request.get("queryResult").get("parameters").get("url"))
         elif action == 'GetInfo':
             return self.get_info(context_url)
         elif action == 'GetMenu':
@@ -48,13 +48,9 @@ class RequestHandler:
         elif action == 'ReadPage':
             return self.read_page(context_url, context_paragraph, context_article)
         elif action == "GoToSection":
-            return  self.go_to_section(context_url)
+            return self.go_to_section(context_url, context.get("parameters").get("section-name"))
 
-
-    def visit_page(self, request):
-        # Get url from parameters.
-        url = request.get("queryResult").get("parameters").get("url")
-
+    def visit_page(self, url):
         try:
             self.url_parser.get_soup(url)
             text_response = "%s visited successfully!" % url
@@ -71,7 +67,9 @@ class RequestHandler:
         return build_response(text_response, url)
 
     def get_menu(self, url):
-        text_response = self.url_parser.get_menu(url)
+        menu = self.url_parser.get_menu(url)
+        strings = [tup[1] for tup in menu]
+        text_response = '-'.join(strings)
         # TODO get elements of menu, how many?
         return build_response(text_response, url=url)
 
@@ -97,8 +95,9 @@ class RequestHandler:
                 article = 0
         return build_response(text_response, url=url, paragraph=paragraph, article=article)
 
-    # def go_to_section(self, url):
-
-
-
-
+    def go_to_section(self, url, name):
+        try:
+            new_url = self.url_parser.go_to_section(url, name)
+            return self.visit_page(new_url)
+        except ValueError:
+            return "Wrong input."

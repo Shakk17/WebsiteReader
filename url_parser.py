@@ -59,22 +59,20 @@ class UrlParser:
         # Flatten list.
         li_lists = [item for sublist in li_lists for item in sublist]
         # Get anchors.
-        a_elements = [li_list.find_all(name="a") for li_list in li_lists]
+        a_elements = [li_list.find(name="a") for li_list in li_lists]
         # Remove duplicates in list.
-        a_elements = list(set(list(a_elements)))
+        a_elements = list(set(a_elements))
         # todo sends back tuple with text and url of anchor
-        strings = [string.split('\n') for string in strings]
-        # Flatten list while removing whitespaces.
-        strings = [item.strip() for sublist in strings for item in sublist]
-        # Filter out empty elements.
-        r = re.compile(".*\w+.*")
-        strings = list(filter(r.match, strings))
-        # Remove duplicates.
-        strings = list(set(strings))
-        joined_strings = ', '.join(strings)
-        print(joined_strings)
-        return joined_strings
+        elements = [(elem.attrs["href"], elem.text) for elem in a_elements]
+        return elements
 
     def go_to_section(self, url, name):
         # Get menu.
         menu = self.get_menu(url)
+        menu_anchors = [tup[0] for tup in menu]
+        menu_strings = [tup[1] for tup in menu]
+        # Put all the strings to lowercase.
+        menu_strings = [string.lower() for string in menu_strings]
+        # Return index of string, if present. Otherwise IndexError.
+        index = menu_strings.index(name.lower())
+        return menu_anchors[index]
