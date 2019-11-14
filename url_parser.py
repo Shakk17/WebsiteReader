@@ -1,12 +1,12 @@
-from bs4 import BeautifulSoup
 import urllib3
-
-import re
+from bs4 import BeautifulSoup
 
 
 class UrlParser:
-    def __init__(self):
+    def __init__(self, url):
         self.http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=5.0, read=5.0))
+        self.url = url
+        self.soup = self.get_soup(url)
 
     def get_soup(self, url):
         try:
@@ -21,39 +21,38 @@ class UrlParser:
         soup = BeautifulSoup(response.data, 'html.parser')
         return soup
 
-    def get_info(self, url):
-        soup = self.get_soup(url)
-        # todo get info about the page.
-        return soup.title.string
+    def get_info(self):
+        text_response = "The title of this page is %s.\n" % self.soup.title.string
+        if self.is_article():
+            text_response += "This page is an article!"
+        else:
+            text_response += "This page is a section!"
+        return text_response
 
-    def is_article(self, url):
-        soup = self.get_soup(url)
+    def is_article(self):
         # Count number of <article> tags in the page.
-        n_articles = soup.find_all(name="article")
+        n_articles = self.soup.find_all(name="article")
         return len(n_articles) < 8
 
-    def get_article(self, url, paragraph):
-        soup = self.get_soup(url)
+    def get_article(self, paragraph):
         # Find article div.
-        article_div = soup.find_all(name="div", attrs={'class': 'news__content'})[0]
+        article_div = self.soup.find_all(name="div", attrs={'class': 'news__content'})[0]
         # If paragraph is available, read it.
         div_paragraphs = article_div.find_all('p')
         string = "%s\n %d paragraph(s) left." % (div_paragraphs[paragraph].text, len(div_paragraphs) - paragraph)
         return string
 
-    def get_section(self, url, article):
-        soup = self.get_soup(url)
+    def get_section(self, article):
         # Get all articles in the section.
-        articles = soup.find_all(name="article")
+        articles = self.soup.find_all(name="article")
         text_response = "Article number %s/%d \n" % (str(article+1), len(articles))
         text_response += articles[article].find(name="h2").text
         print(text_response)
         return text_response
 
-    def get_menu(self, url):
-        soup = self.get_soup(url)
+    def get_menu(self):
         # Get all the ul of class menu.
-        ul_lists = [ul_menu for ul_menu in soup.find_all(name="ul", attrs={'class': 'menu'})]
+        ul_lists = [ul_menu for ul_menu in self.soup.find_all(name="ul", attrs={'class': 'menu'})]
         # Get all the li elements belonging to ul of class menu.
         li_lists = [ul_list.find_all(name="li") for ul_list in ul_lists]
         # Flatten list.
@@ -62,13 +61,13 @@ class UrlParser:
         a_elements = [li_list.find(name="a") for li_list in li_lists]
         # Remove duplicates in list.
         a_elements = list(set(a_elements))
-        # todo sends back tuple with text and url of anchor
+        # Sends back tuple with url and text of anchor.
         elements = [(elem.attrs["href"], elem.text) for elem in a_elements]
         return elements
 
-    def go_to_section(self, url, name):
+    def go_to_section(self, name):
         # Get menu.
-        menu = self.get_menu(url)
+        menu = self.get_menu()
         menu_anchors = [tup[0] for tup in menu]
         menu_strings = [tup[1] for tup in menu]
         # Put all the strings to lowercase.
