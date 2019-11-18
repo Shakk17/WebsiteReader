@@ -1,6 +1,8 @@
 import urllib3
 from bs4 import BeautifulSoup
 
+from time import time
+
 
 class UrlParser:
     def __init__(self, url):
@@ -10,7 +12,9 @@ class UrlParser:
 
     def get_soup(self, url):
         try:
+            start = time()
             response = self.http.request('GET', url)
+            print("Request time: %.2f s" % (time() - start))
         except urllib3.exceptions.MaxRetryError:
             print("Can't access this website: %s" % url)
             raise Exception("Error while visiting the page.")
@@ -42,13 +46,14 @@ class UrlParser:
         string = "%s\n %d paragraph(s) left." % (div_paragraphs[paragraph].text, len(div_paragraphs) - paragraph)
         return string
 
-    def get_section(self, article):
+    def get_section(self, idx_article):
         # Get all articles in the section.
         articles = self.soup.find_all(name="article")
-        text_response = "Article number %s/%d \n" % (str(article+1), len(articles))
-        text_response += articles[article].find(name="h2").text
+        text_response = "Article number %s/%d \n" % (str(idx_article + 1), len(articles))
+        text_response += articles[idx_article].find(name="h2").text
+        link = articles[idx_article].find(name='a').attrs["href"]
         print(text_response)
-        return text_response
+        return text_response, link
 
     def get_menu(self):
         # Get all the ul of class menu.
