@@ -11,9 +11,9 @@ class WebPage:
         # Type of the page, it can be article or section.
         self.type = None
         # Number that indicates the paragraph to read in current article.
-        self.idx_paragraph = None
+        self.idx_paragraph = 0
         # Number that indicates the article to read in current section.
-        self.idx_article = None
+        self.idx_article = 0
         # Link selected.
         self.link = None
 
@@ -89,6 +89,7 @@ class RequestHandler:
     def visit_page(self):
         try:
             text_response = "%s visited successfully!" % self.url_parser.url
+            self.web_page = WebPage(self.url_parser.url)
             # Understand what type of page is.
             if self.url_parser.is_article():
                 self.web_page.type = "article"
