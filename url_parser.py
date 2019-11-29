@@ -1,4 +1,4 @@
-import urllib3
+from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 
 from time import time
@@ -6,23 +6,24 @@ from time import time
 
 class UrlParser:
     def __init__(self, url):
-        self.http = urllib3.PoolManager(timeout=urllib3.Timeout(connect=5.0, read=5.0))
         self.url = url
         self.soup = self.get_soup(url)
 
     def get_soup(self, url):
+        start = time()
         try:
-            start = time()
-            response = self.http.request('GET', url)
-            print("Request time: %.2f s" % (time() - start))
-        except urllib3.exceptions.MaxRetryError:
+            session = HTMLSession()
+            response = session.get(url=url)
+        except Exception:
             print("Can't access this website: %s" % url)
             raise Exception("Error while visiting the page.")
-        except urllib3.exceptions.LocationValueError:
-            print("Not a valid URL: %s" % url)
-            raise Exception("Error while visiting the page.")
 
-        soup = BeautifulSoup(response.data, 'html.parser')
+        print("Request time: %.2f s" % (time() - start))
+
+        response.html.arender()
+        soup = BeautifulSoup(response.html.html, 'lxml')
+        response.close()
+        session.close()
         return soup
 
     def get_info(self):

@@ -2,7 +2,12 @@ import webview
 from url_parser import UrlParser
 
 
-url_parser = UrlParser("www.google.it")
-html_code = url_parser.soup.prettify()
-webview.create_window('Hello world', 'https://pywebview.flowrl.com/hello')
-webview.start()
+def load_html(window):
+    url_parser = UrlParser("http://www.open.online")
+
+    html_code = url_parser.soup.prettify()
+    window.load_html(html_code)
+
+
+window = webview.create_window('Hello world')
+webview.start(load_html, window)
