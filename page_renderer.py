@@ -1,13 +1,20 @@
-import webview
-from url_parser import UrlParser
+import time
+from selenium import webdriver
 
 
-def load_html(window):
-    url_parser = UrlParser("http://www.open.online")
+def save_screenshot(url):
+    start = time.time()
+    options = webdriver.ChromeOptions()
+    options.headless = True
 
-    html_code = url_parser.soup.prettify()
-    window.load_html(html_code)
+    with webdriver.Chrome(options=options)as driver:
+        driver.get(url)
+
+        S = lambda X: driver.execute_script('return document.body.parentNode.scroll' + X)
+        driver.set_window_size(S('Width'), S('Height'))  # May need manual adjustment
+        driver.find_element_by_tag_name('body').screenshot('web_screenshot.png')
+
+    print("Time elapsed: %.2f" % (time.time() - start))
 
 
-window = webview.create_window('Hello world')
-webview.start(load_html, window)
+save_screenshot("https://www.open.online")
