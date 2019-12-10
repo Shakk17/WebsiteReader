@@ -3,6 +3,7 @@ from url_parser import UrlParser
 import queue
 import threading
 import time
+from colorama import Fore, Style
 
 TIMEOUT = 4
 
@@ -22,11 +23,13 @@ class Cursor:
         self.menu = dict()
 
     def print(self):
+        print(Fore.GREEN)
         print("\tURL: %s" % self.url)
         print("\tPage type: %s" % self.type)
         print("\tIdx paragraph: %d" % self.idx_paragraph)
         print("\tIdx article: %d" % self.idx_article)
         print("\tLink: %s" % self.link)
+        print(Style.RESET_ALL)
 
 
 class RequestHandler:
