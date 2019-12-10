@@ -2,31 +2,45 @@ from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 
 from time import time
+import warnings
 
 
 class UrlParser:
     def __init__(self, url):
         self.url = url
-        self.soup = self.get_soup(url)
+        self.html_code = self.render_page()
+        self.soup = BeautifulSoup(self.html_code, 'lxml')
 
-    def get_soup(self, url):
+    def render_page(self):
+        """
+        Parses the web page specifies as URL in the class. It supports Javascript.
+        Returns html code of the web page.
+        """
         start = time()
         try:
+            print("Rendering page...")
             session = HTMLSession()
-            response = session.get(url=url)
+            response = session.get(url=self.url)
         except Exception:
-            print("Can't access this website: %s" % url)
+            print("Can't access this website: %s" % self.url)
             raise Exception("Error while visiting the page.")
 
         print("Request time: %.2f s" % (time() - start))
 
-        response.html.arender()
-        soup = BeautifulSoup(response.html.html, 'lxml')
+        with warnings.catch_warnings():
+            # Ignore arender warning.
+            warnings.simplefilter("ignore")
+            response.html.arender()
+
         response.close()
         session.close()
-        return soup
+
+        return response.html.html
 
     def get_info(self):
+        """
+        Returns a text containing information about the type of the web page analyzed.
+        """
         text_response = "The title of this page is %s.\n" % self.soup.title.string
         if self.is_article():
             text_response += "This page is an article!"
@@ -35,11 +49,17 @@ class UrlParser:
         return text_response
 
     def is_article(self):
+        """
+        Returns true if the web page contained in the url specified is an article.
+        """
         # Count number of <article> tags in the page.
         n_articles = self.soup.find_all(name="article")
         return len(n_articles) < 8
 
     def get_article(self, paragraph):
+        """
+        Returns the text contained in the paragraph indicated in the request.
+        """
         # Find article div.
         article_div = self.soup.find_all(name="div", attrs={'class': 'news__content'})[0]
         # If paragraph is available, read it.
@@ -48,7 +68,9 @@ class UrlParser:
         return string
 
     def get_section(self, idx_article):
-        # Get all articles in the section.
+        """
+        Returns a tuple (text, url) corresponding to the next article preview to be visualized.
+        """
         articles = self.soup.find_all(name="article")
         text_response = "Article number %s/%d \n" % (str(idx_article + 1), len(articles))
         text_response += articles[idx_article].find(name="h2").text
@@ -57,6 +79,9 @@ class UrlParser:
         return text_response, link
 
     def get_menu(self):
+        """
+        Returns a list of tuples (text, url) corresponding to the anchors present in the menu.
+        """
         # Get all the ul of class menu.
         ul_lists = [ul_menu for ul_menu in self.soup.find_all(name="ul", attrs={'class': 'menu'})]
         # Get all the li elements belonging to ul of class menu.
@@ -68,14 +93,17 @@ class UrlParser:
         # Remove duplicates in list.
         a_elements = list(set(a_elements))
         # Sends back tuple with url and text of anchor.
-        elements = [(elem.attrs["href"], elem.text) for elem in a_elements]
+        elements = [(elem.text, elem.attrs["href"]) for elem in a_elements]
         return elements
 
     def go_to_section(self, name):
+        """
+        Given the name of one of the menu's entries, returns its URL.
+        """
         # Get menu.
         menu = self.get_menu()
-        menu_anchors = [tup[0] for tup in menu]
-        menu_strings = [tup[1] for tup in menu]
+        menu_strings = [tup[0] for tup in menu]
+        menu_anchors = [tup[1] for tup in menu]
         # Put all the strings to lowercase.
         menu_strings = [string.lower() for string in menu_strings]
         # Return index of string, if present. Otherwise IndexError.

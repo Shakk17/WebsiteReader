@@ -4,8 +4,10 @@ import queue
 import threading
 import time
 
+TIMEOUT = 4
 
-class WebPage:
+
+class Cursor:
     def __init__(self, url):
         self.url = url
         # Type of the page, it can be article or section.
@@ -16,17 +18,33 @@ class WebPage:
         self.idx_article = 0
         # Link selected.
         self.link = None
+        # Menu of web page.
+        self.menu = dict()
+
+    def print(self):
+        print("\tURL: %s" % self.url)
+        print("\tPage type: %s" % self.type)
+        print("\tIdx paragraph: %d" % self.idx_paragraph)
+        print("\tIdx article: %d" % self.idx_article)
+        print("\tLink: %s" % self.link)
 
 
 class RequestHandler:
     def __init__(self):
         self.url_parser = None
-        self.web_page = None
+        self.cursor = None
+        # Queue set up to
         self.q = queue.Queue()
 
     def get_response(self, request):
+        """
+        Starts two threads.
+        One to process the incoming request, the other one is a timeout.
+        Each thread, after its completion, puts the result in a queue.
+        After the timeout, gets the first available element from the queue.
+        """
         main_thread = threading.Thread(target=self.elaborate, args=(request,), daemon=True)
-        timeout_thread = threading.Thread(target=self.postpone_response, args=(request,), daemon=True)
+        timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
         main_thread.start()
         timeout_thread.start()
         # Wait until timeout is finished.
@@ -35,9 +53,14 @@ class RequestHandler:
         # Returns the first available result.
         result = self.q.get()
 
+        self.cursor.print()
+
         return result
 
     def elaborate(self, request):
+        """
+        Parses the request and understands what to do.
+        """
         # Get action from request.
         action = request.get('queryResult').get('action')
         print("-" * 20)
@@ -57,18 +80,18 @@ class RequestHandler:
             url = context.get("parameters").get("web_page").get("url")
 
         # Create object containing details about the web page.
-        self.web_page = WebPage(url=url)
+        self.cursor = Cursor(url=url)
 
         try:
-            self.web_page.type = context.get("parameters").get("web_page").get("type")
-            self.web_page.idx_paragraph = int(context.get("parameters").get("web_page").get("idx_paragraph"))
-            self.web_page.idx_article = int(context.get("parameters").get("web_page").get("idx_article"))
-            self.web_page.link = context.get("parameters").get("web_page").get("link")
+            self.cursor.type = context.get("parameters").get("web_page").get("type")
+            self.cursor.idx_paragraph = int(context.get("parameters").get("web_page").get("idx_paragraph"))
+            self.cursor.idx_article = int(context.get("parameters").get("web_page").get("idx_article"))
+            self.cursor.link = context.get("parameters").get("web_page").get("link")
         except AttributeError:
-            self.web_page.type = "article"
-            self.web_page.idx_paragraph = 0
-            self.web_page.idx_article = 0
-            self.web_page.link = url
+            self.cursor.type = "article"
+            self.cursor.idx_paragraph = 0
+            self.cursor.idx_article = 0
+            self.cursor.link = url
 
         # Initiate UrlParser.
         self.url_parser = UrlParser(url=url)
@@ -87,15 +110,18 @@ class RequestHandler:
             return self.go_to_section(context.get("parameters").get("section-name"))
 
     def visit_page(self):
+        """
+        Change the position of the cursor to the page visited.
+        """
         try:
             text_response = "%s visited successfully!" % self.url_parser.url
-            self.web_page = WebPage(self.url_parser.url)
+            self.cursor = Cursor(self.url_parser.url)
             # Understand what type of page is.
             if self.url_parser.is_article():
-                self.web_page.type = "article"
+                self.cursor.type = "article"
                 text_response += "\nThis page is an article."
             else:
-                self.web_page.type = "section"
+                self.cursor.type = "section"
                 text_response += "\nThis page is a section."
 
         except Exception as ex:
@@ -105,42 +131,56 @@ class RequestHandler:
         return self.build_response(text_response)
 
     def get_menu(self):
+        """
+        Returns the links reachable from the menu.
+        """
         menu = self.url_parser.get_menu()
-        strings = [tup[1] for tup in menu]
+        strings = [tup[0] for tup in menu]
         text_response = '-'.join(strings)
         # TODO get elements of menu, how many?
         return self.build_response(text_response)
 
     def get_info(self):
+        """
+        Returns info about the web page.
+        """
         text_response = self.url_parser.get_info()
         return self.build_response(text_response)
 
     def read_page(self):
-        # If page is article, read it. otherwise read main article titles available.
+        """
+        If page is article, read it. Otherwise read main article titles available.
+        """
         if self.url_parser.is_article():
             try:
-                text_response = self.url_parser.get_article(self.web_page.idx_paragraph)
-                self.web_page.idx_paragraph += 1
+                text_response = self.url_parser.get_article(self.cursor.idx_paragraph)
+                self.cursor.idx_paragraph += 1
             except IndexError as err:
                 text_response = "End of article."
-                self.web_page.idx_paragraph = 0
+                self.cursor.idx_paragraph = 0
         else:
             try:
-                article = self.url_parser.get_section(self.web_page.idx_article)
+                article = self.url_parser.get_section(self.cursor.idx_article)
                 text_response = article[0]
-                self.web_page.link = article[1]
-                self.web_page.idx_article += 1
+                self.cursor.link = article[1]
+                self.cursor.idx_article += 1
             except IndexError as err:
                 text_response = "End of section."
-                self.web_page.idx_article = 0
+                self.cursor.idx_article = 0
         return self.build_response(text_response)
 
     def open_link(self):
-        self.url_parser = UrlParser(url=self.web_page.link)
-        self.web_page.url = self.web_page.link
+        """
+        Visits the web page linked in the cursor, then sets the cursor on that page.
+        """
+        self.url_parser = UrlParser(url=self.cursor.link)
+        self.cursor.url = self.cursor.link
         return self.visit_page()
 
     def go_to_section(self, name):
+        """
+        Opens the section of the menu, if present.
+        """
         try:
             new_url = self.url_parser.go_to_section(name)
             self.url_parser = UrlParser(new_url)
@@ -149,8 +189,6 @@ class RequestHandler:
             return "Wrong input."
 
     def build_response(self, text_response):
-        print("URL: %s" % self.web_page.url)
-
         self.q.put(
             {
                 "fulfillmentText": text_response,
@@ -158,17 +196,17 @@ class RequestHandler:
                     "name": "projects/<Project ID>/agent/sessions/<Session ID>/contexts/web-page",
                     "lifespanCount": 1,
                     "parameters": {
-                        "web_page": vars(self.web_page)
+                        "web_page": vars(self.cursor)
                     }
                 }]
             })
 
-    def postpone_response(self, request):
+    def postpone_response(self, request, seconds):
         # Get action from request.
         action = request.get('queryResult').get('action')
 
         # Start timer.
-        time.sleep(2.5)
+        time.sleep(seconds)
         # After 4 seconds, checks if the main thread has terminated.
         if self.q.empty():
             # Send a response to server to ask for 5 more seconds to answer. Valid only two times.
@@ -177,7 +215,7 @@ class RequestHandler:
                 {
                     "followupEventInput": {
                         "name": "timeout-" + action,
-                        "parameters": vars(self.web_page),
+                        "parameters": vars(self.cursor),
                         "languageCode": "en-US"
                     }
                 })

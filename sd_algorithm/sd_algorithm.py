@@ -13,18 +13,13 @@
 
 import copy
 import re
-import sys
-import urllib
 from time import time
 
 from lxml import html
 from lxml.html.clean import Cleaner
-from requests_html import HTMLSession
-
-
 from region import Region
+from requests_html import HTMLSession
 from terminal_colors import Tcolors
-from url_parser import UrlParser
 
 VALID_TAGS = ['div', 'td', 'span', 'p', 'form', 'dd', 'dt', 'li']
 STRONG_TAGS = ['div', 'td', 'dd', 'dt', 'li']
@@ -360,8 +355,7 @@ class SDAlgorithm:
         """
         if max_group in grouped_comments:
             first_candidate_comment = grouped_comments[max_group][0]
-            return article.distance_from_root == first_candidate_comment.distance_from_root \
-                   and self.combined_region_level_exceeded(article)
+            return article.distance_from_root == first_candidate_comment.distance_from_root and self.combined_region_level_exceeded(article)
         else:
             return self.combined_region_level_exceeded(article)
 
@@ -500,7 +494,7 @@ class SDAlgorithm:
             region.distance_from_max = 100 - d
             if region.distance_from_max == 0 and region.parts == 1 and not fixed_regions and len(
                     list(region.root_node.getchildren())) > 1 and (
-                    self.content_appears_in_other_region(region) or self.close_diff_from_second_max(self.max_region)):
+                    self.content_appears_in_other_region(region) or self.close_diff_from_second_max()):
                 self.regions.remove(region)
                 self.recompute_max_density_region()
                 fixed_regions = True
@@ -626,7 +620,7 @@ class SDAlgorithm:
 
         if parent_path not in ["/html", "/html/body"] and node_text is not None \
                 and node.tag != 'body' and self.has_visible_parents(valid_parent):
-            if not parent_path in self.valid_nodes:
+            if parent_path not in self.valid_nodes:
                 self.valid_nodes[parent_path] = [node_path]
             else:
                 if node_path not in self.valid_nodes[parent_path]:
@@ -640,7 +634,7 @@ class SDAlgorithm:
 
 
 if __name__ == '__main__':
-    url = "https://www.polimi.it/privacy/"
+    url = "https://www.open.online/2019/12/09/chi-e-sanna-marin-la-premier-piu-giovane-del-mondo/"
     sd = SDAlgorithm()
     sd.url = url
     sd.analyze_page()
