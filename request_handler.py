@@ -19,11 +19,10 @@ class Cursor:
         self.idx_article = 0
         # Link selected.
         self.link = None
-        # Menu of web page.
-        self.menu = dict()
 
     def print(self):
         print(Fore.GREEN)
+        print(Style.BRIGHT + "\t+++ CURSOR +++" + Style.NORMAL)
         print("\tURL: %s" % self.url)
         print("\tPage type: %s" % self.type)
         print("\tIdx paragraph: %d" % self.idx_paragraph)
