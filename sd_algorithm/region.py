@@ -134,18 +134,15 @@ class Region:
 
     def _print(self):
         # Uncomment the following for debugging of the regions.
-        """
-        print Tcolors.CYAN  + "[x] Region:", self.root
-        print "-----------------------------------------------------------------------------"
-        print Tcolors.ENDC + Tcolors.WARNING + " Tag:", self.root_node.tag
-        print " Class:", self.class_name
-        print " Id:", self.id
-        print " Level:", self.distance_from_root
-        print " Parts:", self.parts
-        print " Density:", self.density
-        print " Distance from max:", self.distance_from_max
-        print " Has title on ancestors:", self.has_title_at_ancestors(None, self.root_node)
-        print " Full text: \n", self.full_text 
-        print "\n" + Tcolors.ENDC
-        """
+        print("[x] Region:", self.root)
+        print("-" * 40)
+        print("Tag:", self.root_node.tag)
+        print("Class:", self.class_name)
+        print("Id:", self.id)
+        print("Level:", self.distance_from_root)
+        print("Parts:", self.parts)
+        print("Density:", self.density)
+        print("Distance from max:", self.distance_from_max)
+        print("Has title on ancestors:", self.has_title_at_ancestors(None, self.root_node))
+        print("Full text: \n", self.full_text)
         pass
