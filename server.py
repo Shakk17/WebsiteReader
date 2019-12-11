@@ -1,5 +1,5 @@
 from flask import Flask, request, make_response, jsonify
-import json
+from time import time
 
 from request_handler import RequestHandler
 
@@ -16,11 +16,12 @@ def index():
 
 # function for responses
 def results():
+    start = time()
     # Parse JSON request into readable object.
     req = request.get_json(force=True)
 
     obj_response = parser.get_response(req)
-
+    print("Total time elapsed: %.2f" % (time() - start))
     return jsonify(obj_response)
 
 
