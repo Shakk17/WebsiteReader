@@ -13,13 +13,12 @@
 
 import copy
 import re
-from time import time
 
 from lxml import html
 from lxml.html.clean import Cleaner
-from region import Region
-from requests_html import HTMLSession
-from terminal_colors import Tcolors
+from sd_algorithm.region import Region
+
+from url_parser import UrlParser
 
 VALID_TAGS = ['div', 'td', 'span', 'p', 'form', 'dd', 'dt', 'li']
 STRONG_TAGS = ['div', 'td', 'dd', 'dt', 'li']
@@ -34,7 +33,7 @@ T2 = 20  # min region density threshold
 
 class SDAlgorithm:
 
-    def __init__(self):
+    def __init__(self, url):
         self.valid_nodes = {}
         self.regions = []
         self.max_region = None
@@ -42,7 +41,7 @@ class SDAlgorithm:
         self.min_region_level = 10000
         self.min_region_level_counter = 0
         self.page_model = None
-        self.url = None
+        self.url = url
 
     def analyze_page(self):
 
@@ -57,38 +56,24 @@ class SDAlgorithm:
         self.create_regions(tree)
         print("[*] Calculating distances from max region...")
         self.calculate_distances_from_max(tree)
-        print("[*] Printing regions...\n")
-        for region in self.regions:
-            print(region)
+        print("%d regions found!" % len(self.regions))
 
         article, comments, multiple = self.classify_page()
 
         if article is not None and comments is None:
-            return 'article', article, None, None
+            return 'article', article
         elif article is not None:
             return 'comment', article, comments
         else:
-            return 'multiple', None, None, multiple
+            return 'multiple', multiple
 
     def construct_page_tree(self):
         """
         Downloads the HTML page given the URL and creates the DOM page tree.
         Only the nodes that are useful for the segmentation are kept.
         """
-        start = time()
-        try:
-            session = HTMLSession()
-            response = session.get(url=url)
-        except Exception:
-            print("Can't access this website: %s" % url)
-            raise Exception("Error while visiting the page.")
-
-        print("Request time: %.2f s" % (time() - start))
-
-        response.html.arender()
-        response.close()
-        session.close()
-        doc = html.fromstring(response.html.html)
+        url_parser = UrlParser(self.url)
+        doc = html.fromstring(url_parser.html_code)
         cleaner = Cleaner(**ARGS)
         try:
             doc = cleaner.clean_html(doc)
@@ -117,26 +102,20 @@ class SDAlgorithm:
 
                 context_validated = self.candidate_context_validated(article, grouped_comments, max_group)
                 if self.big_areas_in_same_level(article, grouped_comments, max_group) and not validated:
-                    print(Tcolors.INFO + " Multiple similar regions detected!")
-                    print("Class: ")
-                    print(Tcolors.RES + " " + grouped_comments[max_group][0].class_name)
+                    print("Multiple similar regions detected!")
+                    print("Class: %s" % grouped_comments[max_group][0].class_name)
                     print("Texts: ")
                     for reg in grouped_comments[max_group]:
                         print(reg.full_text)
                     return None, None, grouped_comments[max_group]
                 elif not context_validated:
-                    print()
                     self.print_article(article)
-                    print()
-                    print(Tcolors.INFO + " No comments found.")
+                    print("No comments found.")
                     return article, None, None
                 elif context_validated:
-                    print()
-                    print(Tcolors.INFO + " Article with comments detected!")
+                    print("Article with comments detected!")
                     self.print_article(article)
-                    print()
-                    print("Comment class:")
-                    print(Tcolors.RES + " " + max_group)
+                    print("Comment class: %s" % max_group)
                     print("Comments:")
                     for com in grouped_comments[max_group]:
                         print(com.full_text)
@@ -145,8 +124,7 @@ class SDAlgorithm:
                 self.print_article(article)
                 return article, None, None
         else:
-            print(Tcolors.INFO + " Multiple similar regions detected!")
-            print(Tcolors.RES)
+            print("Multiple similar regions detected!")
             print("Texts: ")
             for reg in biggest_regions:
                 print(reg.full_text)
@@ -164,16 +142,17 @@ class SDAlgorithm:
         for region in self.regions:
             if region.distance_from_max <= T1:
                 biggest_regions.append(region)
-                if region.distance_from_root < self.min_region_level \
-                        and self.combined_region_level_exceeded(region):
+                if region.distance_from_root < self.min_region_level and self.combined_region_level_exceeded(region):
                     self.min_region_level_counter += 1
                     self.min_region_level = region.distance_from_root
 
-            pr_com = (len(region.tree.xpath(region.root)) > 0 and region.tree.xpath(region.root)[
-                0].getparent().attrib.has_key('class') and region.tree.xpath(region.root)[0].getparent().attrib[
-                          "class"].count('comment') > 0)
+            pr_com = (
+                    len(region.tree.xpath(region.root)) > 0
+                    and "class" in region.tree.xpath(region.root)[0].getparent().attrib
+                    and region.tree.xpath(region.root)[0].getparent().attrib["class"].count('comment') > 0)
+
             if region.distance_from_max != 0 and (region.class_name != "" or (region.class_name == "" and pr_com)):
-                if not region.class_name in grouped_comments:
+                if region.class_name not in grouped_comments:
                     grouped_comments[region.class_name] = [region]
                 else:
                     grouped_comments[region.class_name].append(region)
@@ -199,9 +178,10 @@ class SDAlgorithm:
             return True, biggest_regions[0]
         elif biggest_regions is None:
             return False, None
-        biggest_regions = [reg for reg in biggest_regions if reg.ancestor_title \
-                           is not None and reg.distance_from_root <= self.min_region_level \
-                           and self.combined_region_level_exceeded(reg)]
+        biggest_regions = [reg for reg in biggest_regions
+                           if reg.ancestor_title is not None and
+                           reg.distance_from_root <= self.min_region_level and
+                           self.combined_region_level_exceeded(reg)]
         if self.min_region_level_counter > 1 or biggest_regions == []:
             pass
         else:
@@ -231,9 +211,7 @@ class SDAlgorithm:
         candidate group of comments and return the maximum density group that 
         the candidate article belongs to.
         """
-        min_dist = 1000
         max_path_level = 0
-        min_dist_group = None
         max_group_density = 0
 
         if article.root_node.getparent() is not None:
@@ -242,7 +220,6 @@ class SDAlgorithm:
             article_parent_path = ""
         max_group = None
         groups_level = {}
-        groups_below_article_tags = []
 
         if grouped_comments is not None:
             groups_tuple = grouped_comments.items()
@@ -254,12 +231,10 @@ class SDAlgorithm:
                     comment_path_level = comment_parent_path.count("/")
                     article_level = article_parent_path.count("/")
                     groups_level[group[0]] = common_path_level
-                    equal = comment_path_level == article_level
                     if max_path_level < common_path_level <= article_level:
                         max_path_level = common_path_level
 
-        groups_below_article_tags = [group[0] for group in groups_level.items() if \
-                                     group[1] == max_path_level]
+        groups_below_article_tags = [group[0] for group in groups_level.items() if group[1] == max_path_level]
 
         for group in groups_below_article_tags:
             group_density = self.find_group_density(grouped_comments[group])
@@ -355,7 +330,8 @@ class SDAlgorithm:
         """
         if max_group in grouped_comments:
             first_candidate_comment = grouped_comments[max_group][0]
-            return article.distance_from_root == first_candidate_comment.distance_from_root and self.combined_region_level_exceeded(article)
+            return article.distance_from_root == first_candidate_comment.distance_from_root and \
+                self.combined_region_level_exceeded(article)
         else:
             return self.combined_region_level_exceeded(article)
 
@@ -364,7 +340,7 @@ class SDAlgorithm:
         Check whether the candidate comment regions validate as such based on
         the keywords that are detected in their content.
         """
-        print(Tcolors.ACT + " Validating candidate comment group based on its content...")
+        print(" Validating candidate comment group based on its content...")
         COMMENT_TAGS = ['comment', 'reply', 'response', 'ident', 'said:', 'rate', 'user', 'inner', 'wrote:']
         STRONG_COMMENT_TAGS = ['comment', 'reply', 'user', 'said:', 'wrote:']
 
@@ -377,9 +353,9 @@ class SDAlgorithm:
 
         for des in list(comment_parent.iterdescendants()) + [comment_parent]:
             classname = id = ""
-            if des.attrib.has_key("class"):
+            if "class" in des.attrib:
                 classname = des.attrib['class']
-            if des.attrib.has_key("id"):
+            if "id" in des.attrib:
                 id = des.attrib['id']
             for ctag in COMMENT_TAGS:
                 contents = (des.text_content() + classname + id).lower()
@@ -409,9 +385,9 @@ class SDAlgorithm:
         """
         Print the details of a detected article (class, title and text).
         """
-        print(Tcolors.INFO + " Article detected!")
+        print("Article detected!")
         print("Article class: ")
-        print(Tcolors.RES + " " + repr(article.class_name))
+        print(repr(article.class_name))
         print("Article title: ")
         print(article.get_ancestor_title())
         print("Article text: ")
@@ -489,7 +465,6 @@ class SDAlgorithm:
         """
         tmp_regions = self.regions
         for i, region in enumerate(tmp_regions):
-            previous_max_density = self.max_region.density
             d = (float(region.density) / float(self.max_region.density)) * 100
             region.distance_from_max = 100 - d
             if region.distance_from_max == 0 and region.parts == 1 and not fixed_regions and len(
@@ -602,7 +577,7 @@ class SDAlgorithm:
         """
         Get the style attribute of the node if it exists.
         """
-        if node.attrib.has_key("style"):
+        if "style" in node.attrib:
             style = node.attrib.get('style')
         else:
             style = ""
@@ -634,15 +609,7 @@ class SDAlgorithm:
 
 
 if __name__ == '__main__':
-    url = "https://www.open.online/2019/12/09/chi-e-sanna-marin-la-premier-piu-giovane-del-mondo/"
-    sd = SDAlgorithm()
-    sd.url = url
-    sd.analyze_page()
+    url = "https://www.independent.co.uk/news/uk/politics/general-election-news-live-polls-boris-johnson-today-corbyn-labour-brexit-nhs-latest-a9241661.html"
+    sd = SDAlgorithm(url)
+    result = sd.analyze_page()
     print("jij")
-
-# Article with comments
-# python sd_algorithm.py http://www.care2.com/greenliving/chocolate-may-reduce-risk-of-heart-failure.html
-# Article
-# python sd_algorithm.py http://www.bbc.co.uk/news/world-africa-12328506
-# Multiple
-# python sd_algorithm.py "http://www.lonelyplanet.com/thorntree/forum.jspa;jsessionid=57DA8CB66960A9D820CAB16BB221094D.app01?forumID=34&errorMsg=The%20thread%20requested%20is%20not%20currently%20available"
