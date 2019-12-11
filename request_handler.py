@@ -5,9 +5,7 @@ import threading
 import time
 from colorama import Fore, Style
 
-from sd_alg.sd_algorithm import SDAlgorithm
-
-TIMEOUT = 40
+TIMEOUT = 4
 
 
 class Cursor:
@@ -93,7 +91,7 @@ class RequestHandler:
             self.cursor.idx_paragraph = int(context.get("parameters").get("web_page").get("idx_paragraph"))
             self.cursor.idx_article = int(context.get("parameters").get("web_page").get("idx_article"))
             self.cursor.link = context.get("parameters").get("web_page").get("link")
-            self.cursor.sentence_number = context.get("parameters").get("web_page").get("sentence_number")
+            self.cursor.sentence_number = int(context.get("parameters").get("web_page").get("sentence_number"))
         except AttributeError:
             self.cursor.type = "article"
             self.cursor.idx_paragraph = 0
@@ -207,8 +205,8 @@ class RequestHandler:
         result = self.url_parser.analysis
 
         # Take text result, split it into sentences. Return only the sentence pointed by the cursor.
-        sentence = result[1][0].full_text.split('.')[self.cursor.sentence_number]
-        text_response = "Type: %s\n" % result[0]
+        sentence = result[1].full_text.split('.')[self.cursor.sentence_number]
+        text_response = f"Title: {self.url_parser.soup.title.string}\n"
         try:
             text_response += "Text: %s" % sentence
             self.cursor.sentence_number += 1

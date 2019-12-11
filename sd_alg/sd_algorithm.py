@@ -104,7 +104,7 @@ class SDAlgorithm:
                     print("Texts: ")
                     for reg in grouped_comments[max_group]:
                         print(reg.full_text)
-                    return None, None, grouped_comments[max_group]
+                    return None, None, "\n".join(grouped_comments[max_group])
                 elif not context_validated:
                     self.print_article(article)
                     print("No comments found.")
@@ -125,7 +125,7 @@ class SDAlgorithm:
             print("Texts: ")
             for reg in biggest_regions:
                 print(reg.full_text)
-            return None, None, biggest_regions
+            return None, None, "\n".join(biggest_regions.join)
 
     def group_regions(self):
         """
