@@ -18,8 +18,6 @@ from lxml import html
 from lxml.html.clean import Cleaner
 from sd_alg.region import Region
 
-from url_parser import UrlParser
-
 VALID_TAGS = ['div', 'td', 'span', 'p', 'form', 'dd', 'dt', 'li']
 STRONG_TAGS = ['div', 'td', 'dd', 'dt', 'li']
 MODEL_TAGS = ["article", "comments", "multiple_regions"]
@@ -33,7 +31,7 @@ T2 = 20  # min region density threshold
 
 class SDAlgorithm:
 
-    def __init__(self, url):
+    def __init__(self, html_code):
         self.valid_nodes = {}
         self.regions = []
         self.max_region = None
@@ -41,7 +39,7 @@ class SDAlgorithm:
         self.min_region_level = 10000
         self.min_region_level_counter = 0
         self.page_model = None
-        self.url = url
+        self.html_code = html_code
 
     def analyze_page(self):
 
@@ -72,8 +70,7 @@ class SDAlgorithm:
         Downloads the HTML page given the URL and creates the DOM page tree.
         Only the nodes that are useful for the segmentation are kept.
         """
-        url_parser = UrlParser(self.url)
-        doc = html.fromstring(url_parser.html_code)
+        doc = html.fromstring(self.html_code)
         cleaner = Cleaner(**ARGS)
         try:
             doc = cleaner.clean_html(doc)
@@ -609,7 +606,6 @@ class SDAlgorithm:
 
 
 if __name__ == '__main__':
-    url = "https://www.open.online/2019/12/11/mes-bagarre-in-aula-volano-insulti-lo-ha-votato-pure-la-meloni-e-lei-pagliaccio/"
-    sd = SDAlgorithm(url)
-    result = sd.analyze_page()
+    url = "https://www.nytimes.com/2019/12/10/us/politics/trump-impeachment-articles.html"
+    url_parser = UrlParser(url)
     print("jij")

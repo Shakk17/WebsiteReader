@@ -4,12 +4,15 @@ from bs4 import BeautifulSoup
 from time import time
 import warnings
 
+from sd_alg.sd_algorithm import SDAlgorithm
+
 
 class UrlParser:
     def __init__(self, url):
         self.url = url
         self.html_code = self.render_page()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
+        self.analysis = SDAlgorithm(self.html_code).analyze_page()
 
     def render_page(self):
         """

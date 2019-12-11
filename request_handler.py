@@ -7,7 +7,7 @@ from colorama import Fore, Style
 
 from sd_alg.sd_algorithm import SDAlgorithm
 
-TIMEOUT = 4
+TIMEOUT = 40
 
 
 class Cursor:
@@ -21,6 +21,8 @@ class Cursor:
         self.idx_article = 0
         # Link selected.
         self.link = None
+        # Sentence read in current web page.
+        self.sentence_number = 0
 
     def print(self):
         print(Fore.GREEN)
@@ -91,11 +93,13 @@ class RequestHandler:
             self.cursor.idx_paragraph = int(context.get("parameters").get("web_page").get("idx_paragraph"))
             self.cursor.idx_article = int(context.get("parameters").get("web_page").get("idx_article"))
             self.cursor.link = context.get("parameters").get("web_page").get("link")
+            self.cursor.sentence_number = context.get("parameters").get("web_page").get("sentence_number")
         except AttributeError:
             self.cursor.type = "article"
             self.cursor.idx_paragraph = 0
             self.cursor.idx_article = 0
             self.cursor.link = url
+            self.cursor.sentence_number = 0
 
         if action == "VisitPage":
             return self.visit_page()
@@ -199,10 +203,19 @@ class RequestHandler:
         """
         Analyze web page through SD algorithm.
         """
-        sd_algorithm = SDAlgorithm(self.cursor.url)
-        result = sd_algorithm.analyze_page()
+        self.url_parser = UrlParser(url=self.cursor.url)
+        result = self.url_parser.analysis
+
+        # Take text result, split it into sentences. Return only the sentence pointed by the cursor.
+        sentence = result[1][0].full_text.split('.')[self.cursor.sentence_number]
         text_response = "Type: %s\n" % result[0]
-        text_response += "Text: %s" % result[1][0].full_text
+        try:
+            text_response += "Text: %s" % sentence
+            self.cursor.sentence_number += 1
+        except IndexError:
+            text_response += "You have reached the end of the web page."
+            self.cursor.sentence_number = 0
+
         return self.build_response(text_response)
 
     def build_response(self, text_response):
