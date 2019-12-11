@@ -5,7 +5,7 @@ import threading
 import time
 from colorama import Fore, Style
 
-from sd_algorithm.sd_algorithm import SDAlgorithm
+from sd_alg.sd_algorithm import SDAlgorithm
 
 TIMEOUT = 4
 
@@ -202,7 +202,7 @@ class RequestHandler:
         sd_algorithm = SDAlgorithm(self.cursor.url)
         result = sd_algorithm.analyze_page()
         text_response = "Type: %s\n" % result[0]
-        text_response += "Text: %s" % result[1]
+        text_response += "Text: %s" % result[1][0].full_text
         return self.build_response(text_response)
 
     def build_response(self, text_response):

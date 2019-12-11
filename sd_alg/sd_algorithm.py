@@ -16,7 +16,7 @@ import re
 
 from lxml import html
 from lxml.html.clean import Cleaner
-from sd_algorithm.region import Region
+from sd_alg.region import Region
 
 from url_parser import UrlParser
 
@@ -609,7 +609,7 @@ class SDAlgorithm:
 
 
 if __name__ == '__main__':
-    url = "https://www.independent.co.uk/news/uk/politics/general-election-news-live-polls-boris-johnson-today-corbyn-labour-brexit-nhs-latest-a9241661.html"
+    url = "https://www.open.online/2019/12/11/mes-bagarre-in-aula-volano-insulti-lo-ha-votato-pure-la-meloni-e-lei-pagliaccio/"
     sd = SDAlgorithm(url)
     result = sd.analyze_page()
     print("jij")
