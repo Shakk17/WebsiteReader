@@ -22,22 +22,24 @@ class Cursor:
         # Sentence read in current web page.
         self.sentence_number = 0
 
-    def print(self):
-        print(Fore.GREEN)
-        print(Style.BRIGHT + "\t+++ CURSOR +++" + Style.NORMAL)
-        print("\tURL: %s" % self.url)
-        print("\tPage type: %s" % self.type)
-        print("\tIdx paragraph: %d" % self.idx_paragraph)
-        print("\tIdx article: %d" % self.idx_article)
-        print("\tLink: %s" % self.link)
-        print(Style.RESET_ALL)
+    def __repr__(self):
+        return (
+            f"{Fore.GREEN}"
+            f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
+            f"\tURL: {self.url}\n"
+            f"\tPage type: {self.type}\n"
+            f"\tIdx paragraph: {self.idx_paragraph}\n"
+            f"\tIdx article: {self.idx_article}\n"
+            f"\tLink: {self.link}\n"
+            f"\tSentence number: {self.sentence_number}\n"
+            f"{Style.RESET_ALL}")
 
 
 class RequestHandler:
     def __init__(self):
         self.url_parser = None
         self.cursor = None
-        # Queue set up to
+        # Queue set up to hold threads responses.
         self.q = queue.Queue()
 
     def get_response(self, request):
@@ -57,7 +59,7 @@ class RequestHandler:
         # Returns the first available result.
         result = self.q.get()
 
-        self.cursor.print()
+        print(self.cursor)
 
         return result
 
@@ -118,6 +120,7 @@ class RequestHandler:
         """
         Change the position of the cursor to the page visited.
         """
+        self.cursor = Cursor(self.cursor.url)
         self.url_parser = UrlParser(url=self.cursor.url)
         try:
             text_response = "%s visited successfully!" % self.url_parser.url
@@ -204,12 +207,15 @@ class RequestHandler:
         self.url_parser = UrlParser(url=self.cursor.url)
         result = self.url_parser.analysis
 
-        # Take text result, split it into sentences. Return only the sentence pointed by the cursor.
-        sentence = result[1].full_text.split('.')[self.cursor.sentence_number]
+        # Take text result, split it into sentences. Return only first two sentence pointed by the cursor.
+        number_of_sentences = 3
+        sentences = result.split('.')[self.cursor.sentence_number:self.cursor.sentence_number + number_of_sentences]
+        sentence = ".".join(sentences)
         text_response = f"Title: {self.url_parser.soup.title.string}\n"
         try:
-            text_response += "Text: %s" % sentence
-            self.cursor.sentence_number += 1
+            text_response += f"Text: {sentence}."
+            print(text_response)
+            self.cursor.sentence_number += number_of_sentences
         except IndexError:
             text_response += "You have reached the end of the web page."
             self.cursor.sentence_number = 0

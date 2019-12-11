@@ -54,16 +54,10 @@ class SDAlgorithm:
         self.create_regions(tree)
         print("[*] Calculating distances from max region...")
         self.calculate_distances_from_max(tree)
-        print("%d regions found!" % len(self.regions))
+        print(f"[*] {len(self.regions)} regions found!")
 
-        article, comments, multiple = self.classify_page()
-
-        if article is not None and comments is None:
-            return 'article', article
-        elif article is not None:
-            return 'comment', article, comments
-        else:
-            return 'multiple', multiple
+        text = self.classify_page()
+        return text
 
     def construct_page_tree(self):
         """
@@ -81,9 +75,10 @@ class SDAlgorithm:
 
     def classify_page(self):
         """
-        Characterize the page according to i) has main article (has_article()),
-        ii) has main article with comments (is_full_article()), iii) has multiple 
-        opinions like a forum (is_discussion()).
+        Characterize the page according to:
+            i) has main article (has_article()),
+            ii) has main article with comments (is_full_article()),
+            iii) has multiple opinions like a forum (is_discussion()).
         """
         validated = False
 
@@ -99,33 +94,39 @@ class SDAlgorithm:
 
                 context_validated = self.candidate_context_validated(article, grouped_comments, max_group)
                 if self.big_areas_in_same_level(article, grouped_comments, max_group) and not validated:
-                    print("Multiple similar regions detected!")
+                    print("[*] Multiple similar regions detected!")
+                    '''
                     print("Class: %s" % grouped_comments[max_group][0].class_name)
                     print("Texts: ")
                     for reg in grouped_comments[max_group]:
                         print(reg.full_text)
-                    return None, None, "\n".join(grouped_comments[max_group])
+                    '''
+                    return "\n".join(grouped_comments[max_group])
                 elif not context_validated:
-                    self.print_article(article)
-                    print("No comments found.")
-                    return article, None, None
+                    # self.print_article(article)
+                    print("[*] No comments found.")
+                    return article.full_text
                 elif context_validated:
-                    print("Article with comments detected!")
+                    print("[*] Article with comments detected!")
+                    '''
                     self.print_article(article)
                     print("Comment class: %s" % max_group)
                     print("Comments:")
                     for com in grouped_comments[max_group]:
                         print(com.full_text)
-                    return article, grouped_comments[max_group], None
+                    '''
+                    return article.full_text + "\n" + "\n".join(grouped_comments[max_group])
             else:
-                self.print_article(article)
-                return article, None, None
+                # self.print_article(article)
+                return article.full_text
         else:
-            print("Multiple similar regions detected!")
+            print("[*] Multiple similar regions detected!")
+            '''
             print("Texts: ")
             for reg in biggest_regions:
                 print(reg.full_text)
-            return None, None, "\n".join(biggest_regions.join)
+            '''
+            return "\n".join([region.full_text for region in biggest_regions])
 
     def group_regions(self):
         """
@@ -328,7 +329,7 @@ class SDAlgorithm:
         if max_group in grouped_comments:
             first_candidate_comment = grouped_comments[max_group][0]
             return article.distance_from_root == first_candidate_comment.distance_from_root and \
-                self.combined_region_level_exceeded(article)
+                   self.combined_region_level_exceeded(article)
         else:
             return self.combined_region_level_exceeded(article)
 
@@ -603,9 +604,3 @@ class SDAlgorithm:
         Get the tree path of a given node.
         """
         return node.getroottree().getpath(node)
-
-
-if __name__ == '__main__':
-    url = "https://www.nytimes.com/2019/12/10/us/politics/trump-impeachment-articles.html"
-    url_parser = UrlParser(url)
-    print("jij")
