@@ -1,8 +1,9 @@
-from requests_html import HTMLSession
-from bs4 import BeautifulSoup
-
 from time import time
-import warnings
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
 
 from sd_alg.sd_algorithm import SDAlgorithm
 
@@ -21,24 +22,20 @@ class UrlParser:
         """
         start = time()
         try:
-            print("Rendering page...")
-            session = HTMLSession()
-            response = session.get(url=self.url)
+            print("Rendering page with Selenium...")
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(self.url)
         except Exception:
             print("Can't access this website: %s" % self.url)
             raise Exception("Error while visiting the page.")
 
         print("Request time: %.2f s" % (time() - start))
 
-        with warnings.catch_warnings():
-            # Ignore arender warning.
-            warnings.simplefilter("ignore")
-            response.html.arender()
+        html = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
 
-        response.close()
-        session.close()
-
-        return response.html.html
+        return html
 
     def get_info(self):
         """
@@ -112,3 +109,7 @@ class UrlParser:
         # Return index of string, if present. Otherwise IndexError.
         index = menu_strings.index(name.lower())
         return menu_anchors[index]
+
+
+url_parser = UrlParser("https://www.open.online/2020/01/29/stefano-patuanelli-governo-m5s-serve-chiarezza/")
+print(url_parser.get_info())
