@@ -101,7 +101,7 @@ class SDAlgorithm:
                     for reg in grouped_comments[max_group]:
                         print(reg.full_text)
                     '''
-                    return "\n".join(grouped_comments[max_group])
+                    return "\n".join([comment.full_text for comment in grouped_comments[max_group]])
                 elif not context_validated:
                     # self.print_article(article)
                     print("[*] No comments found.")
@@ -115,7 +115,7 @@ class SDAlgorithm:
                     for com in grouped_comments[max_group]:
                         print(com.full_text)
                     '''
-                    return article.full_text + "\n" + "\n".join(grouped_comments[max_group])
+                    return article.full_text + "\n" + "\n".join([comment.full_text for comment in grouped_comments[max_group]])
             else:
                 # self.print_article(article)
                 return article.full_text
