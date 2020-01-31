@@ -7,8 +7,6 @@ import urllib3
 from urllib.parse import urljoin
 
 
-
-
 class Node:
     def __init__(self, url, level, father):
         self.url = url
@@ -121,4 +119,3 @@ crawler = Crawler(2)
 crawler.start("https://www.open.online/")
 crawler.get_most_visited()
 print("Time elapsed: %.2f s" % (time.time() - start_time))
-
