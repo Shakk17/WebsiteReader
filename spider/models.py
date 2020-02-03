@@ -11,7 +11,7 @@ def db_connect(domain_name):
     Performs database connection using database settings from settings.py.
     Returns sqlalchemy engine instance
     """
-    return create_engine("sqlite:///" + domain_name + ".db")
+    return create_engine("sqlite:///databases/" + domain_name + ".db")
 
 
 def create_table(engine):
