@@ -12,12 +12,22 @@ from spider.models import db_connect, create_table, URL
 
 
 class SpiderPipeline(object):
-    def __init__(self):
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # Get values passed as parameters.
+        settings = crawler.settings
+        url = settings.get('url')
+
+        # Instantiate the pipeline.
+        return cls(url=url)
+
+    def __init__(self, url):
         """
         Initializes database connection and sessionmaker
         Creates tables
         """
-        engine = db_connect()
+        engine = db_connect(url)
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
 

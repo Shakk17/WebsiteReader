@@ -8,12 +8,12 @@ from scrapy.utils.project import get_project_settings
 Base = declarative_base()
 
 
-def db_connect():
+def db_connect(domain_name):
     """
     Performs database connection using database settings from settings.py.
     Returns sqlalchemy engine instance
     """
-    return create_engine(get_project_settings().get("CONNECTION_STRING"))
+    return create_engine("sqlite:///" + domain_name + ".db")
 
 
 def create_table(engine):
