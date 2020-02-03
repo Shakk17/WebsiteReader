@@ -22,6 +22,9 @@ CONNECTION_STRING = "sqlite:///scrapy_quotes.db?charset=utf8"
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+# Maximum depth that will be allowed to crawl for any site.
+DEPTH_LIMIT = 1
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

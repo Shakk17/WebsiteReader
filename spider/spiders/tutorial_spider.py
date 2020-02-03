@@ -8,8 +8,8 @@ from spider.items import UrlItem
 
 class QuotesSpider(scrapy.Spider):
     name = "urls"
-    allowed_domains = ["polimi.it"]
-    start_urls = ['https://www.polimi.it/']
+    allowed_domains = ["open.online"]
+    start_urls = ['https://www.open.online/']
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -32,7 +32,7 @@ class QuotesSpider(scrapy.Spider):
                 yield response.follow(link.url, callback=self.parse)
 
             yield url_item
-
+'''
             if self.link_processed == 10000:
-                raise CloseSpider('bandwidth_exceeded')
+                raise CloseSpider('bandwidth_exceeded')'''
 
