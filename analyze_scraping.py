@@ -34,7 +34,7 @@ def select_task_by_priority(conn, priority):
 
 
 def main():
-    database = r"scrapy_quotes.db"
+    database = r"polimi.it.db"
 
     # create a database connection
     conn = create_connection(database)

@@ -1,2 +1,6 @@
 from scrapy import cmdline
-cmdline.execute("scrapy crawl urls -s url=polimi.it".split())
+
+url = "https://www.polimi.it/"
+command = "scrapy crawl urls -s url=" + url
+
+cmdline.execute(command.split())

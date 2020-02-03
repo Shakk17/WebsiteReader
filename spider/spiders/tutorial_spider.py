@@ -5,11 +5,29 @@ from scrapy.exceptions import CloseSpider
 
 from spider.items import UrlItem
 
+from urllib.parse import urlparse
+
+import tldextract
+
 
 class QuotesSpider(scrapy.Spider):
     name = "urls"
     allowed_domains = ["polimi.it"]
     start_urls = ['https://www.polimi.it/']
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        # Get values passed as parameters.
+        settings = crawler.settings
+        url = settings.get('url')
+        extracted_domain = tldextract.extract(url)
+        domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
+
+        cls.allowed_domains = [domain]
+        cls.start_urls = [url]
+
+        # Instantiate the pipeline.
+        return cls()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

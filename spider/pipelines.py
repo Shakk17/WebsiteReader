@@ -2,6 +2,8 @@ from sqlalchemy.orm import sessionmaker
 from scrapy.exceptions import DropItem
 from spider.models import db_connect, create_table, URL
 
+import tldextract
+
 
 # -*- coding: utf-8 -*-
 
@@ -18,9 +20,11 @@ class SpiderPipeline(object):
         # Get values passed as parameters.
         settings = crawler.settings
         url = settings.get('url')
+        extracted_domain = tldextract.extract(url)
+        domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
 
         # Instantiate the pipeline.
-        return cls(url=url)
+        return cls(url=domain)
 
     def __init__(self, url):
         """
