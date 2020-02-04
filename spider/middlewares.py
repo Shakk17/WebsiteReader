@@ -7,6 +7,7 @@
 
 from scrapy import signals
 from scrapy.http import HtmlResponse
+from scrapy.linkextractors import LinkExtractor
 from selenium import webdriver
 
 options = webdriver.ChromeOptions()
@@ -87,23 +88,25 @@ class SpiderDownloaderMiddleware(object):
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         driver.get(request.url)
-
         body = driver.page_source
-
-        # Get all links from the web page opened.
-        elements = driver.find_elements_by_xpath("//a[@href]")
 
         # Create a string containing all the links in the page, with location.
         # FORMAT: href * text * x_position * y_position $
-        links = ""
-        for elem in elements:
-            links += elem.get_attribute("href") + "*" \
-                     + elem.text + "*" \
-                     + str(elem.location.get("x")) + "*" \
-                     + str(elem.location.get("y")) + "$"
+        string_links = ""
+
+        # Extract all links from the page.
+        le = LinkExtractor()
+        links = le.extract_links(HtmlResponse(driver.current_url, body=body, encoding='utf-8', request=request))
+
+        for link in links:
+            # Find element with the anchor extracted by LinkExtractor.
+            element = driver.find_element_by_xpath('//a[@href="'+link.url+'"]')
+            string_links += link.url + "*" + link.text + "*" \
+                     + str(element.location.get("x")) + "*" \
+                     + str(element.location.get("y")) + "$"
 
         # Transform the string to binary code in order to be passed as a parameter.
-        bytes_links = links.encode(encoding='UTF-8')
+        bytes_links = string_links.encode(encoding='UTF-8')
 
         return HtmlResponse(driver.current_url, body=bytes_links, encoding='utf-8', request=request)
 

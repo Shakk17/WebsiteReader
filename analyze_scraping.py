@@ -37,7 +37,7 @@ def select_task_by_priority(conn, priority):
 
 
 def main():
-    database = r"databases/polimi.it.db"
+    database = r"databases/open.online.db"
 
     # create a database connection
     conn = create_connection(database)
