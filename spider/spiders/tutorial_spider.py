@@ -30,12 +30,14 @@ class QuotesSpider(scrapy.Spider):
         self.visited_links = []
 
     def parse(self, response):
-
+        # Decode the bytes string contained in the response body.
         links = response.body.decode(encoding='UTF-8').split("$")
         url_item = UrlItem()
 
         # Analyze each link found in the page.
         for link in links:
+            # Unpack the string in order to read the fields.
+            # FORMAT: href * text * x_position * y_position $
             fields = link.split("*")
             url_item["url_anchor"] = url_anchor = fields[0]
             url_item["text"] = text = fields[1]

@@ -25,7 +25,10 @@ def select_task_by_priority(conn, priority):
     :return:
     """
     cur = conn.cursor()
-    cur.execute("SELECT COUNT(*), text, url_anchor FROM url GROUP BY url_anchor ORDER BY COUNT(*) DESC", ())
+    cur.execute("SELECT COUNT(*), text, url_anchor, round(AVG(NULLIF(x_position, 0))), round(AVG(NULLIF(y_position, 0))) "
+                "FROM url "
+                "GROUP BY url_anchor "
+                "ORDER BY COUNT(*) DESC", ())
 
     rows = cur.fetchall()
 
@@ -34,7 +37,7 @@ def select_task_by_priority(conn, priority):
 
 
 def main():
-    database = r"databases/open.online.db"
+    database = r"databases/polimi.it.db"
 
     # create a database connection
     conn = create_connection(database)

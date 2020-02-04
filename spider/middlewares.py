@@ -94,6 +94,7 @@ class SpiderDownloaderMiddleware(object):
         elements = driver.find_elements_by_xpath("//a[@href]")
 
         # Create a string containing all the links in the page, with location.
+        # FORMAT: href * text * x_position * y_position $
         links = ""
         for elem in elements:
             links += elem.get_attribute("href") + "*" \
@@ -101,6 +102,7 @@ class SpiderDownloaderMiddleware(object):
                      + str(elem.location.get("x")) + "*" \
                      + str(elem.location.get("y")) + "$"
 
+        # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = links.encode(encoding='UTF-8')
 
         return HtmlResponse(driver.current_url, body=bytes_links, encoding='utf-8', request=request)
