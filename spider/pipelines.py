@@ -44,6 +44,8 @@ class SpiderPipeline(object):
         url.text = item["text"]
         url.url_anchor = item["url_anchor"]
         url.found_in_page = item["found_in_page"]
+        url.x_position = item["x_position"]
+        url.y_position = item["y_position"]
 
         ''' check whether the author exists
         exist_author = session.query(Author).filter_by(name=author.name).first()

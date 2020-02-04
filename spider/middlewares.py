@@ -6,8 +6,6 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
-from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium import webdriver
 
@@ -16,6 +14,7 @@ options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
 
 driver = webdriver.Chrome(options=options)
+
 
 class SpiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -90,7 +89,21 @@ class SpiderDownloaderMiddleware(object):
         driver.get(request.url)
 
         body = driver.page_source
-        return HtmlResponse(driver.current_url, body=body, encoding='utf-8', request=request)
+
+        # Get all links from the web page opened.
+        elements = driver.find_elements_by_xpath("//a[@href]")
+
+        # Create a string containing all the links in the page, with location.
+        links = ""
+        for elem in elements:
+            links += elem.get_attribute("href") + "*" \
+                     + elem.text + "*" \
+                     + str(elem.location.get("x")) + "*" \
+                     + str(elem.location.get("y")) + "$"
+
+        bytes_links = links.encode(encoding='UTF-8')
+
+        return HtmlResponse(driver.current_url, body=bytes_links, encoding='utf-8', request=request)
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.

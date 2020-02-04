@@ -15,13 +15,14 @@ class QuotesSpider(scrapy.Spider):
         # Get values passed as parameters.
         settings = crawler.settings
         url = settings.get('url')
+        # Get the domain from the url.
         extracted_domain = tldextract.extract(url)
         domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
 
         cls.allowed_domains = [domain]
         cls.start_urls = [url]
 
-        # Instantiate the pipeline.
+        # Instantiate the class.
         return cls()
 
     def __init__(self, **kwargs):
@@ -29,24 +30,26 @@ class QuotesSpider(scrapy.Spider):
         self.visited_links = []
 
     def parse(self, response):
-        le = LinkExtractor()
-        links = le.extract_links(response)
+
+        links = response.body.decode(encoding='UTF-8').split("$")
         url_item = UrlItem()
 
         # Analyze each link found in the page.
         for link in links:
-            url_item["text"] = link.text
-            url_item["url_anchor"] = link.url
+            fields = link.split("*")
+            url_item["url_anchor"] = url_anchor = fields[0]
+            url_item["text"] = text = fields[1]
+            url_item["x_position"] = x_position = fields[2]
+            url_item["y_position"] = y_position = fields[3]
             url_item["found_in_page"] = response.url
 
             # If the link has not been visited yet, visit it.
-            if link.url not in self.visited_links and self.allowed_domains[0] in link.url:
-                self.visited_links.append(link.url)
-                yield response.follow(link.url, callback=self.parse)
+            if url_anchor not in self.visited_links and self.allowed_domains[0] in url_anchor:
+                self.visited_links.append(url_anchor)
+                yield response.follow(url_anchor, callback=self.parse)
 
             # We save the link in the DB only if it belongs to the domain.
-            if self.allowed_domains[0] in link.url:
+            if self.allowed_domains[0] in url_anchor:
                 yield url_item
             else:
                 yield None
-

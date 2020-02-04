@@ -25,3 +25,5 @@ class URL(Base):
     text = Column('text', String(150))
     url_anchor = Column('url_anchor', String(150))
     found_in_page = Column('found_in_page', String(150))
+    x_position = Column('x_position', Integer)
+    y_position = Column('y_position', Integer)

@@ -7,3 +7,5 @@ class UrlItem(Item):
     text = Field()
     url_anchor = Field()
     found_in_page = Field()
+    x_position = Field()
+    y_position = Field()
