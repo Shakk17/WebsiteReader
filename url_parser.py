@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from pysemantics.NlpClient import NlpClient
 
 from sd_alg.sd_algorithm import SDAlgorithm
 
@@ -39,13 +40,13 @@ class UrlParser:
 
     def get_info(self):
         """
-        Returns a text containing information about the type of the web page analyzed.
+        Returns text containing information about the type of the web page analyzed.
         """
         text_response = "The title of this page is %s.\n" % self.soup.title.string
-        if self.is_article():
-            text_response += "This page is an article!"
-        else:
-            text_response += "This page is a section!"
+        client = NlpClient()
+        result = client.classify(input=self.url)
+        print(result)
+
         return text_response
 
     def is_article(self):
@@ -109,7 +110,3 @@ class UrlParser:
         # Return index of string, if present. Otherwise IndexError.
         index = menu_strings.index(name.lower())
         return menu_anchors[index]
-
-
-url_parser = UrlParser("https://www.open.online/2020/01/29/stefano-patuanelli-governo-m5s-serve-chiarezza/")
-print(url_parser.get_info())
