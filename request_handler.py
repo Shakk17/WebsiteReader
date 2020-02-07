@@ -50,11 +50,12 @@ class RequestHandler:
         After the timeout, gets the first available element from the queue.
         """
         main_thread = threading.Thread(target=self.elaborate, args=(request,), daemon=True)
-        timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
+        # TODO: timeout handler
+        # timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
         main_thread.start()
-        timeout_thread.start()
+        # timeout_thread.start()
         # Wait until timeout is finished.
-        timeout_thread.join()
+        # timeout_thread.join()
 
         # Returns the first available result.
         result = self.q.get()
@@ -85,7 +86,7 @@ class RequestHandler:
         except AttributeError:
             url = context.get("parameters").get("web_page").get("url")
 
-        # Create object containing details about the web page.
+        # Create an object containing details about the web page.
         self.cursor = Cursor(url=url)
 
         try:
@@ -160,7 +161,7 @@ class RequestHandler:
 
     def read_page(self):
         """
-        If page is article, read it. Otherwise read main article titles available.
+        If page is article, read it. Otherwise, read main article titles available.
         """
         self.url_parser = UrlParser(url=self.cursor.url)
         if self.url_parser.is_article():

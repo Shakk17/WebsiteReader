@@ -17,7 +17,7 @@ def index():
 # function for responses
 def results():
     start = time()
-    # Parse JSON request into readable object.
+    # Parse JSON request into a readable object.
     req = request.get_json(force=True)
 
     obj_response = parser.get_response(req)
