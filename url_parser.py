@@ -4,7 +4,9 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+import requests
 from pysemantics.NlpClient import NlpClient
+from datumbox_wrapper import DatumBox
 
 from sd_alg.sd_algorithm import SDAlgorithm
 
@@ -12,9 +14,10 @@ from sd_alg.sd_algorithm import SDAlgorithm
 class UrlParser:
     def __init__(self, url):
         self.url = url
-        self.html_code = self.render_page()
+        self.html_code = self.get_quick_html()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
-        self.analysis = SDAlgorithm(self.html_code).analyze_page()
+        self.get_info()
+        # self.analysis = SDAlgorithm(self.html_code).analyze_page()
 
     def render_page(self):
         """
@@ -38,15 +41,31 @@ class UrlParser:
 
         return html
 
+    def get_quick_html(self):
+        print("Requesting HTML web page with requests...")
+        start = time()
+        html = requests.get(self.url)
+        print("Request time: %.2f s" % (time() - start))
+
+        return html.text
+
     def get_info(self):
         """
         Returns text containing information about the type of the web page analyzed.
         """
         text_response = "The title of this page is %s.\n" % self.soup.title.string
-        client = NlpClient()
-        result = client.classify(input=self.url)
-        print(result)
+        print("Extracting text...")
+        start = time()
 
+        '''client = NlpClient()
+        result = client.classify(input=self.url)
+        print(result)'''
+
+        datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
+        text = datumbox.text_extract(self.html_code)
+        print(text)
+
+        print("Extraction time: %.2f s" % (time() - start))
         return text_response
 
     def is_article(self):
