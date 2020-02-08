@@ -1,6 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from scrapy.exceptions import DropItem
-from spider.models import db_connect, create_table, URL
+from scraping.spider import db_connect, create_table, URL
 
 import tldextract
 

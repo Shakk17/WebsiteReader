@@ -1,8 +1,7 @@
 import scrapy
 import tldextract
-from scrapy.linkextractors import LinkExtractor
 
-from spider.items import UrlItem
+from scraping.spider.items import UrlItem
 
 
 class QuotesSpider(scrapy.Spider):

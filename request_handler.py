@@ -8,14 +8,18 @@ from colorama import Fore, Style
 TIMEOUT = 4
 
 
+def save_action_in_db():
+    return
+
+
 class Cursor:
     def __init__(self, url):
         self.url = url
         # Type of the page, it can be article or section.
         self.type = None
-        # Number that indicates the paragraph to read in current article.
+        # Number that indicates the paragraph to read in the current article.
         self.idx_paragraph = 0
-        # Number that indicates the article to read in current section.
+        # Number that indicates the article to read in the current section.
         self.idx_article = 0
         # Link selected.
         self.link = None
@@ -54,7 +58,7 @@ class RequestHandler:
         # timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
         main_thread.start()
         # timeout_thread.start()
-        # Wait until timeout is finished.
+        # Wait until the timeout expires.
         # timeout_thread.join()
 
         # Returns the first available result.
@@ -101,6 +105,8 @@ class RequestHandler:
             self.cursor.idx_article = 0
             self.cursor.link = url
             self.cursor.sentence_number = 0
+
+        save_action_in_db()
 
         if action == "VisitPage":
             return self.visit_page()

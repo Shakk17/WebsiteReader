@@ -1,5 +1,6 @@
 import requests
 
+# Dictionary containing translation from ISO_639-1 to string.
 languages = dict([
     ('aa', 'Afar'),
     ('ab', 'Abkhazian'),
