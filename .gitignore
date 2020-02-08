@@ -200,6 +200,3 @@ dmypy.json
 /VIPSResult.xml
 /vips_algorithm/
 /vips_algorithm/chromedriver.exe
-/scrapy_quotes.db
-/urls.json
-/databases/

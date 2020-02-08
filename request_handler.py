@@ -4,11 +4,24 @@ import queue
 import threading
 import time
 from colorama import Fore, Style
+import sqlite3
+from sqlite3 import Error
+from databases.create_database import Database
 
 TIMEOUT = 4
 
 
-def save_action_in_db():
+def save_action_in_db(action, url):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        conn = sqlite3.connect(r"./history.db")
+        print(sqlite3.version)
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
     return
 
 
@@ -106,7 +119,8 @@ class RequestHandler:
             self.cursor.link = url
             self.cursor.sentence_number = 0
 
-        save_action_in_db()
+        history_db = Database()
+        history_db.save_action_in_db(action, url)
 
         if action == "VisitPage":
             return self.visit_page()

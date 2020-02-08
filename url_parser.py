@@ -8,8 +8,6 @@ import requests
 from pysemantics.NlpClient import NlpClient
 from datumbox_wrapper import DatumBox
 
-from sd_alg.sd_algorithm import SDAlgorithm
-
 
 class UrlParser:
     def __init__(self, url):
