@@ -125,14 +125,8 @@ class RequestHandler:
         self.url_parser = UrlParser(url=self.cursor.url)
         try:
             text_response = "%s visited successfully!" % self.url_parser.url
+            text_response += self.url_parser.get_info()
             self.cursor = Cursor(self.url_parser.url)
-            # Understand what type of page is.
-            if self.url_parser.is_article():
-                self.cursor.type = "article"
-                text_response += "\nThis page is an article."
-            else:
-                self.cursor.type = "section"
-                text_response += "\nThis page is a section."
 
         except Exception as ex:
             text_response = ex.args[0]

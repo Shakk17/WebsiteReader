@@ -16,7 +16,6 @@ class UrlParser:
         self.url = url
         self.html_code = self.get_quick_html()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
-        self.get_info()
         # self.analysis = SDAlgorithm(self.html_code).analyze_page()
 
     def render_page(self):
@@ -62,10 +61,22 @@ class UrlParser:
         print(result)'''
 
         datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
-        text = datumbox.text_extract(self.html_code)
-        print(text)
+        # Extract text from HTML code.
+        text = datumbox.text_extract(text=self.html_code)
+        print(f"TEXT:  {text}")
+
+        # Get topic from text extracted.
+        topic = datumbox.topic_classification(text=text)
+        print(f"TOPIC: {topic}")
+        text_response += f"The topic of this web page is {topic}."
+
+        # Detect language.
+        language = datumbox.detect_language(text=text)
+        print(f"LANGUAGE: {language}")
+        text_response += f"The language of this web page is {language}."
 
         print("Extraction time: %.2f s" % (time() - start))
+
         return text_response
 
     def is_article(self):
