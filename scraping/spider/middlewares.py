@@ -100,10 +100,10 @@ class SpiderDownloaderMiddleware(object):
 
         for link in links:
             # Find element with the anchor extracted by LinkExtractor.
-            element = driver.find_element_by_xpath('//a[@href="'+link.url+'"]')
+            element = driver.find_element_by_xpath('//a[@href="' + link.url + '"]')
             string_links += link.url + "*" + link.text + "*" \
-                     + str(element.location.get("x")) + "*" \
-                     + str(element.location.get("y")) + "$"
+                            + str(element.location.get("x")) + "*" \
+                            + str(element.location.get("y")) + "$"
 
         # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = string_links.encode(encoding='UTF-8')

@@ -4,8 +4,8 @@ from datetime import datetime
 
 
 class UrlItem(Item):
-    text = Field()
-    url_anchor = Field()
-    found_in_page = Field()
+    page_url = Field()
+    link_url = Field()
+    link_text = Field()
     x_position = Field()
     y_position = Field()

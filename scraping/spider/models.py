@@ -3,27 +3,31 @@ from sqlalchemy import (
 from sqlalchemy import create_engine, Column
 from sqlalchemy.ext.declarative import declarative_base
 
+import os
+from pathlib import Path
+
 Base = declarative_base()
 
 
-def db_connect(domain_name):
+def db_connect():
     """
     Performs database connection using database settings from settings.py.
     Returns sqlalchemy engine instance
     """
-    return create_engine("sqlite:///databases/" + domain_name + ".db")
+    path = Path(os.getcwd())
+    return create_engine(f"sqlite:///{path.parent}/databases/database.db")
 
 
 def create_table(engine):
     Base.metadata.create_all(engine)
 
 
-class URL(Base):
-    __tablename__ = "url"
+class Link(Base):
+    __tablename__ = "links"
 
     id = Column(Integer, primary_key=True)
-    text = Column('text', String(150))
-    url_anchor = Column('url_anchor', String(150))
-    found_in_page = Column('found_in_page', String(150))
+    page_url = Column('page_url', String(200))
+    link_url = Column('link_url', String(200))
+    link_text = Column('link_text', String(200))
     x_position = Column('x_position', Integer)
     y_position = Column('y_position', Integer)

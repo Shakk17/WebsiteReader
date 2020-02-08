@@ -1,8 +1,6 @@
 import sqlite3
 from sqlite3 import Error
 
-
-
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                                 id integer PRIMARY KEY AUTOINCREMENT,
                                                 user text NOT NULL,
@@ -67,3 +65,22 @@ class Database:
         # Returns id of the tuple inserted.
         print(cur.lastrowid)
         return cur.lastrowid
+
+    def analyze_scraping(self):
+        """
+        Query tasks by priority
+        :param conn: the Connection object
+        :param priority:
+        :return:
+        """
+        cur = self.conn.cursor()
+        cur.execute("SELECT COUNT(*), link_text, link_url, round(AVG(NULLIF(x_position, 0))), round(AVG(NULLIF(y_position, 0))) "
+                    "FROM links "
+                    "GROUP BY link_url "
+                    "ORDER BY COUNT(*) DESC "
+                    "LIMIT 20")
+
+        rows = cur.fetchall()
+
+        for row in rows:
+            print(row)

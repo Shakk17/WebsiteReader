@@ -43,11 +43,11 @@ class QuotesSpider(scrapy.Spider):
             if len(fields) == 1:
                 continue
 
-            url_item["url_anchor"] = fields[0]
-            url_item["text"] = fields[1]
+            url_item["link_url"] = fields[0]
+            url_item["link_text"] = fields[1]
             url_item["x_position"] = fields[2]
             url_item["y_position"] = fields[3]
-            url_item["found_in_page"] = response.url
+            url_item["page_url"] = response.url
 
             # If the link has not been visited yet, visit it.
             if fields[0] not in self.visited_links and self.allowed_domains[0] in fields[0]:

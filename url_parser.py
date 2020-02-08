@@ -1,11 +1,10 @@
 from time import time
 
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
-import requests
-from pysemantics.NlpClient import NlpClient
+
 from datumbox_wrapper import DatumBox
 
 
@@ -53,10 +52,6 @@ class UrlParser:
         text_response = "The title of this page is %s.\n" % self.soup.title.string
         print("Extracting text...")
         start = time()
-
-        '''client = NlpClient()
-        result = client.classify(input=self.url)
-        print(result)'''
 
         datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
         # Extract text from HTML code.

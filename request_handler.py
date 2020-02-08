@@ -6,7 +6,7 @@ import time
 from colorama import Fore, Style
 import sqlite3
 from sqlite3 import Error
-from databases.create_database import Database
+from databases.database_handler import Database
 
 TIMEOUT = 4
 

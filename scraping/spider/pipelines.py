@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from scraping.spider import db_connect, create_table, URL
+from scraping.spider.models import db_connect, create_table, Link
 
 import tldextract
 
@@ -23,14 +23,14 @@ class SpiderPipeline(object):
         domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
 
         # Instantiate the pipeline.
-        return cls(url=domain)
+        return cls()
 
-    def __init__(self, url):
+    def __init__(self):
         """
         Initializes database connection and sessionmaker
         Creates tables
         """
-        engine = db_connect(url)
+        engine = db_connect()
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
 
@@ -39,12 +39,12 @@ class SpiderPipeline(object):
         This method is called for every item pipeline component
         """
         session = self.Session()
-        url = URL()
-        url.text = item["text"]
-        url.url_anchor = item["url_anchor"]
-        url.found_in_page = item["found_in_page"]
-        url.x_position = item["x_position"]
-        url.y_position = item["y_position"]
+        link = Link()
+        link.page_url = item["page_url"]
+        link.link_url = item["link_url"]
+        link.link_text = item["link_text"]
+        link.x_position = item["x_position"]
+        link.y_position = item["y_position"]
 
         ''' check whether the author exists
         exist_author = session.query(Author).filter_by(name=author.name).first()
@@ -64,8 +64,7 @@ class SpiderPipeline(object):
                 quote.tags.append(tag)'''
 
         try:
-            session.add(url)
-
+            session.add(link)
             session.commit()
 
         except:
