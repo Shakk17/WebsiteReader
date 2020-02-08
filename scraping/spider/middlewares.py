@@ -9,6 +9,7 @@ from scrapy import signals
 from scrapy.http import HtmlResponse
 from scrapy.linkextractors import LinkExtractor
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
@@ -100,7 +101,10 @@ class SpiderDownloaderMiddleware(object):
 
         for link in links:
             # Find element with the anchor extracted by LinkExtractor.
-            element = driver.find_element_by_xpath('//a[@href="' + link.url + '"]')
+            try:
+                element = driver.find_element_by_xpath('//a[@href="' + link.url + '"]')
+            except NoSuchElementException:
+                continue
             string_links += link.url + "*" + link.text + "*" \
                             + str(element.location.get("x")) + "*" \
                             + str(element.location.get("y")) + "$"

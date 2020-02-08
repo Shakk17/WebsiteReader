@@ -54,16 +54,26 @@ class Database:
         except Error as e:
             print(e)
 
-    def save_action_in_db(self, action, url):
-        sql = ''' INSERT INTO history
+    def insert_action(self, action, url):
+        sql = '''INSERT INTO history
                     (user, action, url, timestamp)
                     VALUES
                     (?, ?, ?, current_timestamp) '''
         cur = self.conn.cursor()
         record = ("shakk", action, url)
-        cur.execute(sql, record)
+        cur.execute(sql, (record, ))
         # Returns id of the tuple inserted.
-        print(cur.lastrowid)
+        return cur.lastrowid
+
+    def insert_website(self, url):
+        sql = '''INSERT INTO websites
+                            (url, last_crawled_on)
+                            VALUES
+                            (?, current_timestamp) '''
+        cur = self.conn.cursor()
+        record = url
+        cur.execute(sql, (record, ))
+        # Returns id of the tuple inserted.
         return cur.lastrowid
 
     def analyze_scraping(self):

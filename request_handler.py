@@ -120,7 +120,7 @@ class RequestHandler:
             self.cursor.sentence_number = 0
 
         history_db = Database()
-        history_db.save_action_in_db(action, url)
+        history_db.insert_action(action, url)
 
         if action == "VisitPage":
             return self.visit_page()
