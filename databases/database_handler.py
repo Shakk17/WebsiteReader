@@ -61,20 +61,39 @@ class Database:
                     (?, ?, ?, current_timestamp) '''
         cur = self.conn.cursor()
         record = ("shakk", action, url)
-        cur.execute(sql, (record, ))
+        cur.execute(sql, record)
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
     def insert_website(self, url):
         sql = '''INSERT INTO websites
-                            (url, last_crawled_on)
-                            VALUES
-                            (?, current_timestamp) '''
+                    (url, last_crawled_on)
+                    VALUES
+                    (?, current_timestamp) '''
         cur = self.conn.cursor()
         record = url
         cur.execute(sql, (record, ))
         # Returns id of the tuple inserted.
         return cur.lastrowid
+
+    def remove_old_website(self, url):
+        sql = '''DELETE FROM websites
+                    WHERE url LIKE ?;'''
+        cur = self.conn.cursor()
+        record = url
+        cur.execute(sql, (record,))
+        # Returns id of the tuple inserted.
+        return cur.lastrowid
+
+    def has_been_crawled(self, url):
+        sql = '''SELECT * FROM websites
+                    WHERE url LIKE ?'''
+        cur = self.conn.cursor()
+        record = url
+        cur.execute(sql, (record,))
+        # Returns True is it has been crawled, False otherwise.
+        print("welw")
+        return cur.rowcount > 0
 
     def analyze_scraping(self):
         """

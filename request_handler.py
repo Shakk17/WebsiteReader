@@ -1,3 +1,5 @@
+from scrapy.crawler import CrawlerProcess
+
 from url_parser import UrlParser
 
 import queue
@@ -7,6 +9,8 @@ from colorama import Fore, Style
 import sqlite3
 from sqlite3 import Error
 from databases.database_handler import Database
+from scraping.crawler_handler import Crawler
+from scraping.spider.spiders.links_spider import LinksSpider
 
 TIMEOUT = 4
 
@@ -119,6 +123,7 @@ class RequestHandler:
             self.cursor.link = url
             self.cursor.sentence_number = 0
 
+        # Save action requested into the history database.
         history_db = Database()
         history_db.insert_action(action, url)
 
@@ -139,17 +144,29 @@ class RequestHandler:
 
     def visit_page(self):
         """
-        Change the position of the cursor to the page visited.
+        This method:
+        - parses the page, extracting info about it;
+        - if there are no errors, updates the cursor to the new page just visited;
+        - checks if the domain has been already crawled. If not, it starts a new crawl.
+        Returns a response.
         """
         self.cursor = Cursor(self.cursor.url)
         self.url_parser = UrlParser(url=self.cursor.url)
         try:
+            # Page parsing.
             text_response = "%s visited successfully!" % self.url_parser.url
             text_response += self.url_parser.get_info()
+            # Cursor update.
             self.cursor = Cursor(self.url_parser.url)
-
         except Exception as ex:
             text_response = ex.args[0]
+
+        # Checks if domain has been already crawled.
+        if not Database().has_been_crawled(self.url_parser.url):
+            # Start crawling in the background.
+            crawler = Crawler(start_url=self.url_parser.url)
+            thread = threading.Thread(target=crawler.run, args=())
+            thread.start()
 
         # Update url in context.
         return self.build_response(text_response)

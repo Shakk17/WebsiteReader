@@ -4,10 +4,8 @@ import tldextract
 from scraping.spider.items import UrlItem
 
 
-class QuotesSpider(scrapy.Spider):
-    name = "urls"
-    allowed_domains = ["polimi.it"]
-    start_urls = ['https://www.polimi.it/']
+class LinksSpider(scrapy.Spider):
+    name = "links"
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
