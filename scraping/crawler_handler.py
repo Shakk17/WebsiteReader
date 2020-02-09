@@ -1,8 +1,8 @@
-from scrapy import cmdline
-from scrapy.crawler import CrawlerProcess
+import os
+import subprocess
+from pathlib import Path
 
 from databases.database_handler import Database
-from scraping.spider.spiders.links_spider import LinksSpider
 
 
 class Crawler:
@@ -10,13 +10,11 @@ class Crawler:
         self.start_url = start_url
 
     def run(self):
-        process = CrawlerProcess()
-        process.crawl(LinksSpider, )
-        process.start()
+        path = str(Path(os.getcwd()))
+        shell_path = path + "/scraping/"
         command = f"scrapy crawl links -s url={self.start_url}"
-        cmdline.execute(command.split())
+        subprocess.call(command, cwd=shell_path, shell=True)
+
         db = Database()
         db.insert_website(url=self.start_url)
 
-
-Crawler("http://www.polimi.it/").run()

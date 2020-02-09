@@ -92,7 +92,6 @@ class Database:
         record = url
         cur.execute(sql, (record,))
         # Returns True is it has been crawled, False otherwise.
-        print("welw")
         return cur.rowcount > 0
 
     def analyze_scraping(self):

@@ -1,16 +1,19 @@
-from scrapy.crawler import CrawlerProcess
-
-from url_parser import UrlParser
-
 import queue
+import sqlite3
 import threading
 import time
-from colorama import Fore, Style
-import sqlite3
+import os
+import subprocess
+from pathlib import Path
+
 from sqlite3 import Error
+
+from colorama import Fore, Style
+
 from databases.database_handler import Database
+from url_parser import UrlParser
+
 from scraping.crawler_handler import Crawler
-from scraping.spider.spiders.links_spider import LinksSpider
 
 TIMEOUT = 4
 
@@ -167,6 +170,9 @@ class RequestHandler:
             crawler = Crawler(start_url=self.url_parser.url)
             thread = threading.Thread(target=crawler.run, args=())
             thread.start()
+            '''path = Path(os.getcwd())
+            shell_path = path + "/scraping/"
+            subprocess.call("", cwd=shell_path, shell=True)'''
 
         # Update url in context.
         return self.build_response(text_response)

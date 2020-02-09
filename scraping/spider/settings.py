@@ -23,6 +23,8 @@ ROBOTSTXT_OBEY = True
 # Maximum depth that will be allowed to crawl for any site.
 DEPTH_LIMIT = 1
 
+LOG_LEVEL = "INFO"
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
