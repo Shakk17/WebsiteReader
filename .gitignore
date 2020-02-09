@@ -200,4 +200,4 @@ dmypy.json
 /VIPSResult.xml
 /vips_algorithm/
 /vips_algorithm/chromedriver.exe
-!/databases/database.db
+/databases/database.db
