@@ -170,9 +170,6 @@ class RequestHandler:
             crawler = Crawler(start_url=self.url_parser.url)
             thread = threading.Thread(target=crawler.run, args=())
             thread.start()
-            '''path = Path(os.getcwd())
-            shell_path = path + "/scraping/"
-            subprocess.call("", cwd=shell_path, shell=True)'''
 
         # Update url in context.
         return self.build_response(text_response)

@@ -66,10 +66,7 @@ class Database:
         return cur.lastrowid
 
     def insert_website(self, url):
-        sql = '''INSERT INTO websites
-                    (url, last_crawled_on)
-                    VALUES
-                    (?, current_timestamp) '''
+        sql = "INSERT INTO websites (url, last_crawled_on) VALUES (?, current_timestamp)"
         cur = self.conn.cursor()
         record = url
         cur.execute(sql, (record, ))
@@ -77,8 +74,7 @@ class Database:
         return cur.lastrowid
 
     def remove_old_website(self, url):
-        sql = '''DELETE FROM websites
-                    WHERE url LIKE ?;'''
+        sql = "DELETE FROM websites WHERE url LIKE ?;"
         cur = self.conn.cursor()
         record = url
         cur.execute(sql, (record,))
@@ -86,13 +82,13 @@ class Database:
         return cur.lastrowid
 
     def has_been_crawled(self, url):
-        sql = '''SELECT * FROM websites
-                    WHERE url LIKE ?'''
+        sql = "SELECT * FROM websites WHERE url LIKE ?"
         cur = self.conn.cursor()
         record = url
-        cur.execute(sql, (record,))
+        cur.execute(sql, (record, ))
+        rows = cur.fetchall()
         # Returns True is it has been crawled, False otherwise.
-        return cur.rowcount > 0
+        return len(rows) > 0
 
     def analyze_scraping(self):
         """
