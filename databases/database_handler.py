@@ -55,10 +55,8 @@ class Database:
             print(e)
 
     def insert_action(self, action, url):
-        sql = '''INSERT INTO history
-                    (user, action, url, timestamp)
-                    VALUES
-                    (?, ?, ?, current_timestamp) '''
+        sql = '''INSERT INTO history (user, action, url, timestamp)
+                    VALUES (?, ?, ?, current_timestamp) '''
         cur = self.conn.cursor()
         record = ("shakk", action, url)
         cur.execute(sql, record)
