@@ -6,7 +6,8 @@ from colorama import Fore, Style
 
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
-from url_parser import UrlParser
+from page_visitor import PageVisitor
+from helper import Helper
 
 TIMEOUT = 4
 
@@ -121,7 +122,7 @@ class RequestHandler:
         Returns a response.
         """
         # Page parsing.
-        self.url_parser = UrlParser(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url)
         try:
             text_response = "%s visited successfully!" % self.url_parser.url
             text_response += self.url_parser.get_info()
@@ -144,8 +145,7 @@ class RequestHandler:
         """
         Returns the links reachable from the menu.
         """
-        self.url_parser = UrlParser(url=self.cursor.url)
-        menu = self.url_parser.get_menu()
+        menu = Helper().get_menu(self.cursor.url)
         strings = [tup[0] for tup in menu]
 
         text_response = "You can choose between: \n"
@@ -158,7 +158,7 @@ class RequestHandler:
         """
         Returns info about the web page.
         """
-        self.url_parser = UrlParser(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url)
         text_response = self.url_parser.get_info()
         return self.build_response(text_response)
 
@@ -166,7 +166,7 @@ class RequestHandler:
         """
         If page is article, read it. Otherwise, read main article titles available.
         """
-        self.url_parser = UrlParser(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url)
         if self.url_parser.is_article():
             try:
                 text_response = self.url_parser.get_article(self.cursor.idx_paragraph)
@@ -196,16 +196,14 @@ class RequestHandler:
         """
         Opens the section of the menu, if present.
         """
-        self.url_parser = UrlParser(url=self.cursor.url)
-
         try:
             number = int(parameters.get("section-number"))
             if number == 0:
                 name = parameters.get("section-name")
-                new_url = self.url_parser.go_to_section(name=name)
+                new_url = Helper().go_to_section(self.cursor.url, name=name)
             else:
-                new_url = self.url_parser.go_to_section(number=number)
-            self.url_parser = UrlParser(new_url)
+                new_url = Helper().go_to_section(self.cursor.url, number=number)
+            self.cursor.url = new_url
             return self.visit_page()
         except ValueError:
             return "Wrong input."
@@ -214,7 +212,7 @@ class RequestHandler:
         """
         Analyze web page through SD algorithm.
         """
-        self.url_parser = UrlParser(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url)
         result = self.url_parser.analysis
 
         # Take text result, split it into sentences. Return only first two sentence pointed by the cursor.
@@ -240,7 +238,7 @@ class RequestHandler:
             {
                 "fulfillmentText": text_response,
                 "outputContexts": [{
-                    "name": "projects/<Project ID>/agent/sessions/<Session ID>/contexts/web-page",
+                    "name": "projects/<Project ID>/agent/sessions/<Session ID>/contexts/cursor",
                     "lifespanCount": 1,
                     "parameters": {
                         "cursor": vars(self.cursor)
