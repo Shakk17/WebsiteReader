@@ -1,44 +1,20 @@
 import queue
-import sqlite3
 import threading
 import time
-import os
-import subprocess
-from pathlib import Path
-
-from sqlite3 import Error
 
 from colorama import Fore, Style
 
 from databases.database_handler import Database
-from url_parser import UrlParser
-
 from scraping.crawler_handler import Crawler
+from url_parser import UrlParser
 
 TIMEOUT = 4
 
 
-def save_action_in_db(action, url):
-    """ create a database connection to a SQLite database """
-    conn = None
-    try:
-        conn = sqlite3.connect(r"./history.db")
-        print(sqlite3.version)
-    except Error as e:
-        print(e)
-    finally:
-        if conn:
-            conn.close()
-    return
-
-
 class Cursor:
-    def __init__(self, url):
-        self.url = url
-        # Type of the page, it can be article or section.
-        self.type = None
+    def __init__(self, cursor_context, url):
         # Number that indicates the paragraph to read in the current article.
-        self.idx_paragraph = 0
+        self.idx_paragraph = 1
         # Number that indicates the article to read in the current section.
         self.idx_article = 0
         # Link selected.
@@ -46,12 +22,16 @@ class Cursor:
         # Sentence read in current web page.
         self.sentence_number = 0
 
+        for key, value in cursor_context.get("parameters").items():
+            if not key.endswith("original"):
+                setattr(self, key, value)
+        self.url = url
+
     def __repr__(self):
         return (
             f"{Fore.GREEN}"
             f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
             f"\tURL: {self.url}\n"
-            f"\tPage type: {self.type}\n"
             f"\tIdx paragraph: {self.idx_paragraph}\n"
             f"\tIdx article: {self.idx_article}\n"
             f"\tLink: {self.link}\n"
@@ -60,9 +40,10 @@ class Cursor:
 
 
 class RequestHandler:
+    url_parser = None
+    cursor = None
+
     def __init__(self):
-        self.url_parser = None
-        self.cursor = None
         # Queue set up to hold threads responses.
         self.q = queue.Queue()
 
@@ -97,34 +78,20 @@ class RequestHandler:
         print("-" * 20)
         print("Action: " + action)
 
-        # Get open-online context from request, if available.
+        # Get main context from request, if available.
         contexts = request.get("queryResult").get("outputContexts")
-        context = next((x for x in contexts if "web-page" in x.get("name")), None)
+        cursor_context = next((x for x in contexts if "cursor" in x.get("name")), None)
 
-        # Get context parameters from request, if available.
+        # URL is either in parameters (VisitPage) or in context.
         try:
-            # URL is either in parameters or in context.
             url = request.get("queryResult").get("parameters").get("url")
             if url is None:
                 raise AttributeError
         except AttributeError:
-            url = context.get("parameters").get("web_page").get("url")
+            url = cursor_context.get("parameters").get("cursor").get("url")
 
-        # Create an object containing details about the web page.
-        self.cursor = Cursor(url=url)
-
-        try:
-            self.cursor.type = context.get("parameters").get("web_page").get("type")
-            self.cursor.idx_paragraph = int(context.get("parameters").get("web_page").get("idx_paragraph"))
-            self.cursor.idx_article = int(context.get("parameters").get("web_page").get("idx_article"))
-            self.cursor.link = context.get("parameters").get("web_page").get("link")
-            self.cursor.sentence_number = int(context.get("parameters").get("web_page").get("sentence_number"))
-        except AttributeError:
-            self.cursor.type = "article"
-            self.cursor.idx_paragraph = 0
-            self.cursor.idx_article = 0
-            self.cursor.link = url
-            self.cursor.sentence_number = 0
+        # Create a Cursor object containing details about the web page.
+        self.cursor = Cursor(cursor_context, url)
 
         # Save action requested into the history database.
         history_db = Database()
@@ -141,7 +108,7 @@ class RequestHandler:
         elif action == "OpenLink":
             return self.open_link()
         elif action == "GoToSection":
-            return self.go_to_section(context.get("parameters").get("section-name"))
+            return self.go_to_section(cursor_context.get("parameters"))
         elif action == "Analyze":
             return self.analyze()
 
@@ -153,14 +120,13 @@ class RequestHandler:
         - checks if the domain has been already crawled. If not, it starts a new crawl.
         Returns a response.
         """
-        self.cursor = Cursor(self.cursor.url)
+        # Page parsing.
         self.url_parser = UrlParser(url=self.cursor.url)
         try:
-            # Page parsing.
             text_response = "%s visited successfully!" % self.url_parser.url
             text_response += self.url_parser.get_info()
             # Cursor update.
-            self.cursor = Cursor(self.url_parser.url)
+            self.cursor.url = self.url_parser.url
         except Exception as ex:
             text_response = ex.args[0]
 
@@ -226,13 +192,19 @@ class RequestHandler:
         self.cursor.url, self.cursor.link = self.cursor.link, None
         return self.visit_page()
 
-    def go_to_section(self, name):
+    def go_to_section(self, parameters):
         """
         Opens the section of the menu, if present.
         """
         self.url_parser = UrlParser(url=self.cursor.url)
+
         try:
-            new_url = self.url_parser.go_to_section(name)
+            number = int(parameters.get("section-number"))
+            if number == 0:
+                name = parameters.get("section-name")
+                new_url = self.url_parser.go_to_section(name=name)
+            else:
+                new_url = self.url_parser.go_to_section(number=number)
             self.url_parser = UrlParser(new_url)
             return self.visit_page()
         except ValueError:
@@ -271,7 +243,7 @@ class RequestHandler:
                     "name": "projects/<Project ID>/agent/sessions/<Session ID>/contexts/web-page",
                     "lifespanCount": 1,
                     "parameters": {
-                        "web_page": vars(self.cursor)
+                        "cursor": vars(self.cursor)
                     }
                 }]
             })

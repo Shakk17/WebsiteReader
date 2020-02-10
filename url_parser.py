@@ -16,7 +16,6 @@ class UrlParser:
         self.url = url
         self.html_code = self.get_quick_html()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
-        # self.analysis = SDAlgorithm(self.html_code).analyze_page()
 
     def render_page(self):
         """
@@ -75,14 +74,6 @@ class UrlParser:
 
         return text_response
 
-    def is_article(self):
-        """
-        Returns true if the web page contained in the url specified is an article.
-        """
-        # Count number of <article> tags in the page.
-        n_articles = self.soup.find_all(name="article")
-        return len(n_articles) < 8
-
     def get_article(self, paragraph):
         """
         Returns the text contained in the paragraph indicated in the request.
@@ -107,6 +98,7 @@ class UrlParser:
 
     def get_menu(self):
         """
+        Analyze the scraped pages from the url's domain, then returns the 10 most frequent links.
         Returns a list of tuples (text, url) corresponding to the anchors present in the menu.
         """
         extracted_domain = tldextract.extract(self.url)
@@ -114,7 +106,7 @@ class UrlParser:
         menu = Database().analyze_scraping(domain)
         return menu
 
-    def go_to_section(self, name):
+    def go_to_section(self, name=None, number=None):
         """
         Given the name of one of the menu's entries, returns its URL.
         """
@@ -122,8 +114,14 @@ class UrlParser:
         menu = self.get_menu()
         menu_strings = [tup[0] for tup in menu]
         menu_anchors = [tup[1] for tup in menu]
-        # Put all the strings to lowercase.
-        menu_strings = [string.lower() for string in menu_strings]
-        # Return index of string, if present. Otherwise IndexError.
-        index = menu_strings.index(name.lower())
+
+        # Check if the parameter is the name of the section or the index.
+        if name is not None:
+            # Put all the strings to lowercase.
+            menu_strings = [string.lower() for string in menu_strings]
+            # Return index of string, if present. Otherwise, IndexError.
+            index = menu_strings.index(name.lower())
+        else:
+            index = number
+
         return menu_anchors[index]
