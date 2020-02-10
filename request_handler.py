@@ -181,8 +181,11 @@ class RequestHandler:
         self.url_parser = UrlParser(url=self.cursor.url)
         menu = self.url_parser.get_menu()
         strings = [tup[0] for tup in menu]
-        text_response = '-'.join(strings)
-        # TODO get elements of menu, how many?
+
+        text_response = "You can choose between: \n"
+        for i, string in enumerate(strings, start=1):
+            text_response += f"{i}) {string}\n"
+
         return self.build_response(text_response)
 
     def get_info(self):

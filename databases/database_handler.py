@@ -88,21 +88,21 @@ class Database:
         # Returns True is it has been crawled, False otherwise.
         return len(rows) > 0
 
-    def analyze_scraping(self):
-        """
-        Query tasks by priority
-        :param conn: the Connection object
-        :param priority:
-        :return:
-        """
+    def analyze_scraping(self, url):
         cur = self.conn.cursor()
         cur.execute("SELECT COUNT(*), link_text, link_url, round(AVG(NULLIF(x_position, 0))), round(AVG(NULLIF(y_position, 0))) "
                     "FROM links "
+                    "WHERE page_url LIKE ?"
                     "GROUP BY link_url "
                     "ORDER BY COUNT(*) DESC "
-                    "LIMIT 20")
+                    "LIMIT 10", (f"%{url}%", ))
 
         rows = cur.fetchall()
 
+        result = []
+
         for row in rows:
+            result.append(tuple(row[1:3]))
             print(row)
+
+        return result

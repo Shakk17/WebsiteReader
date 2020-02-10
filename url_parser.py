@@ -4,8 +4,11 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+import tldextract
 
 from datumbox_wrapper import DatumBox
+
+from databases.database_handler import Database
 
 
 class UrlParser:
@@ -106,19 +109,10 @@ class UrlParser:
         """
         Returns a list of tuples (text, url) corresponding to the anchors present in the menu.
         """
-        # Get all the ul of class menu.
-        ul_lists = [ul_menu for ul_menu in self.soup.find_all(name="ul", attrs={'class': 'menu'})]
-        # Get all the li elements belonging to ul of class menu.
-        li_lists = [ul_list.find_all(name="li") for ul_list in ul_lists]
-        # Flatten list.
-        li_lists = [item for sublist in li_lists for item in sublist]
-        # Get anchors.
-        a_elements = [li_list.find(name="a") for li_list in li_lists]
-        # Remove duplicates in list.
-        a_elements = list(set(a_elements))
-        # Sends back tuple with url and text of anchor.
-        elements = [(elem.text, elem.attrs["href"]) for elem in a_elements]
-        return elements
+        extracted_domain = tldextract.extract(self.url)
+        domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
+        menu = Database().analyze_scraping(domain)
+        return menu
 
     def go_to_section(self, name):
         """
