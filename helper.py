@@ -29,6 +29,6 @@ class Helper:
             # Return index of string, if present. Otherwise, IndexError.
             index = menu_strings.index(name.lower())
         else:
-            index = number
+            index = number - 1
 
         return menu_anchors[index]
