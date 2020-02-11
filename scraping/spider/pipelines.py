@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from scraping.spider.models import db_connect, create_table, Link
 
-import tldextract
+from helper import get_domain
 
 
 # -*- coding: utf-8 -*-
@@ -19,8 +19,7 @@ class SpiderPipeline(object):
         # Get values passed as parameters.
         settings = crawler.settings
         url = settings.get('url')
-        extracted_domain = tldextract.extract(url)
-        domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
+        domain = get_domain(url)
 
         # Instantiate the pipeline.
         return cls()

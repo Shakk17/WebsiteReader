@@ -1,5 +1,5 @@
 import scrapy
-import tldextract
+from helper import get_domain
 
 from scraping.spider.items import UrlItem
 
@@ -13,8 +13,7 @@ class LinksSpider(scrapy.Spider):
         settings = crawler.settings
         url = settings.get('url')
         # Get the domain from the url.
-        extracted_domain = tldextract.extract(url)
-        domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
+        domain = get_domain(url)
 
         cls.allowed_domains = [domain]
         cls.start_urls = [url]

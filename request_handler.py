@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import Helper
+from helper import get_menu, go_to_section
 
 TIMEOUT = 4
 
@@ -23,6 +23,7 @@ class Cursor:
         # Sentence read in current web page.
         self.sentence_number = 0
 
+        # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
             if not key.endswith("original"):
                 setattr(self, key, value)
@@ -145,7 +146,7 @@ class RequestHandler:
         """
         Returns the links reachable from the menu.
         """
-        menu = Helper().get_menu(self.cursor.url)
+        menu = get_menu(self.cursor.url)
         strings = [tup[0] for tup in menu]
 
         text_response = "You can choose between: \n"
@@ -200,9 +201,9 @@ class RequestHandler:
             number = int(parameters.get("section-number"))
             if number == 0:
                 name = parameters.get("section-name")
-                new_url = Helper().go_to_section(self.cursor.url, name=name)
+                new_url = go_to_section(self.cursor.url, name=name)
             else:
-                new_url = Helper().go_to_section(self.cursor.url, number=number)
+                new_url = go_to_section(self.cursor.url, number=number)
             self.cursor.url = new_url
             return self.visit_page()
         except ValueError:
