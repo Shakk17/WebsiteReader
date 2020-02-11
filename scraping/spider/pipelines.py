@@ -14,16 +14,6 @@ from helper import get_domain
 
 class SpiderPipeline(object):
 
-    @classmethod
-    def from_crawler(cls, crawler):
-        # Get values passed as parameters.
-        settings = crawler.settings
-        url = settings.get('url')
-        domain = get_domain(url)
-
-        # Instantiate the pipeline.
-        return cls()
-
     def __init__(self):
         """
         Initializes database connection and sessionmaker
