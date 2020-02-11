@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, go_to_section
+from helper import get_menu, go_to_section, get_domain
 
 TIMEOUT = 4
 
@@ -78,7 +78,6 @@ class RequestHandler:
         # Get action from request.
         action = request.get('queryResult').get('action')
         print("-" * 20)
-        print("Action: " + action)
 
         # Get main context from request, if available.
         contexts = request.get("queryResult").get("outputContexts")
@@ -95,9 +94,9 @@ class RequestHandler:
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context, url)
 
-        # Save action requested into the history database.
-        history_db = Database()
-        history_db.insert_action(action, url)
+        # Save action requested into the history table of the database.
+        Database().insert_action(action, url)
+        print(f"Action {action} saved in history.")
 
         if action == "VisitPage":
             return self.visit_page()
@@ -133,7 +132,7 @@ class RequestHandler:
             text_response = ex.args[0]
 
         # Checks if domain has been already crawled.
-        if not Database().has_been_crawled(self.url_parser.url):
+        if not Database().has_been_crawled(get_domain(self.url_parser.url)):
             # Start crawling in the background.
             crawler = Crawler(start_url=self.url_parser.url)
             thread = threading.Thread(target=crawler.run, args=())

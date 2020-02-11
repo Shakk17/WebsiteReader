@@ -10,7 +10,7 @@ sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                             ); """
 
 sql_create_websites_table = """CREATE TABLE IF NOT EXISTS websites (
-                                    url text PRIMARY KEY,
+                                    domain text PRIMARY KEY,
                                     last_crawled_on text NOT NULL
                                 );"""
 
@@ -21,7 +21,7 @@ sql_create_links_table = """CREATE TABLE IF NOT EXISTS links (
                                     link_text integer NOT NULL,
                                     x_position integer NOT NULL,
                                     y_position text NOT NULL,
-                                    FOREIGN KEY (page_url) REFERENCES websites (url)
+                                    FOREIGN KEY (page_url) REFERENCES websites (domain)
                                 );"""
 
 
@@ -63,27 +63,25 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def insert_website(self, url):
-        sql = "INSERT INTO websites (url, last_crawled_on) VALUES (?, current_timestamp)"
+    def insert_website(self, domain):
+        sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, current_timestamp)"
         cur = self.conn.cursor()
-        record = url
+        record = domain
         cur.execute(sql, (record, ))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def remove_old_website(self, url):
-        sql = "DELETE FROM websites WHERE url LIKE ?;"
+    def remove_old_website(self, domain):
+        sql = "DELETE FROM websites WHERE domain LIKE ?;"
         cur = self.conn.cursor()
-        record = url
-        cur.execute(sql, (record,))
+        cur.execute(sql, (domain,))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def has_been_crawled(self, url):
-        sql = "SELECT * FROM websites WHERE url LIKE ?"
+    def has_been_crawled(self, domain):
+        sql = "SELECT * FROM websites WHERE domain LIKE ?"
         cur = self.conn.cursor()
-        record = url
-        cur.execute(sql, (record, ))
+        cur.execute(sql, (domain, ))
         rows = cur.fetchall()
         # Returns True is it has been crawled, False otherwise.
         return len(rows) > 0
