@@ -1,6 +1,8 @@
 import sqlite3
 from sqlite3 import Error
 
+from datetime import datetime
+
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                                 id integer PRIMARY KEY AUTOINCREMENT,
                                                 user text NOT NULL,
@@ -72,6 +74,12 @@ class Database:
         return cur.lastrowid
 
     def remove_old_website(self, domain):
+        # First remove all the tuples in 'links' related to the domain.
+        sql = "DELETE FROM links WHERE page_url LIKE ?;"
+        cur = self.conn.cursor()
+        url = f"%{domain}%"
+        cur.execute(sql, (url,))
+        # Then remove the tuple in 'websites' containing the domain.
         sql = "DELETE FROM websites WHERE domain LIKE ?;"
         cur = self.conn.cursor()
         cur.execute(sql, (domain,))
@@ -79,12 +87,24 @@ class Database:
         return cur.lastrowid
 
     def has_been_crawled(self, domain):
-        sql = "SELECT * FROM websites WHERE domain LIKE ?"
+        sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
         cur = self.conn.cursor()
         cur.execute(sql, (domain, ))
         rows = cur.fetchall()
         # Returns True is it has been crawled, False otherwise.
-        return len(rows) > 0
+        crawled = len(rows) > 0
+        if crawled:
+            # Check when was the last crawling of the domain.
+            query_timestamp = rows[0][1]
+            t1 = datetime.strptime(query_timestamp, "%Y-%m-%d %H:%M:%S")
+            t2 = datetime.now()
+            difference = t2 - t1
+            print(f"The domain {domain} was last crawled {difference.days} days ago.")
+            if difference.days > 7:
+                # It's time to crawl it again!
+                self.remove_old_website(domain)
+                return False
+        return crawled
 
     def analyze_scraping(self, url):
         cur = self.conn.cursor()

@@ -55,7 +55,6 @@ class PageVisitor:
         datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
         # Extract text from HTML code.
         text = datumbox.text_extract(text=self.html_code)
-        print(f"TEXT:  {text}")
 
         # Get topic from text extracted.
         topic = datumbox.topic_classification(text=text)
