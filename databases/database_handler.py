@@ -108,10 +108,12 @@ class Database:
 
     def analyze_scraping(self, url):
         cur = self.conn.cursor()
-        cur.execute("SELECT COUNT(*), link_text, link_url, round(AVG(NULLIF(x_position, 0))), round(AVG(NULLIF(y_position, 0))) "
+        cur.execute("SELECT COUNT(*), link_text, link_url, "
+                    "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
                     "FROM links "
-                    "WHERE page_url LIKE ?"
+                    "WHERE page_url LIKE ? "
                     "GROUP BY link_url "
+                    "HAVING avg_y < 500 "
                     "ORDER BY COUNT(*) DESC "
                     "LIMIT 10", (f"%{url}%", ))
 
