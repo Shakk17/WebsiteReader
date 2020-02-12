@@ -9,6 +9,11 @@ from scrapy import signals
 from scrapy.http import HtmlResponse
 from seleniumwire import webdriver
 
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import StaleElementReferenceException
+
+from colorama import Fore, Style
+
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
@@ -99,6 +104,8 @@ class SpiderDownloaderMiddleware(object):
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         driver.get(request.url)
+        print(f"{Fore.MAGENTA}Scraping {request.url}{Style.RESET_ALL}")
+
         body = driver.page_source
 
         # Create a string containing all the links in the page, with location.
@@ -106,12 +113,15 @@ class SpiderDownloaderMiddleware(object):
         string_links = ""
 
         # Extract all links from the page.
-        links = driver.find_elements_by_xpath("//a[@href]")
+        links = driver.find_elements(By.XPATH, '//a[@href]')
 
         for link in links:
-            string_links += link.get_attribute('href') + "*" + link.get_attribute('innerHTML') + "*" \
-                            + str(link.location.get("x")) + "*" \
-                            + str(link.location.get("y")) + "$"
+            try:
+                string_links += link.get_attribute('href') + "*" + link.get_attribute('innerHTML') + "*" \
+                                + str(link.location.get("x")) + "*" \
+                                + str(link.location.get("y")) + "$"
+            except StaleElementReferenceException:
+                continue
 
         # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = string_links.encode(encoding='UTF-8')

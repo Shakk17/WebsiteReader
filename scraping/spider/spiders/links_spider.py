@@ -2,6 +2,7 @@ import scrapy
 from helper import get_domain
 
 from scraping.spider.items import UrlItem
+from scrapy import signals
 
 
 class LinksSpider(scrapy.Spider):
@@ -9,17 +10,20 @@ class LinksSpider(scrapy.Spider):
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(LinksSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+
         # Get values passed as parameters.
         settings = crawler.settings
         url = settings.get('url')
         # Get the domain from the url.
         domain = get_domain(url)
 
-        cls.allowed_domains = [domain]
-        cls.start_urls = [url]
+        spider.allowed_domains = [domain]
+        spider.start_urls = [url]
 
         # Instantiate the class.
-        return cls()
+        return spider
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -56,3 +60,7 @@ class LinksSpider(scrapy.Spider):
                 yield url_item
             else:
                 yield None
+
+    def spider_closed(self, spider):
+        print(f"Scraping of {self.start_urls[0]} finished.")
+        spider.logger.info('Spider closed: %s', spider.name)
