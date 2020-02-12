@@ -99,7 +99,6 @@ class SpiderDownloaderMiddleware(object):
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         driver.get(request.url)
-        print(f"Agent: {driver.execute_script('return navigator.userAgent')}")
         body = driver.page_source
 
         # Create a string containing all the links in the page, with location.
