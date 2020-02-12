@@ -7,15 +7,25 @@
 
 from scrapy import signals
 from scrapy.http import HtmlResponse
-from scrapy.linkextractors import LinkExtractor
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from seleniumwire import webdriver
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
+options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
 
 driver = webdriver.Chrome(options=options)
+driver.header_overrides = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7,es;q=0.6,fr;q=0.5,nl;q=0.4,sv;q=0.3",
+    "Dnt": "1",
+    "Referer": "https://www.google.com/",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1"
+}
 
 
 class SpiderSpiderMiddleware(object):
@@ -89,6 +99,7 @@ class SpiderDownloaderMiddleware(object):
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
         driver.get(request.url)
+        print(f"Agent: {driver.execute_script('return navigator.userAgent')}")
         body = driver.page_source
 
         # Create a string containing all the links in the page, with location.
