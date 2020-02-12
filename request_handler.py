@@ -89,7 +89,7 @@ class RequestHandler:
             if url is None:
                 raise AttributeError
         except AttributeError:
-            url = cursor_context.get("parameters").get("cursor").get("url")
+            url = cursor_context.get("parameters").get("url")
 
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context, url)
@@ -124,8 +124,7 @@ class RequestHandler:
         # Page parsing.
         self.url_parser = PageVisitor(url=self.cursor.url)
         try:
-            text_response = "%s visited successfully!" % self.url_parser.url
-            text_response += self.url_parser.get_info()
+            text_response = self.url_parser.get_info()
             # Cursor update.
             self.cursor.url = self.url_parser.url
         except Exception as ex:
@@ -167,22 +166,14 @@ class RequestHandler:
         If page is article, read it. Otherwise, read main article titles available.
         """
         self.url_parser = PageVisitor(url=self.cursor.url)
-        if self.url_parser.is_article():
-            try:
-                text_response = self.url_parser.get_article(self.cursor.idx_paragraph)
-                self.cursor.idx_paragraph += 1
-            except IndexError as err:
-                text_response = "End of article."
-                self.cursor.idx_paragraph = 0
-        else:
-            try:
-                article = self.url_parser.get_section(self.cursor.idx_article)
-                text_response = article[0]
-                self.cursor.link = article[1]
-                self.cursor.idx_article += 1
-            except IndexError as err:
-                text_response = "End of section."
-                self.cursor.idx_article = 0
+
+        try:
+            text_response = self.url_parser.get_article(int(self.cursor.idx_paragraph))
+            self.cursor.idx_paragraph += 3
+        except IndexError as err:
+            text_response = "End of article."
+            self.cursor.idx_paragraph = 0
+
         return self.build_response(text_response)
 
     def open_link(self):
@@ -240,9 +231,7 @@ class RequestHandler:
                 "outputContexts": [{
                     "name": "projects/<Project ID>/agent/sessions/<Session ID>/contexts/cursor",
                     "lifespanCount": 1,
-                    "parameters": {
-                        "cursor": vars(self.cursor)
-                    }
+                    "parameters": vars(self.cursor)
                 }]
             })
 

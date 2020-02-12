@@ -13,6 +13,7 @@ class PageVisitor:
         self.url = url
         self.html_code = self.get_quick_html()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
+        self.datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
 
     def render_page(self):
         """
@@ -52,17 +53,16 @@ class PageVisitor:
         print("Extracting text...")
         start = time()
 
-        datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
         # Extract text from HTML code.
-        text = datumbox.text_extract(text=self.html_code)
+        text = self.datumbox.text_extract(text=self.html_code)
 
         # Get topic from text extracted.
-        topic = datumbox.topic_classification(text=text)
+        topic = self.datumbox.topic_classification(text=text)
         print(f"TOPIC: {topic}")
         text_response += f"The topic of this web page is {topic}."
 
         # Detect language.
-        language = datumbox.detect_language(text=text)
+        language = self.datumbox.detect_language(text=text)
         print(f"LANGUAGE: {language}")
         text_response += f"The language of this web page is {language}."
 
@@ -70,15 +70,18 @@ class PageVisitor:
 
         return text_response
 
-    def get_article(self, paragraph):
+    def get_article(self, idx_paragraph):
         """
         Returns the text contained in the paragraph indicated in the request.
         """
-        # Find article div.
-        article_div = self.soup.find_all(name="div", attrs={'class': 'news__content'})[0]
-        # If paragraph is available, read it.
-        div_paragraphs = article_div.find_all('p')
-        string = "%s\n %d paragraph(s) left." % (div_paragraphs[paragraph].text, len(div_paragraphs) - paragraph)
+        # Extract text from HTML code.
+        text = self.datumbox.text_extract(text=self.html_code)
+        # Split up the sentences.
+        split_text = text.split('.')
+        string = ""
+        for text in split_text[idx_paragraph:idx_paragraph+4]:
+            string += f"{text}."
+        string += f"\n{len(split_text) - idx_paragraph} sentence(s) left."
         return string
 
     def get_section(self, idx_article):
