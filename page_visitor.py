@@ -49,7 +49,7 @@ class PageVisitor:
         """
         Returns text containing information about the type of the web page analyzed.
         """
-        text_response = "The title of this page is %s.\n" % self.soup.title.string
+        text_response = f"The title of this page is {self.soup.title.string}.\n"
         print("Extracting text...")
         start = time()
 
@@ -59,12 +59,12 @@ class PageVisitor:
         # Get topic from text extracted.
         topic = self.datumbox.topic_classification(text=text)
         print(f"TOPIC: {topic}")
-        text_response += f"The topic of this web page is {topic}."
+        text_response += f"The topic of this web page is {topic}. \n"
 
         # Detect language.
         language = self.datumbox.detect_language(text=text)
         print(f"LANGUAGE: {language}")
-        text_response += f"The language of this web page is {language}."
+        text_response += f"The language of this web page is {language}. \n"
 
         print("Extraction time: %.2f s" % (time() - start))
 
@@ -79,7 +79,7 @@ class PageVisitor:
         # Split up the sentences.
         split_text = text.split('.')
         string = ""
-        for text in split_text[idx_paragraph:idx_paragraph+4]:
+        for text in split_text[idx_paragraph:idx_paragraph+3]:
             string += f"{text}."
         string += f"\n{len(split_text) - idx_paragraph} sentence(s) left."
         return string

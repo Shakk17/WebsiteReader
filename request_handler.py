@@ -149,7 +149,7 @@ class RequestHandler:
 
         text_response = "You can choose between: \n"
         for i, string in enumerate(strings, start=1):
-            text_response += f"{i}) {string}\n"
+            text_response += f"{i}: {string}. \n"
 
         return self.build_response(text_response)
 
