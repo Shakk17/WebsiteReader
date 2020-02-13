@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, go_to_section, get_domain
+from helper import get_menu, go_to_section, get_domain, get_url_from_google
 
 TIMEOUT = 4
 
@@ -90,6 +90,12 @@ class RequestHandler:
                 raise AttributeError
         except AttributeError:
             url = cursor_context.get("parameters").get("url")
+
+        # Get first result from Google Search (in case the parameter is not a URL).
+        query = request.get("queryResult").get("parameters").get("query")
+
+        if query is not None:
+            url = get_url_from_google(query)
 
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context, url)

@@ -1,5 +1,15 @@
 import tldextract
+from googlesearch import search
+from time import time
 from databases.database_handler import Database
+
+
+def get_url_from_google(query):
+    start = time()
+    result = search(query, tld='com', lang='en', num=1, start=0, pause=1.0)
+    for res in result:
+        print("Time elapsed for Google Search: %.2f s" % (time() - start))
+        return res
 
 
 def get_domain(url):

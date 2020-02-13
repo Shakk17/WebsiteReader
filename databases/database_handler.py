@@ -1,7 +1,6 @@
 import sqlite3
-from sqlite3 import Error
-
 from datetime import datetime
+from sqlite3 import Error
 
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                                 id integer PRIMARY KEY AUTOINCREMENT,
