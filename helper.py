@@ -6,7 +6,7 @@ from databases.database_handler import Database
 
 def get_url_from_google(query):
     start = time()
-    result = search(query, tld='com', lang='en', num=1, start=0, pause=1.0)
+    result = search(query, tld='com', lang='en', num=1, start=0, pause=0.0)
     for res in result:
         print("Time elapsed for Google Search: %.2f s" % (time() - start))
         return res

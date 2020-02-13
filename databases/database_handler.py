@@ -125,3 +125,23 @@ class Database:
             print(row)
 
         return result
+
+    def get_previous_action(self, user):
+        # First, get the second to last action performed.
+        cur = self.conn.cursor()
+        cur.execute("SELECT action, url "
+                    "FROM history "
+                    "WHERE user LIKE ? "
+                    "ORDER BY id DESC ",
+                    (f"{user}",)
+        )
+
+        result = cur.fetchall()[1]
+
+        # Then, delete the last two actions performed.
+        cur.execute("DELETE from history "
+                    "WHERE id IN (SELECT id FROM history WHERE user LIKE ? ORDER BY id DESC LIMIT 2)",
+                    (f"{user}", )
+        )
+
+        return result

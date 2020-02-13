@@ -97,6 +97,9 @@ class RequestHandler:
         if query is not None:
             url = get_url_from_google(query)
 
+        if action == "GoBack":
+            action, url = Database().get_previous_action("shakk")
+
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context, url)
 
