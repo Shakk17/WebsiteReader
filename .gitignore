@@ -201,3 +201,4 @@ dmypy.json
 /vips_algorithm/
 /vips_algorithm/chromedriver.exe
 /databases/database.db
+/.google-cookie
