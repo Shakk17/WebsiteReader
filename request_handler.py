@@ -94,7 +94,7 @@ class RequestHandler:
         # Get first result from Google Search (in case the parameter is not a URL).
         query = request.get("queryResult").get("parameters").get("query")
 
-        if query is not None:
+        if query is (not '') and (not None):
             url = get_url_from_google(query)
 
         if action == "GoBack":
