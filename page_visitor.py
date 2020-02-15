@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from datumbox_wrapper import DatumBox
+from sd_alg.sd_algorithm import SDAlgorithm
 
 
 class PageVisitor:
@@ -97,14 +98,15 @@ class PageVisitor:
 
     def get_main_content(self):
         # First, render page and get DOM tree.
-        rendered_html = self.html_code
+        rendered_html = self.render_page()
 
         # Second, extract text from HTML code.
-        text = self.datumbox.text_extract(text=rendered_html)
+        # text = self.datumbox.text_extract(text=rendered_html)
+        text = SDAlgorithm(rendered_html).analyze_page()
 
         # Third, get some substrings from the extracted text.
         n_substrings = 10
-        substring_len = 4
+        substring_len = 5
         substrings = []
         for i in range(n_substrings):
             start_index = int(len(text) / n_substrings * i)
@@ -132,4 +134,4 @@ class PageVisitor:
 
         print()
 
-PageVisitor("http://www.floriandaniel.it/").get_main_content()
+PageVisitor("http://www.floriandaniel.it/research.html").get_main_content()
