@@ -1,5 +1,5 @@
 from time import time
-
+import re
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -104,9 +104,13 @@ class PageVisitor:
         # text = self.datumbox.text_extract(text=rendered_html)
         text = SDAlgorithm(rendered_html).analyze_page()
 
+        # Get all words from text with 4+ characters.
+        words = re.findall(r'\w+', text)
+        words = set([word for word in words if len(word) > 3])
+
         # Third, get some substrings from the extracted text.
         n_substrings = 10
-        substring_len = 5
+        substring_len = 6
         substrings = []
         for i in range(n_substrings):
             start_index = int(len(text) / n_substrings * i)
@@ -121,17 +125,17 @@ class PageVisitor:
         for element in all_elements:
             element_text = element.get_text()
             counter = 0
-            for substring in substrings:
-                if substring in element_text:
+            for word in words:
+                if word in element_text:
                     counter += 1
             # If the element contains at least half the substrings, it is a candidate element.
 
-            if counter > n_substrings / 2:
+            if counter > len(words) * 0.75:
                 # Now I select the deepest element between the candidates.
-                candidates.append(element)
+                candidates.append((element, counter))
 
-        candidates.sort(key=lambda x: len(list(x.parents)), reverse=True)
+        candidates.sort(key=lambda x: len(list(x[0].parents)), reverse=True)
 
-        print()
+        print(candidates)
 
-PageVisitor("http://www.floriandaniel.it/research.html").get_main_content()
+PageVisitor("https://www.polimi.it/il-politecnico/chi-siamo/").get_main_content()
