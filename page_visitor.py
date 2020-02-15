@@ -94,3 +94,42 @@ class PageVisitor:
         link = articles[idx_article].find(name='a').attrs["href"]
         print(text_response)
         return text_response, link
+
+    def get_main_content(self):
+        # First, render page and get DOM tree.
+        rendered_html = self.html_code
+
+        # Second, extract text from HTML code.
+        text = self.datumbox.text_extract(text=rendered_html)
+
+        # Third, get some substrings from the extracted text.
+        n_substrings = 10
+        substring_len = 4
+        substrings = []
+        for i in range(n_substrings):
+            start_index = int(len(text) / n_substrings * i)
+            end_index = int(start_index + substring_len)
+            substrings.append(text[start_index:end_index])
+
+        # Fourth, get all the elements from the HTML code.
+        all_elements = BeautifulSoup(rendered_html, 'lxml').find_all()
+
+        # Fifth, for each element, check if it contains all the substrings.
+        candidates = []
+        for element in all_elements:
+            element_text = element.get_text()
+            counter = 0
+            for substring in substrings:
+                if substring in element_text:
+                    counter += 1
+            # If the element contains at least half the substrings, it is a candidate element.
+
+            if counter > n_substrings / 2:
+                # Now I select the deepest element between the candidates.
+                candidates.append(element)
+
+        candidates.sort(key=lambda x: len(list(x.parents)), reverse=True)
+
+        print()
+
+PageVisitor("http://www.floriandaniel.it/").get_main_content()
