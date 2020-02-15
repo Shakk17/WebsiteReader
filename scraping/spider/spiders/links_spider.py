@@ -41,7 +41,7 @@ class LinksSpider(scrapy.Spider):
 
             fields = link.split("*")
 
-            if len(fields) == 1:
+            if len(fields) != 4:
                 continue
 
             url_item["link_url"] = fields[0]
