@@ -338,7 +338,7 @@ class SDAlgorithm:
         Check whether the candidate comment regions validate as such based on
         the keywords that are detected in their content.
         """
-        print(" Validating candidate comment group based on its content...")
+        # print(" Validating candidate comment group based on its content...")
         COMMENT_TAGS = ['comment', 'reply', 'response', 'ident', 'said:', 'rate', 'user', 'inner', 'wrote:']
         STRONG_COMMENT_TAGS = ['comment', 'reply', 'user', 'said:', 'wrote:']
 
@@ -383,13 +383,13 @@ class SDAlgorithm:
         """
         Print the details of a detected article (class, title and text).
         """
-        print("Article detected!")
+        '''print("Article detected!")
         print("Article class: ")
         print(repr(article.class_name))
         print("Article title: ")
         print(article.get_ancestor_title())
         print("Article text: ")
-        print(article.full_text.replace("\n", " "))
+        print(article.full_text.replace("\n", " "))'''
 
     def merge_groups(self, tree):
         """
