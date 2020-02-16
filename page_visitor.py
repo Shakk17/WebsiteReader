@@ -76,7 +76,7 @@ class PageVisitor:
         Returns the text contained in the paragraph indicated in the request.
         """
         # Extract text from HTML code.
-        text = self.datumbox.text_extract(text=self.html_code)
+        text = self.get_main_content().text
         # Split up the sentences.
         split_text = text.split('.')
         string = ""
@@ -97,6 +97,11 @@ class PageVisitor:
         return text_response, link
 
     def get_main_content(self):
+        """
+        Given the URL present in PageVisitor, returns the element containing the main content of the web page.
+        It uses the SD algorithm to analyse the rendered HTML of the web page.
+        :return: The HTML element containing the main content of the page.
+        """
         # First, render page and get DOM tree.
         rendered_html = self.render_page()
 
@@ -104,23 +109,14 @@ class PageVisitor:
         # text = self.datumbox.text_extract(text=rendered_html)
         text = SDAlgorithm(rendered_html).analyze_page()
 
-        # Get all words from text with 4+ characters.
+        # Third, get all words from text composed by 4+ characters.
         words = re.findall(r'\w+', text)
         words = set([word for word in words if len(word) > 3])
-
-        # Third, get some substrings from the extracted text.
-        n_substrings = 10
-        substring_len = 6
-        substrings = []
-        for i in range(n_substrings):
-            start_index = int(len(text) / n_substrings * i)
-            end_index = int(start_index + substring_len)
-            substrings.append(text[start_index:end_index])
 
         # Fourth, get all the elements from the HTML code.
         all_elements = BeautifulSoup(rendered_html, 'lxml').find_all()
 
-        # Fifth, for each element, check if it contains all the substrings.
+        # Fifth, for each element, check how many text words it contains.
         candidates = []
         for element in all_elements:
             element_text = element.get_text()
@@ -128,14 +124,11 @@ class PageVisitor:
             for word in words:
                 if word in element_text:
                     counter += 1
-            # If the element contains at least half the substrings, it is a candidate element.
-
+            # If the element contains at least 75% of the words, it is a candidate element.
             if counter > len(words) * 0.75:
-                # Now I select the deepest element between the candidates.
                 candidates.append((element, counter))
 
+        # Sixth, order the candidates depending on their depth in the DOM tree.
         candidates.sort(key=lambda x: len(list(x[0].parents)), reverse=True)
 
-        print(candidates)
-
-PageVisitor("https://www.polimi.it/il-politecnico/chi-siamo/").get_main_content()
+        return candidates[0][0]
