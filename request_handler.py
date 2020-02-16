@@ -173,12 +173,12 @@ class RequestHandler:
         """
         Returns info about the web page.
         """
-        self.url_parser = PageVisitor(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url, quick_download=False)
         text_response = self.url_parser.get_info()
         return self.build_response(text_response)
 
     def read_page(self):
-        self.url_parser = PageVisitor(url=self.cursor.url)
+        self.url_parser = PageVisitor(url=self.cursor.url, quick_download=False)
         try:
             text_response = self.url_parser.get_sentences(int(self.cursor.idx_paragraph))
             self.cursor.idx_paragraph += 3

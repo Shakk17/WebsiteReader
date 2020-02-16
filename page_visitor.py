@@ -10,9 +10,11 @@ from sd_alg.sd_algorithm import SDAlgorithm
 
 
 class PageVisitor:
-    def __init__(self, url):
+    def __init__(self, url, quick_download=True):
         self.url = url
-        self.html_code = self.get_quick_html()
+        self.html_code = None
+        if quick_download:
+            self.html_code = self.render_page()
         self.soup = BeautifulSoup(self.html_code, 'lxml')
         self.datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
 
