@@ -42,7 +42,7 @@ class Cursor:
 
 
 class RequestHandler:
-    url_parser = None
+    page_visitor = None
     cursor = None
 
     def __init__(self):
@@ -138,19 +138,19 @@ class RequestHandler:
         Returns a response.
         """
         # Page parsing.
-        self.url_parser = PageVisitor(url=self.cursor.url)
+        self.page_visitor = PageVisitor(url=self.cursor.url)
         self.cursor.idx_paragraph = 0
         try:
-            text_response = self.url_parser.get_info()
+            text_response = self.page_visitor.get_info()
             # Cursor update.
-            self.cursor.url = self.url_parser.url
+            self.cursor.url = self.page_visitor.url
         except Exception as ex:
             text_response = ex.args[0]
 
         # Checks if domain has been already crawled.
-        if not Database().has_been_crawled(get_domain(self.url_parser.url)):
+        if not Database().has_been_crawled(get_domain(self.page_visitor.url)):
             # Start crawling in the background.
-            crawler = Crawler(start_url=self.url_parser.url)
+            crawler = Crawler(start_url=self.page_visitor.url)
             thread = threading.Thread(target=crawler.run, args=())
             thread.start()
 
@@ -174,15 +174,15 @@ class RequestHandler:
         """
         Returns info about the web page.
         """
-        self.url_parser = PageVisitor(url=self.cursor.url, quick_download=False)
-        text_response = self.url_parser.get_info()
+        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
+        text_response = self.page_visitor.get_info()
         return self.build_response(text_response)
 
     def read_page(self):
-        self.url_parser = PageVisitor(url=self.cursor.url, quick_download=False)
+        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         try:
-            text_response = self.url_parser.get_sentences(int(self.cursor.idx_paragraph))
-            self.cursor.idx_paragraph += 3
+            text_response = self.page_visitor.get_sentences(int(self.cursor.idx_paragraph))
+            self.cursor.idx_paragraph += 2
         except IndexError:
             text_response = "You have reached the end of the page."
             self.cursor.idx_paragraph = 0

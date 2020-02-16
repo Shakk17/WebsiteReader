@@ -62,10 +62,10 @@ class PageVisitor:
             raise IndexError
 
         string = ""
-        for text in split_text[idx_paragraph:idx_paragraph + 3]:
+        for text in split_text[idx_paragraph:idx_paragraph + 2]:
             string += f"{text}."
 
-        string += f"\n{min(idx_paragraph + 3, len(split_text))} out of {len(split_text)} sentence(s) read."
+        string += f"\n{min(idx_paragraph + 2, len(split_text))} out of {len(split_text)} sentence(s) read."
         return string
 
 # print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)
