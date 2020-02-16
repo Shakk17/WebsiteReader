@@ -1,6 +1,7 @@
 import tldextract
 from googlesearch import search
 from time import time
+import re
 from databases.database_handler import Database
 
 
@@ -47,3 +48,9 @@ def go_to_section(url, name=None, number=None):
         index = number - 1
 
     return menu_anchors[index]
+
+
+def fix_url(url):
+    if not re.match('(?:http|ftp|https)://', url):
+        return 'http://{}'.format(url)
+    return url
