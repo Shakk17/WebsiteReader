@@ -18,11 +18,17 @@ sql_create_websites_table = """CREATE TABLE IF NOT EXISTS websites (
 sql_create_links_table = """CREATE TABLE IF NOT EXISTS links (
                                     id integer PRIMARY KEY,
                                     page_url text NOT NULL,
-                                    link_url integer,
+                                    link_url integer NOT NULL,
                                     link_text integer NOT NULL,
                                     x_position integer NOT NULL,
                                     y_position text NOT NULL,
                                     FOREIGN KEY (page_url) REFERENCES websites (domain)
+                                );"""
+
+sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
+                                    url text PRIMARY KEY,
+                                    html_element text,
+                                    timestamp text NOT NULL
                                 );"""
 
 
@@ -39,6 +45,7 @@ class Database:
             self.create_table(sql_create_history_table)
             self.create_table(sql_create_websites_table)
             self.create_table(sql_create_links_table)
+            self.create_table(sql_create_pages_table)
         else:
             print("Error! cannot create the database connection.")
 
@@ -69,6 +76,13 @@ class Database:
         cur = self.conn.cursor()
         record = domain
         cur.execute(sql, (record, ))
+        # Returns id of the tuple inserted.
+        return cur.lastrowid
+
+    def insert_page(self, url, html_element):
+        sql = "INSERT INTO pages (url, html_element, timestamp) VALUES (?, ?, current_timestamp)"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url, html_element))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
@@ -104,6 +118,16 @@ class Database:
                 self.remove_old_website(domain)
                 return False
         return crawled
+
+    def has_been_parsed(self, url):
+        sql = "SELECT html_element FROM pages WHERE url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url,))
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            return rows[0][0]
+        else:
+            return False
 
     def analyze_scraping(self, url):
         cur = self.conn.cursor()
