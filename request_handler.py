@@ -61,6 +61,7 @@ class RequestHandler:
 
         # If you receive a timeout request, just wait for the previous one to finish, no need to start another one.
         if not request.get('queryResult').get('queryText').startswith("timeout-"):
+            self.q = queue.Queue()
             main_thread.start()
         timeout_thread.start()
 
