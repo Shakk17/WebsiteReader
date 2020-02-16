@@ -57,17 +57,21 @@ class RequestHandler:
         After the timeout, gets the first available element from the queue.
         """
         main_thread = threading.Thread(target=self.elaborate, args=(request,), daemon=True)
-        # TODO: timeout handler
-        # timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
-        main_thread.start()
-        # timeout_thread.start()
+        timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
+
+        # If you receive a timeout request, just wait for the previous one to finish, no need to start another one.
+        if not request.get('queryResult').get('queryText').startswith("timeout-"):
+            main_thread.start()
+        timeout_thread.start()
+
         # Wait until the timeout expires.
-        # timeout_thread.join()
+        timeout_thread.join()
 
         # Returns the first available result.
         result = self.q.get()
 
-        print(self.cursor)
+        if result.get("fulfillmentText") is not None:
+            print(self.cursor)
 
         return result
 
@@ -75,6 +79,7 @@ class RequestHandler:
         """
         Parses the request and understands what to do.
         """
+
         # Get action from request.
         action = request.get('queryResult').get('action')
         print("-" * 20)
@@ -93,10 +98,10 @@ class RequestHandler:
 
         # Get first result from Google Search (in case the parameter is not a URL).
         query = request.get("queryResult").get("parameters").get("query")
-
         if query != '' and query is not None:
             url = get_url_from_google(query)
 
+        # If the action is GoBack, get the previous action from the database and execute it.
         if action == "GoBack":
             action, url = Database().get_previous_action("shakk")
 
