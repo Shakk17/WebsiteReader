@@ -15,7 +15,7 @@ TIMEOUT = 4
 class Cursor:
     def __init__(self, cursor_context, url):
         # Number that indicates the paragraph to read in the current article.
-        self.idx_paragraph = 1
+        self.idx_paragraph = 0
         # Number that indicates the article to read in the current section.
         self.idx_article = 0
         # Link selected.
@@ -96,7 +96,7 @@ class RequestHandler:
         except AttributeError:
             url = cursor_context.get("parameters").get("url")
 
-        # Recognize if URL is not well formed.
+        # Recognize if URL is not well-formed.
         url = fix_url(url)
 
         # Get first result from Google Search (in case the parameter is not a URL).
@@ -127,8 +127,6 @@ class RequestHandler:
             return self.open_link()
         elif action == "GoToSection":
             return self.go_to_section(cursor_context.get("parameters"))
-        elif action == "Analyze":
-            return self.analyze()
 
     def visit_page(self):
         """
@@ -140,6 +138,7 @@ class RequestHandler:
         """
         # Page parsing.
         self.url_parser = PageVisitor(url=self.cursor.url)
+        self.cursor.idx_paragraph = 0
         try:
             text_response = self.url_parser.get_info()
             # Cursor update.
@@ -179,16 +178,12 @@ class RequestHandler:
         return self.build_response(text_response)
 
     def read_page(self):
-        """
-        If page is article, read it. Otherwise, read main article titles available.
-        """
         self.url_parser = PageVisitor(url=self.cursor.url)
-
         try:
-            text_response = self.url_parser.get_article(int(self.cursor.idx_paragraph))
+            text_response = self.url_parser.get_sentences(int(self.cursor.idx_paragraph))
             self.cursor.idx_paragraph += 3
-        except IndexError as err:
-            text_response = "End of article."
+        except IndexError:
+            text_response = "You have reached the end of the page."
             self.cursor.idx_paragraph = 0
 
         return self.build_response(text_response)
@@ -216,28 +211,6 @@ class RequestHandler:
         except ValueError:
             return "Wrong input."
 
-    def analyze(self):
-        """
-        Analyze web page through SD algorithm.
-        """
-        self.url_parser = PageVisitor(url=self.cursor.url)
-        result = self.url_parser.analysis
-
-        # Take text result, split it into sentences. Return only first two sentence pointed by the cursor.
-        number_of_sentences = 3
-        sentences = result.split('.')[self.cursor.sentence_number:self.cursor.sentence_number + number_of_sentences]
-        sentence = ".".join(sentences)
-        text_response = f"Title: {self.url_parser.soup.title.string}\n"
-        try:
-            text_response += f"Text: {sentence}."
-            print(text_response)
-            self.cursor.sentence_number += number_of_sentences
-        except IndexError:
-            text_response += "You have reached the end of the web page."
-            self.cursor.sentence_number = 0
-
-        return self.build_response(text_response)
-
     def build_response(self, text_response):
         """
         Put the successful response in the queue.
@@ -264,7 +237,7 @@ class RequestHandler:
         # After 4 seconds, checks if the main thread has terminated.
         if self.q.empty():
             # Send a response to server to ask for 5 more seconds to answer. Valid only two times.
-            print("Sent request for more time.")
+            print(f"{Fore.CYAN}Sent request for more time.{Style.RESET_ALL}")
             self.q.put(
                 {
                     "followupEventInput": {

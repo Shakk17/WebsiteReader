@@ -67,11 +67,11 @@ class PageVisitor:
         print(f"LANGUAGE: {language}")
         text_response += f"The language of this web page is {language}. \n"
 
-        print("Extraction time: %.2f s" % (time() - start))
+        print(f"Info retrieval elapsed time: {(time() - start):.2f} s")
 
         return text_response
 
-    def get_article(self, idx_paragraph):
+    def get_sentences(self, idx_paragraph):
         """
         Returns the text contained in the paragraph indicated in the request.
         """
@@ -79,10 +79,16 @@ class PageVisitor:
         text = self.get_main_content().text
         # Split up the sentences.
         split_text = text.split('.')
+
+        # If we reached the end of the text, raise IndexError and reset the counter.
+        if idx_paragraph > len(split_text):
+            raise IndexError
+
         string = ""
         for text in split_text[idx_paragraph:idx_paragraph+3]:
             string += f"{text}."
-        string += f"\n{len(split_text) - idx_paragraph} sentence(s) left."
+
+        string += f"\n{min(idx_paragraph + 3, len(split_text))} out of {len(split_text)} sentence(s) read."
         return string
 
     def get_section(self, idx_article):
