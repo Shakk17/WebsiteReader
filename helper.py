@@ -10,6 +10,11 @@ from sd_alg.sd_algorithm import SDAlgorithm
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+# Avoid loading images.
+prefs = {"profile.managed_default_content_settings.images": 2}
+chrome_options.add_experimental_option("prefs", prefs)
 
 
 def get_url_from_google(query):
@@ -122,8 +127,6 @@ def render_page(url):
     start = time()
     try:
         print("Rendering page with Selenium...")
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
         driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
     except Exception:
