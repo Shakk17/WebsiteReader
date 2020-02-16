@@ -32,7 +32,7 @@ class PageVisitor:
             print("Can't access this website: %s" % self.url)
             raise Exception("Error while visiting the page.")
 
-        print("Request time: %.2f s" % (time() - start))
+        print(f"Selenium request elapsed time: {(time() - start):.2f} s")
 
         html = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
 
@@ -42,7 +42,7 @@ class PageVisitor:
         print("Requesting HTML web page with requests...")
         start = time()
         html = requests.get(self.url)
-        print("Request time: %.2f s" % (time() - start))
+        print(f"Quick HTML request elapsed time: {(time() - start):.2f} s")
 
         return html.text
 
@@ -132,3 +132,5 @@ class PageVisitor:
         candidates.sort(key=lambda x: len(list(x[0].parents)), reverse=True)
 
         return candidates[0][0]
+
+# print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)

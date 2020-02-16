@@ -13,6 +13,7 @@
 
 import copy
 import re
+from time import time
 
 from lxml import html
 from lxml.html.clean import Cleaner
@@ -42,6 +43,7 @@ class SDAlgorithm:
         self.html_code = html_code
 
     def analyze_page(self):
+        start = time()
         print("Executing SD algorithm...")
         # print("[*] Create DOM tree...")
         tree = self.construct_page_tree()
@@ -57,6 +59,7 @@ class SDAlgorithm:
         # print(f"[*] {len(self.regions)} regions found!")
 
         text = self.classify_page()
+        print(f"SD algorithm elapsed time: {(time() - start):.2f} s")
         return text
 
     def construct_page_tree(self):
