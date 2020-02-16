@@ -42,19 +42,19 @@ class SDAlgorithm:
         self.html_code = html_code
 
     def analyze_page(self):
-
-        print("[*] Create DOM tree...")
+        print("Executing SD algorithm...")
+        # print("[*] Create DOM tree...")
         tree = self.construct_page_tree()
         node = tree.getroot()
         self.cross_tree(node)
-        print("[*] Calculating initial groups...")
-        print("[*] Merging groups...")
+        # print("[*] Calculating initial groups...")
+        # print("[*] Merging groups...")
         self.merge_groups(tree)
-        print("[*] Creating regions...")
+        # print("[*] Creating regions...")
         self.create_regions(tree)
-        print("[*] Calculating distances from max region...")
+        # print("[*] Calculating distances from max region...")
         self.calculate_distances_from_max(tree)
-        print(f"[*] {len(self.regions)} regions found!")
+        # print(f"[*] {len(self.regions)} regions found!")
 
         text = self.classify_page()
         return text
@@ -94,8 +94,8 @@ class SDAlgorithm:
 
                 context_validated = self.candidate_context_validated(article, grouped_comments, max_group)
                 if self.big_areas_in_same_level(article, grouped_comments, max_group) and not validated:
-                    print("[*] Multiple similar regions detected!")
                     '''
+                    print("[*] Multiple similar regions detected!")
                     print("Class: %s" % grouped_comments[max_group][0].class_name)
                     print("Texts: ")
                     for reg in grouped_comments[max_group]:
@@ -104,10 +104,10 @@ class SDAlgorithm:
                     return "\n".join([comment.full_text for comment in grouped_comments[max_group]])
                 elif not context_validated:
                     # self.print_article(article)
-                    print("[*] No comments found.")
+                    # print("[*] No comments found.")
                     return article.full_text
                 elif context_validated:
-                    print("[*] Article with comments detected!")
+                    # print("[*] Article with comments detected!")
                     '''
                     self.print_article(article)
                     print("Comment class: %s" % max_group)
@@ -120,7 +120,7 @@ class SDAlgorithm:
                 # self.print_article(article)
                 return article.full_text
         else:
-            print("[*] Multiple similar regions detected!")
+            # print("[*] Multiple similar regions detected!")
             '''
             print("Texts: ")
             for reg in biggest_regions:
