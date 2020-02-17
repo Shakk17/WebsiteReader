@@ -17,7 +17,7 @@ class Cursor:
         # Number that indicates the paragraph to read in the current article.
         self.idx_paragraph = 0
         # Number that indicates the article to read in the current section.
-        self.idx_article = 0
+        self.idx_menu = 0
         # Link selected.
         self.link = None
         # Sentence read in current web page.
@@ -35,7 +35,7 @@ class Cursor:
             f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
             f"\tURL: {self.url}\n"
             f"\tIdx paragraph: {self.idx_paragraph}\n"
-            f"\tIdx article: {self.idx_article}\n"
+            f"\tIdx menu: {self.idx_menu}\n"
             f"\tLink: {self.link}\n"
             f"\tSentence number: {self.sentence_number}\n"
             f"{Style.RESET_ALL}")
@@ -140,6 +140,7 @@ class RequestHandler:
         # Page parsing.
         self.page_visitor = PageVisitor(url=self.cursor.url)
         self.cursor.idx_paragraph = 0
+        self.cursor.idx_menu = 0
         try:
             text_response = self.page_visitor.get_info()
             # Cursor update.
@@ -158,22 +159,25 @@ class RequestHandler:
         return self.build_response(text_response)
 
     def get_menu(self):
-        """
-        Returns the links reachable from the menu.
-        """
+        num_choices = 10
+        # Get the first 10 strings of the menu starting from idx_menu.
         menu = get_menu(self.cursor.url)
-        strings = [tup[1] for tup in menu]
+
+        idx_start = int(self.cursor.idx_menu)
+        if idx_start >= len(menu):
+            idx_start = 0
+        idx_end = idx_start + 10
+        strings = [tup[1] for tup in menu[idx_start:idx_end]]
 
         text_response = "You can choose between: \n"
         for i, string in enumerate(strings, start=1):
-            text_response += f"{i}: {string}. \n"
+            text_response += f"{idx_start + i}: {string}. \n"
+
+        self.cursor.idx_menu = idx_start + num_choices
 
         return self.build_response(text_response)
 
     def get_info(self):
-        """
-        Returns info about the web page.
-        """
         self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         text_response = self.page_visitor.get_info()
         return self.build_response(text_response)
