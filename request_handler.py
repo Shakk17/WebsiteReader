@@ -172,6 +172,7 @@ class RequestHandler:
         text_response = "You can choose between: \n"
         for i, string in enumerate(strings, start=1):
             text_response += f"{idx_start + i}: {string}. \n"
+        text_response += f"\n{min(idx_start + num_choices, len(menu))} out of {len(menu)} option(s) read."
 
         self.cursor.idx_menu = idx_start + num_choices
 
