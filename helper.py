@@ -1,5 +1,6 @@
 import re
 from time import time
+import html
 
 import tldextract
 from bs4 import BeautifulSoup
@@ -15,6 +16,12 @@ chrome_options.add_argument("--headless")
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 chrome_options.add_experimental_option("prefs", prefs)
+
+
+def strip_html_tags(text):
+    text = html.unescape(str(text))
+    regex = re.compile(r'<[^>]+>')
+    return regex.sub('', text)
 
 
 def get_url_from_google(query):
@@ -36,8 +43,22 @@ def get_menu(url):
     Analyze the scraped pages from the url's domain, then returns the 10 most frequent links.
     Returns a list of tuples (text, url) corresponding to the anchors present in the menu.
     """
+    # Get menu of domain.
     domain = get_domain(url)
-    menu = Database().analyze_scraping(domain)
+    menu = (Database().analyze_scraping(domain))
+    menu = [list(element) for element in menu]
+
+    # Remove tags from text fields.
+    for i, element in enumerate(menu):
+        menu[i][1] = strip_html_tags(element[1])
+
+    # Remove elements with empty texts.
+    menu = list(filter(lambda x: len(x[1]) > 0, menu))
+
+    # Remove not frequent elements.
+    highest_freq = menu[0][0]
+    menu = list(filter(lambda x: x[0] > highest_freq * 0.10, menu))
+
     return menu
 
 

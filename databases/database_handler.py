@@ -129,26 +129,17 @@ class Database:
         else:
             return False
 
-    def analyze_scraping(self, url):
+    def analyze_scraping(self, domain):
         cur = self.conn.cursor()
         cur.execute("SELECT COUNT(*), link_text, link_url, "
                     "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
                     "FROM links "
                     "WHERE page_url LIKE ? "
                     "GROUP BY link_url "
-                    "HAVING avg_y < 500 "
-                    "ORDER BY COUNT(*) DESC "
-                    "LIMIT 10", (f"%{url}%", ))
+                    "ORDER BY COUNT(*) DESC ", (f"%{domain}%", ))
 
         rows = cur.fetchall()
-
-        result = []
-
-        for row in rows:
-            result.append(tuple(row[1:3]))
-            print(row)
-
-        return result
+        return rows
 
     def get_previous_action(self, user):
         # First, get the second to last action performed.

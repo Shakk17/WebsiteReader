@@ -1,3 +1,5 @@
 from databases.database_handler import Database
 
-Database().analyze_scraping()
+menu = Database().analyze_scraping("open.online")
+for el in menu:
+    print(el)

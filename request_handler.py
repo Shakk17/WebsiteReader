@@ -162,7 +162,7 @@ class RequestHandler:
         Returns the links reachable from the menu.
         """
         menu = get_menu(self.cursor.url)
-        strings = [tup[0] for tup in menu]
+        strings = [tup[1] for tup in menu]
 
         text_response = "You can choose between: \n"
         for i, string in enumerate(strings, start=1):
