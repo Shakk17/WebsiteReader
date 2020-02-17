@@ -18,10 +18,10 @@ sql_create_websites_table = """CREATE TABLE IF NOT EXISTS websites (
 sql_create_links_table = """CREATE TABLE IF NOT EXISTS links (
                                     id integer PRIMARY KEY,
                                     page_url text NOT NULL,
-                                    link_url integer NOT NULL,
-                                    link_text integer NOT NULL,
+                                    link_url text NOT NULL,
+                                    link_text text NOT NULL,
                                     x_position integer NOT NULL,
-                                    y_position text NOT NULL,
+                                    y_position integer NOT NULL,
                                     FOREIGN KEY (page_url) REFERENCES websites (domain)
                                 );"""
 
@@ -134,7 +134,7 @@ class Database:
         cur.execute("SELECT COUNT(*), link_text, link_url, "
                     "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
                     "FROM links "
-                    "WHERE page_url LIKE ? "
+                    "WHERE page_url LIKE ? AND y_position < 1000 "
                     "GROUP BY link_url "
                     "ORDER BY COUNT(*) DESC ", (f"%{domain}%", ))
 
