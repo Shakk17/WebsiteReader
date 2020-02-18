@@ -53,8 +53,8 @@ class PageVisitor:
         """
         Returns the text contained in the paragraph indicated in the request.
         """
-        # Extract text from HTML code.
-        text = get_main_content(self.url).get_text()
+        # Extract text from the database.
+        text = Database().last_time_visited(url=self.url)[0]
         # Split up the sentences.
         split_text = text.split('.')
 
@@ -76,7 +76,7 @@ class PageVisitor:
             # If not, I get the clean text from it.
             text = get_clean_text(url=self.url)
         else:
-            text = result[0]
+            return
 
         # Given the extracted text, get its main container.
         container = get_main_container(url=self.url, text=text)

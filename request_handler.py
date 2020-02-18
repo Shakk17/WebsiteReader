@@ -142,7 +142,7 @@ class RequestHandler:
         self.cursor.idx_paragraph = 0
         self.cursor.idx_menu = 0
         # Analyze page.
-        self.page_visitor.analyze_page()
+        threading.Thread(target=self.page_visitor.analyze_page, args=()).start()
         try:
             text_response = self.page_visitor.get_info()
             # Cursor update.
