@@ -1,21 +1,20 @@
-import re
-from time import time
 import html
+import re
+from datetime import datetime
+from time import time
+import urllib.parse
 
 import tldextract
+from aylienapiclient import textapi
 from bs4 import BeautifulSoup
 from googlesearch import search
-from datetime import datetime
 
 from databases.database_handler import Database
-from sd_alg.sd_algorithm import SDAlgorithm
-
-from aylienapiclient import textapi
-
-client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -180,3 +179,36 @@ def is_action_recent(timestamp, days):
     difference = t2 - t1
 
     return difference.days < days
+
+
+def get_links_positions(container, text, url):
+    # Get all the links present in the container.
+    container_links = container.find_all('a')
+    # Filter out the links that do not contain a string.
+    container_links = list(filter(lambda x: len(x.contents) > 0, container_links))
+    text_links = [(link.contents[0], link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
+
+    # Create a list holding all the positions in the main text.
+    links = []
+
+    # For each link in the container, get its position in the clean text.
+    for text_link in text_links:
+        if text_link[0] == '[a]':
+            print()
+        # Get all its occurrences in the main text.
+        indexes = [m.start() for m in re.finditer('(?={0})'.format(re.escape(text_link[0])), text)]
+        # Check if some index has already been chosen for another link.
+        position = -1
+        for index in indexes:
+            if next((x for x in links if x[0] == index), None) is None:
+                position = index
+                break
+
+        # Get absolute URL of link.
+        url = urllib.parse.urljoin(url, text_link[1])
+        if position >= 0 and text_link[0] != '':
+            links.append((position, url, text_link[0]))
+
+    links.sort(key=lambda x: x[0], reverse=False)
+    links = [(link[0] + len(link[2]), link[1], link[2]) for link in links]
+    return links

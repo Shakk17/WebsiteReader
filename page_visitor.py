@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from datumbox_wrapper import DatumBox
-from helper import get_main_container, get_clean_text, is_action_recent
+from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions
 from databases.database_handler import Database
 
 
@@ -81,17 +81,14 @@ class PageVisitor:
         # Given the extracted text, get its main container.
         container = get_main_container(url=self.url, text=text)
 
-        # Get all texts from the container's links.
-        links = container.find_all('a')
-        links = list(filter(lambda x: len(x.contents) > 0, links))
-        text_links = [link.contents[0] for link in links if isinstance(link.contents[0], str)]
+        # Get all positions from the container's links.
+        # link = position, url, text
+        links = get_links_positions(container=container, text=text, url=self.url)
 
-        # For each link, if their link_text is present in the text, add [link n] after them.
-        for text_link in text_links:
-            position = text.find(text_link)
-            if position >= 0 and text_link != '':
-                position += len(text_link)
-                text = f"{text[:position]} [LINK n]{text[position:]}"
+        # Add the links to the clean text.
+        for i, link in enumerate(links):
+            offset = link[0] + i * 9
+            text = f"{text[:offset]} [LINK {i}]{text[offset:]}"
 
         # Save the text in the DB.
         Database().insert_page(url=self.url, clean_text=text)
