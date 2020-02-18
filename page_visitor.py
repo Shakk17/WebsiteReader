@@ -81,15 +81,13 @@ class PageVisitor:
         # Given the extracted text, get its main container.
         container = get_main_container(url=self.url, text=text)
 
-        # Get all the links from the container.
+        # Get all texts from the container's links.
         links = container.find_all('a')
+        links = list(filter(lambda x: len(x.contents) > 0, links))
+        text_links = [link.contents[0] for link in links if isinstance(link.contents[0], str)]
 
         # For each link, if their link_text is present in the text, add [link n] after them.
-        for link in links:
-            # Get the text of the link.
-            text_link = link.contents[0]
-            if not isinstance(text_link, str):
-                continue
+        for text_link in text_links:
             position = text.find(text_link)
             if position >= 0 and text_link != '':
                 position += len(text_link)
