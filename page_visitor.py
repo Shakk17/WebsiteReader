@@ -4,7 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from datumbox_wrapper import DatumBox
-from helper import get_main_content, render_page
+from helper import get_main_container, get_clean_text, is_action_recent
+from databases.database_handler import Database
 
 
 class PageVisitor:
@@ -67,5 +68,35 @@ class PageVisitor:
 
         string += f"\n{min(idx_paragraph + 2, len(split_text))} out of {len(split_text)} sentence(s) read."
         return string
+
+    def analyze_page(self):
+        # Check if page has already been visited recently.
+        result = Database().last_time_visited(url=self.url)
+        if result is None or not is_action_recent(timestamp=result[1], days=1):
+            # If not, I get the clean text from it.
+            text = get_clean_text(url=self.url)
+        else:
+            text = result[0]
+
+        # Given the extracted text, get its main container.
+        container = get_main_container(url=self.url, text=text)
+
+        # Get all the links from the container.
+        links = container.find_all('a')
+
+        # For each link, if their link_text is present in the text, add [link n] after them.
+        for link in links:
+            # Get the text of the link.
+            text_link = link.contents[0]
+            if not isinstance(text_link, str):
+                continue
+            position = text.find(text_link)
+            if position >= 0 and text_link != '':
+                position += len(text_link)
+                text = f"{text[:position]} [LINK n]{text[position:]}"
+
+        # Save the text in the DB.
+        Database().insert_page(url=self.url, clean_text=text)
+        return
 
 # print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)

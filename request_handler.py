@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, go_to_section, get_domain, get_url_from_google, fix_url
+from helper import get_menu, go_to_section, get_domain, get_url_from_google, fix_url, is_action_recent
 
 TIMEOUT = 4
 
@@ -141,6 +141,8 @@ class RequestHandler:
         self.page_visitor = PageVisitor(url=self.cursor.url)
         self.cursor.idx_paragraph = 0
         self.cursor.idx_menu = 0
+        # Analyze page.
+        self.page_visitor.analyze_page()
         try:
             text_response = self.page_visitor.get_info()
             # Cursor update.
@@ -149,8 +151,23 @@ class RequestHandler:
             text_response = ex.args[0]
 
         # Checks if domain has been already crawled.
-        if not Database().has_been_crawled(get_domain(self.page_visitor.url)):
-            # Start crawling in the background.
+        domain = get_domain(url=self.page_visitor.url)
+        to_crawl = False
+        last_time_crawled = Database().last_time_crawled(domain=domain)
+
+        if last_time_crawled is None:
+            print(f"The domain {domain} has never been crawled before.")
+            to_crawl = True
+
+        # Check if the last crawling is recent.
+        elif not is_action_recent(timestamp=last_time_crawled, days=7):
+            print(f"The domain {domain} was last crawled too many days ago.")
+            # Remove previous crawling results.
+            Database().remove_old_website(domain)
+            to_crawl = True
+
+        # If necessary, start crawling in the background.
+        if to_crawl:
             crawler = Crawler(start_url=self.page_visitor.url)
             thread = threading.Thread(target=crawler.run, args=())
             thread.start()

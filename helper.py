@@ -5,12 +5,18 @@ import html
 import tldextract
 from bs4 import BeautifulSoup
 from googlesearch import search
+from datetime import datetime
 
 from databases.database_handler import Database
 from sd_alg.sd_algorithm import SDAlgorithm
 
+from aylienapiclient import textapi
+
+client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 # Avoid loading images.
@@ -89,25 +95,20 @@ def fix_url(url):
     return url
 
 
-def get_main_content(url):
+def get_main_container(url, text):
     """
     Given the html_code, returns the element containing the main content of the web page.
     It uses the SD algorithm to analyse the rendered HTML of the web page.
     :return: The HTML element containing the main content of the page.
     """
-    # Check in the database if the page has already been parsed.
+    '''# Check in the database if the page has already been parsed.
     html_element = Database().has_been_parsed(url)
-
     # If this is not the first time visiting the page, I just return the text I already have.
     if html_element:
-        return BeautifulSoup(html_element, 'lxml')
+        return BeautifulSoup(html_element, 'lxml')'''
 
     # First, I render the HTML code of the page.
     rendered_html = render_page(url)
-
-    # Second, extract text from HTML code.
-    # text = self.datumbox.text_extract(text=rendered_html)
-    text = SDAlgorithm(rendered_html).analyze_page()
 
     # Third, get all words from text composed by 4+ characters.
     words = re.findall(r'\w+', text)
@@ -135,7 +136,7 @@ def get_main_content(url):
     html_element = candidates[0][0]
 
     # Finally, save it in the database.
-    Database().insert_page(url, html_element.prettify())
+    # Database().insert_page(url, html_element.prettify())
     return html_element
 
 
@@ -159,3 +160,23 @@ def render_page(url):
     html = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
 
     return html
+
+
+def get_clean_text(url):
+    """
+    Utilizes Aylien APIs to extract the text from a web page.
+    :param url: URL of the web page.
+    :return: the text of the web page.
+    """
+    start = time()
+    text = client.Extract({'url': url})
+    print(f"Aylien API extract text elapsed time: {(time() - start):.2f}")
+    return text.get("article")
+
+
+def is_action_recent(timestamp, days):
+    t1 = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+    t2 = datetime.now()
+    difference = t2 - t1
+
+    return difference.days < days

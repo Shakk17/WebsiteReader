@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 from sqlite3 import Error
 
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
@@ -15,7 +14,7 @@ sql_create_websites_table = """CREATE TABLE IF NOT EXISTS websites (
                                     last_crawled_on text NOT NULL
                                 );"""
 
-sql_create_links_table = """CREATE TABLE IF NOT EXISTS links (
+sql_create_crawler_links_table = """CREATE TABLE IF NOT EXISTS crawler_links (
                                     id integer PRIMARY KEY,
                                     page_url text NOT NULL,
                                     link_url text NOT NULL,
@@ -27,8 +26,16 @@ sql_create_links_table = """CREATE TABLE IF NOT EXISTS links (
 
 sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                     url text PRIMARY KEY,
-                                    html_element text,
-                                    timestamp text NOT NULL
+                                    clean_text text,
+                                    last_visit text NOT NULL
+                                );"""
+
+sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
+                                    url text PRIMARY KEY,
+                                    num_link text,
+                                    text_link text NOT NULL,
+                                    url_link text NOT NULL,
+                                    FOREIGN KEY (url) REFERENCES pages (url)
                                 );"""
 
 
@@ -44,8 +51,9 @@ class Database:
             # Create tables.
             self.create_table(sql_create_history_table)
             self.create_table(sql_create_websites_table)
-            self.create_table(sql_create_links_table)
+            self.create_table(sql_create_crawler_links_table)
             self.create_table(sql_create_pages_table)
+            self.create_table(sql_create_page_links_table)
         else:
             print("Error! cannot create the database connection.")
 
@@ -79,16 +87,16 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def insert_page(self, url, html_element):
-        sql = "INSERT INTO pages (url, html_element, timestamp) VALUES (?, ?, current_timestamp)"
+    def insert_page(self, url, clean_text):
+        sql = "INSERT INTO pages (url, clean_text, last_visit) VALUES (?, ?, current_timestamp)"
         cur = self.conn.cursor()
-        cur.execute(sql, (url, html_element))
+        cur.execute(sql, (url, clean_text))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
     def remove_old_website(self, domain):
         # First remove all the tuples in 'links' related to the domain.
-        sql = "DELETE FROM links WHERE page_url LIKE ?;"
+        sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"
         cur = self.conn.cursor()
         url = f"%{domain}%"
         cur.execute(sql, (url,))
@@ -99,41 +107,31 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def has_been_crawled(self, domain):
+    def last_time_crawled(self, domain):
         sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
         cur = self.conn.cursor()
         cur.execute(sql, (domain, ))
         rows = cur.fetchall()
         # Returns True is it has been crawled, False otherwise.
-        crawled = len(rows) > 0
-        if crawled:
-            # Check when was the last crawling of the domain.
-            query_timestamp = rows[0][1]
-            t1 = datetime.strptime(query_timestamp, "%Y-%m-%d %H:%M:%S")
-            t2 = datetime.now()
-            difference = t2 - t1
-            print(f"The domain {domain} was last crawled {difference.days} days ago.")
-            if difference.days > 7:
-                # It's time to crawl it again!
-                self.remove_old_website(domain)
-                return False
-        return crawled
+        if len(rows) == 0:
+            return None
+        return rows[0][1]
 
-    def has_been_parsed(self, url):
-        sql = "SELECT html_element FROM pages WHERE url LIKE ?"
+    def last_time_visited(self, url):
+        sql = "SELECT clean_text, last_visit FROM pages WHERE url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (url,))
         rows = cur.fetchall()
         if len(rows) > 0:
-            return rows[0][0]
+            return rows[0]
         else:
-            return False
+            return None
 
     def analyze_scraping(self, domain):
         cur = self.conn.cursor()
         cur.execute("SELECT COUNT(*), link_text, link_url, "
                     "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
-                    "FROM links "
+                    "FROM crawler_links "
                     "WHERE page_url LIKE ? AND y_position < 1000 "
                     "GROUP BY link_url "
                     "ORDER BY COUNT(*) DESC ", (f"%{domain}%", ))
