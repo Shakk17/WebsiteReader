@@ -86,16 +86,16 @@ class PageVisitor:
         links = get_links_positions(container=container, text=text, url=self.url)
 
         # Add the links to the clean text.
-        for i, link in enumerate(links):
-            offset = link[0] + i * 9
+        for i, link in enumerate(links, start=1):
+            offset = link[0] + (i-1) * 9
             text = f"{text[:offset]} [LINK {i}]{text[offset:]}"
 
         # Save the text in the DB.
         Database().insert_page(url=self.url, clean_text=text)
 
         # Save the links in the DB.
-        for link in links:
-            Database().insert_page_link(page_url=self.url, link=link)
+        for i, link in enumerate(links, start=1):
+            Database().insert_page_link(page_url=self.url, id=i, link=link)
         return
 
 # print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)

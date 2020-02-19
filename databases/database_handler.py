@@ -33,6 +33,7 @@ sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
 sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
                                     page_url text NOT NULL,
                                     link_num integer NOT NULL,
+                                    position integer NOT NULL,
                                     link_text text NOT NULL,
                                     link_url text NOT NULL,
                                     PRIMARY KEY (page_url, link_num),
@@ -84,7 +85,7 @@ class Database:
         sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, current_timestamp)"
         cur = self.conn.cursor()
         record = domain
-        cur.execute(sql, (record, ))
+        cur.execute(sql, (record,))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
@@ -95,12 +96,19 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def insert_page_link(self, page_url, link):
-        sql = "INSERT INTO page_links (page_url, link_num, link_text, link_url) VALUES (?, ?, ?, ?)"
+    def insert_page_link(self, page_url, link_num, link):
+        sql = "INSERT INTO page_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
         cur = self.conn.cursor()
-        cur.execute(sql, (page_url, link[0], link[1], link[2]))
+        cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
         # Returns id of the tuple inserted.
         return cur.lastrowid
+
+    def get_page_link(self, page_url, link_num):
+        sql = "SELECT link_url FROM page_links WHERE page_url LIKE ? AND link_num = ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (page_url, link_num))
+        result = cur.fetchone()
+        return result
 
     def remove_old_website(self, domain):
         # First remove all the tuples in 'links' related to the domain.
@@ -118,7 +126,7 @@ class Database:
     def last_time_crawled(self, domain):
         sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
         cur = self.conn.cursor()
-        cur.execute(sql, (domain, ))
+        cur.execute(sql, (domain,))
         rows = cur.fetchall()
         # Returns True is it has been crawled, False otherwise.
         if len(rows) == 0:
@@ -142,7 +150,7 @@ class Database:
                     "FROM crawler_links "
                     "WHERE page_url LIKE ? AND y_position < 1000 "
                     "GROUP BY link_url "
-                    "ORDER BY COUNT(*) DESC ", (f"%{domain}%", ))
+                    "ORDER BY COUNT(*) DESC ", (f"%{domain}%",))
 
         rows = cur.fetchall()
         return rows
@@ -155,14 +163,14 @@ class Database:
                     "WHERE user LIKE ? "
                     "ORDER BY id DESC ",
                     (f"{user}",)
-        )
+                    )
 
         result = cur.fetchall()[1]
 
         # Then, delete the last two actions performed.
         cur.execute("DELETE from history "
                     "WHERE id IN (SELECT id FROM history WHERE user LIKE ? ORDER BY id DESC LIMIT 2)",
-                    (f"{user}", )
-        )
+                    (f"{user}",)
+                    )
 
         return result

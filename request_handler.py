@@ -125,7 +125,7 @@ class RequestHandler:
         elif action == 'ReadPage':
             return self.read_page()
         elif action == "OpenLink":
-            return self.open_link()
+            return self.open_link(cursor_context.get("parameters"))
         elif action == "GoToSection":
             return self.go_to_section(cursor_context.get("parameters"))
 
@@ -211,12 +211,19 @@ class RequestHandler:
 
         return self.build_response(text_response)
 
-    def open_link(self):
+    def open_link(self, parameters):
         """
         Visits the web page linked in the cursor, then sets the cursor on that page.
         """
-        self.cursor.url, self.cursor.link = self.cursor.link, None
-        return self.visit_page()
+        # Get the parameter from the request.
+        link_num = int(parameters.get("number"))
+        # Get URL to visit from the DB and update the cursor.
+        link_url = Database().get_page_link(page_url=self.cursor.url, link_num=link_num)
+        if link_url is not None:
+            self.cursor.url = link_url[0]
+            return self.visit_page()
+        else:
+            return self.build_response("Wrong input.")
 
     def go_to_section(self, parameters):
         """
