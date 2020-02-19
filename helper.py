@@ -24,7 +24,9 @@ chrome_options.add_experimental_option("prefs", prefs)
 
 
 def strip_html_tags(text):
+    # Unescape difficult character like &amp;.
     text = html.unescape(str(text))
+    # Remove all the html tags.
     regex = re.compile(r'<[^>]+>')
     return regex.sub('', text)
 
@@ -125,8 +127,6 @@ def get_main_container(url, text):
     # Seventh, select the deepest element.
     html_element = candidates[0][0]
 
-    # Finally, save it in the database.
-    # Database().insert_page(url, html_element.prettify())
     return html_element
 
 
@@ -177,15 +177,15 @@ def get_links_positions(container, text, url):
     container_links = container.find_all('a')
     # Filter out the links that do not contain a string.
     container_links = list(filter(lambda x: len(x.contents) > 0, container_links))
-    text_links = [(link.contents[0], link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
+    text_links = [(strip_html_tags(link.contents[0]), link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
 
     # Create a list holding all the positions in the main text.
     links = []
 
     # For each link in the container, get its position in the clean text.
     for text_link in text_links:
-        # Get the link's text occurrences in the main text.
-        indexes = [m.start() for m in re.finditer('(?={0})'.format(re.escape(text_link[0])), text)]
+        # Get all the link's text occurrences in the main text.
+        indexes = [m.start() for m in re.finditer(f"\\b{re.escape(text_link[0])}\\b", text)]
         # Check if some index has already been chosen for another link.
         position = -1
         for index in indexes:

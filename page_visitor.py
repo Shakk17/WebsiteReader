@@ -95,7 +95,7 @@ class PageVisitor:
 
         # Save the links in the DB.
         for i, link in enumerate(links, start=1):
-            Database().insert_page_link(page_url=self.url, id=i, link=link)
+            Database().insert_page_link(page_url=self.url, link_num=i, link=link)
         return
 
 # print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)
