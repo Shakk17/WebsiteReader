@@ -177,26 +177,40 @@ def get_links_positions(container, text, url):
     container_links = container.find_all('a')
     # Filter out the links that do not contain a string.
     container_links = list(filter(lambda x: len(x.contents) > 0, container_links))
-    text_links = [(strip_html_tags(link.contents[0]), link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
+    text_links = [(link.get_text(), link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
+
+    # Sort the links putting the ones with the longest texts first.
+    text_links.sort(key=lambda x: len(x[0]), reverse=True)
 
     # Create a list holding all the positions in the main text.
     links = []
 
     # For each link in the container, get its position in the clean text.
+    positions_taken = []
     for text_link in text_links:
+        position = -1
+
+        if text_link[0] == "Chrome":
+            print()
         # Get all the link's text occurrences in the main text.
         indexes = [m.start() for m in re.finditer(f"\\b{re.escape(text_link[0])}\\b", text)]
+        if len(indexes) > 3:
+            print()
         # Check if some index has already been chosen for another link.
-        position = -1
         for index in indexes:
-            if next((x for x in links if x[0] == index), None) is None:
+            if index not in positions_taken:
                 position = index
                 break
+        print()
 
         # Get absolute URL of link.
         url = urllib.parse.urljoin(url, text_link[1])
         # If the link is valid, add it to the list of links to return.
         if position >= 0 and text_link[0] != '':
+            # Occupy the positions taken.
+            for x in range(len(text_link[0])):
+                positions_taken.append(position + x)
+            # Accept the link.
             links.append((position, text_link[0], url))
 
     # Sort links depending on their position in the main text.

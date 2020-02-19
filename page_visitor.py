@@ -87,8 +87,9 @@ class PageVisitor:
 
         # Add the links to the clean text.
         for i, link in enumerate(links, start=1):
-            offset = link[0] + (i-1) * 9
-            text = f"{text[:offset]} [LINK {i}]{text[offset:]}"
+            string = f"[LINK {i}]"
+            offset = link[0] + (i-1) * len(string)
+            text = f"{text[:offset]}{string}{text[offset:]}"
 
         # Save the text in the DB.
         Database().insert_page(url=self.url, clean_text=text)
