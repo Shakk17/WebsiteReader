@@ -82,7 +82,7 @@ class PageVisitor:
         container = get_main_container(url=self.url, text=text)
 
         # Get all positions from the container's links.
-        # link = position, url, text
+        # link = position, text, url
         links = get_links_positions(container=container, text=text, url=self.url)
 
         # Add the links to the clean text.
@@ -92,6 +92,10 @@ class PageVisitor:
 
         # Save the text in the DB.
         Database().insert_page(url=self.url, clean_text=text)
+
+        # Save the links in the DB.
+        for link in links:
+            Database().insert_page_link(page_url=self.url, link=link)
         return
 
 # print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)

@@ -31,11 +31,12 @@ sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                 );"""
 
 sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
-                                    url text PRIMARY KEY,
-                                    num_link text,
-                                    text_link text NOT NULL,
-                                    url_link text NOT NULL,
-                                    FOREIGN KEY (url) REFERENCES pages (url)
+                                    page_url text NOT NULL,
+                                    link_num integer NOT NULL,
+                                    link_text text NOT NULL,
+                                    link_url text NOT NULL,
+                                    PRIMARY KEY (page_url, link_num),
+                                    FOREIGN KEY (page_url) REFERENCES pages (url)
                                 );"""
 
 
@@ -91,6 +92,13 @@ class Database:
         sql = "INSERT INTO pages (url, clean_text, last_visit) VALUES (?, ?, current_timestamp)"
         cur = self.conn.cursor()
         cur.execute(sql, (url, clean_text))
+        # Returns id of the tuple inserted.
+        return cur.lastrowid
+
+    def insert_page_link(self, page_url, link):
+        sql = "INSERT INTO page_links (page_url, link_num, link_text, link_url) VALUES (?, ?, ?, ?)"
+        cur = self.conn.cursor()
+        cur.execute(sql, (page_url, link[0], link[1], link[2]))
         # Returns id of the tuple inserted.
         return cur.lastrowid
 

@@ -193,9 +193,7 @@ def get_links_positions(container, text, url):
 
     # For each link in the container, get its position in the clean text.
     for text_link in text_links:
-        if text_link[0] == '[a]':
-            print()
-        # Get all its occurrences in the main text.
+        # Get the link's text occurrences in the main text.
         indexes = [m.start() for m in re.finditer('(?={0})'.format(re.escape(text_link[0])), text)]
         # Check if some index has already been chosen for another link.
         position = -1
@@ -206,9 +204,12 @@ def get_links_positions(container, text, url):
 
         # Get absolute URL of link.
         url = urllib.parse.urljoin(url, text_link[1])
+        # If the link is valid, add it to the list of links to return.
         if position >= 0 and text_link[0] != '':
-            links.append((position, url, text_link[0]))
+            links.append((position, text_link[0], url))
 
+    # Sort links depending on their position in the main text.
     links.sort(key=lambda x: x[0], reverse=False)
-    links = [(link[0] + len(link[2]), link[1], link[2]) for link in links]
+    # Add offset to positions in order to point at the end of the link text.
+    links = [(link[0] + len(link[1]), link[1], link[2]) for link in links]
     return links
