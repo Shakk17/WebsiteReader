@@ -55,6 +55,20 @@ class PageVisitor:
         """
         # Extract text from the database.
         text = Database().last_time_visited(url=self.url)[0]
+
+        # Add the links to the text.
+        links_positions = Database().get_page_links(page_url=self.url)
+        for i, link in enumerate(links_positions, start=0):
+            start_link = links_positions[i][0]
+            if i < 10:
+                string_offset = i * len(f"[LINK {i}]")
+            elif i < 100:
+                string_offset = 9 * len(f"[LINK 1]") + (i-9) * len(f"[LINK {i+1}]")
+            else:
+                string_offset = 9 * len(f"[LINK 1]") + 90 * len(f"[LINK 10]") + (i-99) * len(f"[LINK {i+1}]")
+            offset = start_link + string_offset
+            text = f"{text[:offset]}[LINK {i+1}]{text[offset:]}"
+
         # Split up the sentences.
         split_text = text.split('.')
 
@@ -84,12 +98,6 @@ class PageVisitor:
         # Get all positions from the container's links.
         # link = position, text, url
         links = get_links_positions(container=container, text=text, url=self.url)
-
-        # Add the links to the clean text.
-        for i, link in enumerate(links, start=1):
-            string = f"[LINK {i}]"
-            offset = link[0] + (i-1) * len(string)
-            text = f"{text[:offset]}{string}{text[offset:]}"
 
         # Save the text in the DB.
         Database().insert_page(url=self.url, clean_text=text)

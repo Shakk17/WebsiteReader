@@ -110,6 +110,13 @@ class Database:
         result = cur.fetchone()
         return result
 
+    def get_page_links(self, page_url):
+        sql = "SELECT position, link_text FROM page_links WHERE page_url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (page_url, ))
+        result = cur.fetchall()
+        return result
+
     def remove_old_website(self, domain):
         # First remove all the tuples in 'links' related to the domain.
         sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"

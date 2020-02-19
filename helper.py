@@ -190,18 +190,14 @@ def get_links_positions(container, text, url):
     for text_link in text_links:
         position = -1
 
-        if text_link[0] == "Chrome":
-            print()
         # Get all the link's text occurrences in the main text.
         indexes = [m.start() for m in re.finditer(f"\\b{re.escape(text_link[0])}\\b", text)]
-        if len(indexes) > 3:
-            print()
+
         # Check if some index has already been chosen for another link.
         for index in indexes:
             if index not in positions_taken:
                 position = index
                 break
-        print()
 
         # Get absolute URL of link.
         url = urllib.parse.urljoin(url, text_link[1])
