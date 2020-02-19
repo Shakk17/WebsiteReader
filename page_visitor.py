@@ -53,8 +53,12 @@ class PageVisitor:
         """
         Returns the text contained in the paragraph indicated in the request.
         """
-        # Extract text from the database.
-        text = Database().last_time_visited(url=self.url)[0]
+        # Extract text from the database, if present.
+        last_time_visited = Database().last_time_visited(url=self.url)
+        if last_time_visited is None:
+            raise FileNotFoundError
+
+        text = last_time_visited[0]
 
         # Add the links to the text.
         links_positions = Database().get_page_links(page_url=self.url)

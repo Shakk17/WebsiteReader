@@ -200,14 +200,14 @@ def get_links_positions(container, text, url):
                 break
 
         # Get absolute URL of link.
-        url = urllib.parse.urljoin(url, text_link[1])
+        link_url = urllib.parse.urljoin(url, text_link[1])
         # If the link is valid, add it to the list of links to return.
         if position >= 0 and text_link[0] != '':
             # Occupy the positions taken.
             for x in range(len(text_link[0])):
                 positions_taken.append(position + x)
             # Accept the link.
-            links.append((position, text_link[0], url))
+            links.append((position, text_link[0], link_url))
 
     # Sort links depending on their position in the main text.
     links.sort(key=lambda x: x[0], reverse=False)

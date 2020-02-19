@@ -208,6 +208,8 @@ class RequestHandler:
         except IndexError:
             text_response = "You have reached the end of the page."
             self.cursor.idx_paragraph = 0
+        except FileNotFoundError:
+            text_response = "Sorry, this page is not ready. Try again later!"
 
         return self.build_response(text_response)
 
