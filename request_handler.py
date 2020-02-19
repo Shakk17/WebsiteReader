@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, go_to_section, get_domain, get_url_from_google, fix_url, is_action_recent
+from helper import get_menu, get_menu_link, get_domain, get_url_from_google, fix_url, is_action_recent
 
 TIMEOUT = 4
 
@@ -124,10 +124,10 @@ class RequestHandler:
             return self.get_menu()
         elif action == 'ReadPage':
             return self.read_page()
-        elif action == "OpenLink":
-            return self.open_link(cursor_context.get("parameters"))
-        elif action == "GoToSection":
-            return self.go_to_section(cursor_context.get("parameters"))
+        elif action == "OpenPageLink":
+            return self.open_page_link(cursor_context.get("parameters"))
+        elif action == "OpenMenuLink":
+            return self.open_menu_link(cursor_context.get("parameters"))
 
     def visit_page(self):
         """
@@ -211,7 +211,7 @@ class RequestHandler:
 
         return self.build_response(text_response)
 
-    def open_link(self, parameters):
+    def open_page_link(self, parameters):
         """
         Visits the web page linked in the cursor, then sets the cursor on that page.
         """
@@ -225,21 +225,18 @@ class RequestHandler:
         else:
             return self.build_response("Wrong input.")
 
-    def go_to_section(self, parameters):
+    def open_menu_link(self, parameters):
         """
         Opens the section of the menu, if present.
         """
+        # Get the parameter from the request.
+        link_num = int(parameters.get("number"))
         try:
-            number = int(parameters.get("section-number"))
-            if number == 0:
-                name = parameters.get("section-name")
-                new_url = go_to_section(self.cursor.url, name=name)
-            else:
-                new_url = go_to_section(self.cursor.url, number=number)
+            new_url = get_menu_link(url=self.cursor.url, number=link_num)
             self.cursor.url = new_url
             return self.visit_page()
         except ValueError:
-            return "Wrong input."
+            return self.build_response("Wrong input.")
 
     def build_response(self, text_response):
         """

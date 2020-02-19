@@ -67,23 +67,14 @@ def get_menu(url):
     return menu
 
 
-def go_to_section(url, name=None, number=None):
+def get_menu_link(url, number):
     """
     Given the name of one of the menu's entries, returns its URL.
     """
     # Get menu.
     menu = get_menu(url)
-    menu_strings = [tup[0] for tup in menu]
-    menu_anchors = [tup[1] for tup in menu]
-
-    # Check if the parameter is the name of the section or the index.
-    if name is not None:
-        # Put all the strings to lowercase.
-        menu_strings = [string.lower() for string in menu_strings]
-        # Return index of string, if present. Otherwise, IndexError.
-        index = menu_strings.index(name.lower())
-    else:
-        index = number - 1
+    menu_anchors = [tup[2] for tup in menu]
+    index = number - 1
 
     return menu_anchors[index]
 
