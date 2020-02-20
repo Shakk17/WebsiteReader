@@ -13,9 +13,13 @@ TIMEOUT = 4
 
 
 class Cursor:
+    """
+    An object that keeps track of the current state of the user.
+    It is sent and received by the server (as a JSON) in requests and responses to the agent.
+    """
     def __init__(self, cursor_context, url):
         # Number that indicates the paragraph to read in the current article.
-        self.idx_paragraph = 0
+        self.idx_sentence = 0
         # Number that indicates the article to read in the current section.
         self.idx_menu = 0
         # Link selected.
@@ -34,7 +38,7 @@ class Cursor:
             f"{Fore.GREEN}"
             f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
             f"\tURL: {self.url}\n"
-            f"\tIdx paragraph: {self.idx_paragraph}\n"
+            f"\tIdx sentence: {self.idx_sentence}\n"
             f"\tIdx menu: {self.idx_menu}\n"
             f"\tLink: {self.link}\n"
             f"\tSentence number: {self.sentence_number}\n"
@@ -42,6 +46,9 @@ class Cursor:
 
 
 class RequestHandler:
+    """
+    This class handles the requests received by the server from the agent.
+    """
     page_visitor = None
     cursor = None
 
@@ -51,10 +58,12 @@ class RequestHandler:
 
     def get_response(self, request):
         """
-        Starts two threads.
-        One to process the incoming request, the other one is a timeout.
+        This method starts two threads.
+        The first thread processes the incoming request.
+        The second thread waits four second before sending a neq request to the agent.
         Each thread, after its completion, puts the result in a queue.
-        After the timeout, gets the first available element from the queue.
+        After the second thread completes, the first available element from the queue is taken and sent to the agent.
+        This escamotage is used to change the waiting time of the agent from 4 seconds to 12 seconds.
         """
         main_thread = threading.Thread(target=self.elaborate, args=(request,), daemon=True)
         timeout_thread = threading.Thread(target=self.postpone_response, args=(request, TIMEOUT), daemon=True)
@@ -71,6 +80,7 @@ class RequestHandler:
         # Returns the first available result.
         result = self.q.get()
 
+        # Print the cursor in the console only if the action asked by the user has been completed.
         if result.get("fulfillmentText") is not None:
             print(self.cursor)
 
@@ -78,7 +88,10 @@ class RequestHandler:
 
     def elaborate(self, request):
         """
-        Parses the request and understands what to do.
+        This method parses the request and decides which action to take.
+        :param request: The user request received by the server.
+        :return: A well-formed text_response containing the message to show to the user, and the parameters to keep in
+                the context.
         """
 
         # Get action from request.
@@ -89,7 +102,7 @@ class RequestHandler:
         contexts = request.get("queryResult").get("outputContexts")
         cursor_context = next((x for x in contexts if "cursor" in x.get("name")), None)
 
-        # URL is either in parameters (VisitPage) or in context.
+        # URL is either in parameters (VisitPage) or in the context.
         try:
             url = request.get("queryResult").get("parameters").get("url")
             if url is None:
@@ -97,10 +110,10 @@ class RequestHandler:
         except AttributeError:
             url = cursor_context.get("parameters").get("url")
 
-        # Recognize if URL is not well-formed.
+        # Fix the URL if it's not well-formed (missing schema).
         url = fix_url(url)
 
-        # Get first result from Google Search (in case the parameter is not a URL).
+        # If a query is passed to the server, get the URL of the first result from Google Search.
         query = request.get("queryResult").get("parameters").get("query")
         if query != '' and query is not None:
             url = get_url_from_google(query)
@@ -112,51 +125,58 @@ class RequestHandler:
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context, url)
 
-        # Save action requested into the history table of the database.
+        # Save the action performed by the user into the history table of the database.
         Database().insert_action(action, url)
         print(f"Action {action} saved in history.")
 
+        text_response = "Action not recognized by the server."
+
         if action == "VisitPage":
-            return self.visit_page()
+            text_response = self.visit_page()
         elif action == 'GetInfo':
-            return self.get_info()
+            text_response =  self.get_info()
         elif action == 'GetMenu':
-            return self.get_menu()
+            text_response = self.get_menu()
         elif action == 'ReadPage':
-            return self.read_page()
+            text_response = self.read_page()
         elif action == "OpenPageLink":
-            return self.open_page_link(cursor_context.get("parameters"))
+            text_response = self.open_page_link(link_num=int(cursor_context.get("parameters").get("number")))
         elif action == "OpenMenuLink":
-            return self.open_menu_link(cursor_context.get("parameters"))
+            text_response = self.open_menu_link(link_num=int(cursor_context.get("parameters").get("number")))
+
+        return self.build_response(text_response=text_response)
 
     def visit_page(self):
         """
         This method:
-        - parses the page, extracting info about it;
-        - if there are no errors, updates the cursor to the new page just visited;
+        - gets the HTML of the web page;
+        - extracts information about the web page;
+        - updates the cursor;
         - checks if the domain has been already crawled. If not, it starts a new crawl.
-        Returns a response.
+        :return: A text response containing information to show to the user about the web page.
         """
-        # Page parsing.
+        # Get the HTML of the web page.
         self.page_visitor = PageVisitor(url=self.cursor.url)
-        self.cursor.idx_paragraph = 0
-        self.cursor.idx_menu = 0
 
         # Get info about the web page.
         text_response = self.page_visitor.get_info()
-        # Cursor update.
+
+        # Update the cursor.
         self.cursor.url = self.page_visitor.url
+        self.cursor.idx_sentence = 0
+        self.cursor.idx_menu = 0
 
         # Checks if domain has been already crawled.
         domain = get_domain(url=self.page_visitor.url)
         to_crawl = False
         last_time_crawled = Database().last_time_crawled(domain=domain)
 
+        # If the domain has never been crawled, crawl it.
         if last_time_crawled is None:
             print(f"The domain {domain} has never been crawled before.")
             to_crawl = True
 
-        # Check if the last crawling is recent.
+        # If the domain hasn't been crawled in the last week, cancel the result of the previous crawl. Then crawl again.
         elif not is_action_recent(timestamp=last_time_crawled, days=7):
             print(f"The domain {domain} was last crawled too many days ago.")
             # Remove previous crawling results.
@@ -169,77 +189,115 @@ class RequestHandler:
             thread = threading.Thread(target=crawler.run, args=())
             thread.start()
 
-        # Update url in context.
-        return self.build_response(text_response)
+        # Update the url in context and return info about the web page to the user.
+        return text_response
 
     def get_menu(self):
+        """
+        This method:
+        - analyzes the result of the crawl of a domain and extracts its menu;
+        - selects which options are to be shown to the user.
+        :return: A text response containing the options to be shown to the user.
+        """
+        # Number of choices that will get displayed to the user at once.
         num_choices = 10
-        # Get the first 10 strings of the menu starting from idx_menu.
+
+        # Extract the menu from the crawl results.
         menu = get_menu(self.cursor.url)
 
+        # Get how many elements of the menu have already been shown.
         idx_start = int(self.cursor.idx_menu)
+
+        # Get the indexes of the options to be shown to the user
         if idx_start >= len(menu):
             idx_start = 0
         idx_end = idx_start + 10
+
+        # Get the options that will be shown to the user in the text response.
         strings = [tup[1] for tup in menu[idx_start:idx_end]]
 
+        # Format of display -> option n: text
+        #                      option n+1: text
         text_response = "You can choose between: \n"
         for i, string in enumerate(strings, start=1):
             text_response += f"{idx_start + i}: {string}. \n"
         text_response += f"\n{min(idx_start + num_choices, len(menu))} out of {len(menu)} option(s) read."
 
+        # Update cursor.
         self.cursor.idx_menu = idx_start + num_choices
 
-        return self.build_response(text_response)
+        return text_response
 
     def get_info(self):
+        """
+        This method returns info about the web page currently visited to the user.
+        :return: A text response containing info about the web page currently visited.
+        """
         self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
+        # Get info about the web page.
         text_response = self.page_visitor.get_info()
-        return self.build_response(text_response)
+        return text_response
 
     def read_page(self):
+        """
+        This method gets the main text of the web page and returns a part of it to be shown to the user.
+        It also updates the cursor.
+        :return: A text response containing a part of the main text of the web page.
+        """
         self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         try:
-            text_response = self.page_visitor.get_sentences(int(self.cursor.idx_paragraph))
-            self.cursor.idx_paragraph += 2
+            # Get actual position of the cursor in the main text.
+            idx_sentence = int(self.cursor.idx_sentence)
+            # Get sentences from the main text to be shown to the user.
+            text_response = self.page_visitor.get_sentences(idx_sentence=idx_sentence, n_sentences=2)
+            # Update cursor.
+            self.cursor.idx_sentence += 2
         except IndexError:
+            # There are no more sentences to be read.
             text_response = "You have reached the end of the page."
-            self.cursor.idx_paragraph = 0
+            # Reset cursor position.
+            self.cursor.idx_sentence = 0
         except FileNotFoundError:
-            text_response = "Sorry, this page is not ready. Try again later!"
+            text_response = "Sorry, this page is still in the process of being analysed. Try again later!"
 
-        return self.build_response(text_response)
+        return text_response
 
-    def open_page_link(self, parameters):
+    def open_page_link(self, link_num):
         """
-        Visits the web page linked in the cursor, then sets the cursor on that page.
+        This method visits the link chosen from the page by the user.
+        :param link_num: The position in the page of the link to be visited.
+        :return: A text response containing info about the new web page.
         """
-        # Get the parameter from the request.
-        link_num = int(parameters.get("number"))
-        # Get URL to visit from the DB and update the cursor.
+        # Get URL to visit from the DB.
         link_url = Database().get_page_link(page_url=self.cursor.url, link_num=link_num)
+
+        # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
             self.cursor.url = link_url[0]
             return self.visit_page()
         else:
-            return self.build_response("Wrong input.")
+            return "Wrong input."
 
-    def open_menu_link(self, parameters):
+    def open_menu_link(self, link_num):
         """
-        Opens the section of the menu, if present.
+        This method visits the link chosen from the menu by the user.
+        :param link_num: The position in the menu of the link to be visited.
+        :return: A text response containing info about the new web page.
         """
-        # Get the parameter from the request.
-        link_num = int(parameters.get("number"))
         try:
+            # Get URL to visit from the DB.
             new_url = get_menu_link(url=self.cursor.url, number=link_num)
+            # Update cursor and visit the page.
             self.cursor.url = new_url
             return self.visit_page()
         except ValueError:
-            return self.build_response("Wrong input.")
+            return "Wrong input."
 
     def build_response(self, text_response):
         """
-        Put the successful response in the queue.
+        This method builds a response message to send back to the agent.
+        :param text_response: A text message containing the message to be shown to the user.
+        :return: A well-formed response message to be sent to the agent.
         """
         self.q.put(
             {
@@ -253,17 +311,26 @@ class RequestHandler:
 
     def postpone_response(self, request, seconds):
         """
-        Puts a request for more time in the queue.
+        This method is used to request additional time to the DialogFlow agent.
+        The DialogFlow agent normally needs to receive a response in the next 4 seconds since its request to the server.
+        This is an escamotage used to push this limit to 12 seconds by triggering another event.
+        The server sends back a request containing the same payload as the one sent by the agent.
+        This request sent to the agent triggers an event that makes the agent resend the request to the server.
+        ATTENTION: the intent triggered by the user MUST have "timeout-'actionName'" as an Event.
+        It can only used 2 times, after the third trigger the agent will just display a standard response to the user.
+        :param request: The request sent by the agent to the server.
+        :param seconds: The seconds that the server will wait before asking more time to the agent.
+        :return: A response containing the request payload and the trigger for the event.
         """
         # Get action from request.
         action = request.get('queryResult').get('action')
 
         # Start timer.
         time.sleep(seconds)
-        # After 4 seconds, checks if the main thread has terminated.
+        # After the timer is over, if the main thread has not finished yet, send the request for more time.
         if self.q.empty():
-            # Send a response to server to ask for 5 more seconds to answer. Valid only two times.
             print(f"{Fore.CYAN}Sent request for more time.{Style.RESET_ALL}")
+            # Send a response to server to ask for more time. Valid only two times.
             self.q.put(
                 {
                     "followupEventInput": {

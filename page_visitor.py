@@ -4,9 +4,9 @@ from time import time
 import requests
 from bs4 import BeautifulSoup
 
-from datumbox_wrapper import DatumBox, get_language_string
-from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions, get_info_from_api
 from databases.database_handler import Database
+from datumbox_wrapper import get_language_string
+from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions, get_info_from_api
 
 
 class PageVisitor:
@@ -15,7 +15,6 @@ class PageVisitor:
         self.html_code = None
         if quick_download:
             self.html_code = self.get_quick_html()
-        self.datumbox = DatumBox(api_key="3670edf305888ab66dc6d9756d0f8498")
 
     def get_quick_html(self):
         print("Requesting HTML web page with requests...")
@@ -62,7 +61,7 @@ class PageVisitor:
 
         return text_response
 
-    def get_sentences(self, idx_paragraph):
+    def get_sentences(self, idx_sentence, n_sentences):
         """
         Returns the text contained in the paragraph indicated in the request.
         """
@@ -90,14 +89,14 @@ class PageVisitor:
         split_text = text.split('.')
 
         # If we reached the end of the text, raise IndexError and reset the counter.
-        if idx_paragraph > len(split_text):
+        if idx_sentence > len(split_text):
             raise IndexError
 
         string = ""
-        for text in split_text[idx_paragraph:idx_paragraph + 2]:
+        for text in split_text[idx_sentence:idx_sentence + n_sentences]:
             string += f"{text}."
 
-        string += f"\n{min(idx_paragraph + 2, len(split_text))} out of {len(split_text)} sentence(s) read."
+        string += f"\n{min(idx_sentence + n_sentences, len(split_text))} out of {len(split_text)} sentence(s) read."
         return string
 
     def analyze_page(self):
