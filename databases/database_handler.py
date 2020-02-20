@@ -26,6 +26,9 @@ sql_create_crawler_links_table = """CREATE TABLE IF NOT EXISTS crawler_links (
 
 sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                     url text PRIMARY KEY,
+                                    topic text,
+                                    summary text,
+                                    language text,
                                     clean_text text,
                                     last_visit text NOT NULL
                                 );"""
@@ -72,6 +75,8 @@ class Database:
         except Error as e:
             print(e)
 
+    # HISTORY TABLE
+
     def insert_action(self, action, url):
         sql = '''INSERT INTO history (user, action, url, timestamp)
                     VALUES (?, ?, ?, current_timestamp) '''
@@ -81,6 +86,21 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
+    def get_previous_action(self, user):
+        # First, get the second to last action performed.
+        cur = self.conn.cursor()
+        cur.execute("SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC ", (f"{user}",))
+        result = cur.fetchall()[1]
+
+        # Then, delete the last two actions performed.
+        cur.execute("DELETE from history "
+                    "WHERE id IN (SELECT id FROM history WHERE user LIKE ? ORDER BY id DESC LIMIT 2)",
+                    (f"{user}",)
+                    )
+        return result
+
+    # WEBSITES TABLE
+
     def insert_website(self, domain):
         sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, current_timestamp)"
         cur = self.conn.cursor()
@@ -89,12 +109,39 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def insert_page(self, url, clean_text):
-        sql = "INSERT INTO pages (url, clean_text, last_visit) VALUES (?, ?, current_timestamp)"
+    def last_time_crawled(self, domain):
+        sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
         cur = self.conn.cursor()
-        cur.execute(sql, (url, clean_text))
-        # Returns id of the tuple inserted.
+        cur.execute(sql, (domain,))
+        rows = cur.fetchall()
+        # Returns True is it has been crawled, False otherwise.
+        if len(rows) == 0:
+            return None
+        return rows[0][1]
+
+    # PAGES TABLE
+
+    def insert_page(self, url, topic, summary, language):
+        sql = "INSERT INTO pages (url, topic, summary, language, last_visit) " \
+              "VALUES (?, ?, ?, ?, current_timestamp)"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url, topic, summary, language))
+        return
+
+    def update_page(self, url, clean_text):
+        sql = "UPDATE pages SET clean_text=? WHERE url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (clean_text, url))
         return cur.lastrowid
+
+    def last_time_visited(self, url):
+        sql = "SELECT * FROM pages WHERE url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url,))
+        result = cur.fetchone()
+        return result
+
+    # PAGE LINKS TABLE
 
     def insert_page_link(self, page_url, link_num, link):
         sql = "INSERT INTO page_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
@@ -113,9 +160,11 @@ class Database:
     def get_page_links(self, page_url):
         sql = "SELECT position, link_text FROM page_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
-        cur.execute(sql, (page_url, ))
+        cur.execute(sql, (page_url,))
         result = cur.fetchall()
         return result
+
+    # CRAWLER LINKS TABLE
 
     def remove_old_website(self, domain):
         # First remove all the tuples in 'links' related to the domain.
@@ -130,26 +179,6 @@ class Database:
         # Returns id of the tuple inserted.
         return cur.lastrowid
 
-    def last_time_crawled(self, domain):
-        sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
-        cur = self.conn.cursor()
-        cur.execute(sql, (domain,))
-        rows = cur.fetchall()
-        # Returns True is it has been crawled, False otherwise.
-        if len(rows) == 0:
-            return None
-        return rows[0][1]
-
-    def last_time_visited(self, url):
-        sql = "SELECT clean_text, last_visit FROM pages WHERE url LIKE ?"
-        cur = self.conn.cursor()
-        cur.execute(sql, (url,))
-        rows = cur.fetchall()
-        if len(rows) > 0:
-            return rows[0]
-        else:
-            return None
-
     def analyze_scraping(self, domain):
         cur = self.conn.cursor()
         cur.execute("SELECT COUNT(*), link_text, link_url, "
@@ -161,23 +190,3 @@ class Database:
 
         rows = cur.fetchall()
         return rows
-
-    def get_previous_action(self, user):
-        # First, get the second to last action performed.
-        cur = self.conn.cursor()
-        cur.execute("SELECT action, url "
-                    "FROM history "
-                    "WHERE user LIKE ? "
-                    "ORDER BY id DESC ",
-                    (f"{user}",)
-                    )
-
-        result = cur.fetchall()[1]
-
-        # Then, delete the last two actions performed.
-        cur.execute("DELETE from history "
-                    "WHERE id IN (SELECT id FROM history WHERE user LIKE ? ORDER BY id DESC LIMIT 2)",
-                    (f"{user}",)
-                    )
-
-        return result

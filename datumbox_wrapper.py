@@ -208,6 +208,10 @@ languages = dict([
 ])
 
 
+def get_language_string(code):
+    return languages[code]
+
+
 class DatumBox:
     base_url = "http://api.datumbox.com:80/1.0/"
 
@@ -222,7 +226,7 @@ class DatumBox:
 
     def detect_language(self, text):
         """Returns an ISO_639-1 language code"""
-        return languages[self._classification_request(text, "LanguageDetection")]
+        return get_language_string(self._classification_request(text, "LanguageDetection"))
 
     def text_extract(self, text):
         """Extracts text from a webpage"""

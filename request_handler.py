@@ -141,14 +141,11 @@ class RequestHandler:
         self.page_visitor = PageVisitor(url=self.cursor.url)
         self.cursor.idx_paragraph = 0
         self.cursor.idx_menu = 0
-        # Analyze page.
-        threading.Thread(target=self.page_visitor.analyze_page, args=()).start()
-        try:
-            text_response = self.page_visitor.get_info()
-            # Cursor update.
-            self.cursor.url = self.page_visitor.url
-        except Exception as ex:
-            text_response = ex.args[0]
+
+        # Get info about the web page.
+        text_response = self.page_visitor.get_info()
+        # Cursor update.
+        self.cursor.url = self.page_visitor.url
 
         # Checks if domain has been already crawled.
         domain = get_domain(url=self.page_visitor.url)

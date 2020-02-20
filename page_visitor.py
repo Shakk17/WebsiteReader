@@ -1,10 +1,11 @@
+import threading
 from time import time
 
 import requests
 from bs4 import BeautifulSoup
 
-from datumbox_wrapper import DatumBox
-from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions
+from datumbox_wrapper import DatumBox, get_language_string
+from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions, get_info_from_api
 from databases.database_handler import Database
 
 
@@ -28,22 +29,34 @@ class PageVisitor:
         """
         Returns text containing information about the type of the web page analyzed.
         """
-        text_response = f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
-        print("Extracting text...")
         start = time()
 
-        # Extract text from HTML code.
-        text = self.datumbox.text_extract(text=self.html_code)
+        # Check in the database if the web page has already been visited.
+        result = Database().last_time_visited(url=self.url)
+        if result is None or not is_action_recent(timestamp=result[5], days=1):
+            print("Calling Aylien API to extract information...")
 
-        # Get topic from text extracted.
-        topic = self.datumbox.topic_classification(text=text)
+            # Get info from the Aylien API.
+            topic, summary, language_code = get_info_from_api(url=self.url)
+            language = get_language_string(language_code)
+
+            # Save the info in the DB.
+            Database().insert_page(url=self.url, topic=topic, summary=summary, language=language)
+
+            # Analyze page.
+            threading.Thread(target=self.analyze_page, args=()).start()
+        else:
+            topic, summary, language = result[1], result[2], result[3]
+
+        text_response = (
+            f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
+            f"The topic of this web page is {topic}. \n"
+            f"The summary of this web page is {summary}. \n"
+            f"The language of this web page is {language}. \n"
+        )
         print(f"TOPIC: {topic}")
-        text_response += f"The topic of this web page is {topic}. \n"
-
-        # Detect language.
-        language = self.datumbox.detect_language(text=text)
+        print(f"SUMMARY: {summary}")
         print(f"LANGUAGE: {language}")
-        text_response += f"The language of this web page is {language}. \n"
 
         print(f"Info retrieval elapsed time: {(time() - start):.2f} s")
 
@@ -88,13 +101,7 @@ class PageVisitor:
         return string
 
     def analyze_page(self):
-        # Check if page has already been visited recently.
-        result = Database().last_time_visited(url=self.url)
-        if result is None or not is_action_recent(timestamp=result[1], days=1):
-            # If not, I get the clean text from it.
-            text = get_clean_text(url=self.url)
-        else:
-            return
+        text = get_clean_text(url=self.url)
 
         # Given the extracted text, get its main container.
         container = get_main_container(url=self.url, text=text)
@@ -104,7 +111,7 @@ class PageVisitor:
         links = get_links_positions(container=container, text=text, url=self.url)
 
         # Save the text in the DB.
-        Database().insert_page(url=self.url, clean_text=text)
+        Database().update_page(url=self.url, clean_text=text)
 
         # Save the links in the DB.
         for i, link in enumerate(links, start=1):

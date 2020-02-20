@@ -152,6 +152,25 @@ def render_page(url):
     return html
 
 
+def get_info_from_api(url):
+    combined = client.Combined({
+        'url': url,
+        'endpoint': ["classify", "summarize", "language"]
+    })
+
+    language = combined.get("results")[0].get("result").get("lang")
+
+    topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
+    if topic_confidence > 0.3:
+        topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
+    else:
+        topic = "unknown"
+
+    summary = combined.get("results")[2].get("result").get("sentences")[0]
+
+    return topic, summary, language
+
+
 def get_clean_text(url):
     """
     Utilizes Aylien APIs to extract the text from a web page.
