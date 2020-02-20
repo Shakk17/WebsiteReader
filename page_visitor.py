@@ -10,6 +10,9 @@ from helper import get_main_container, get_clean_text, is_action_recent, get_lin
 
 
 class PageVisitor:
+    """
+    An object that holds the HTML code (no JS support to be loaded quicker) of a web page.
+    """
     def __init__(self, url, quick_download=True):
         self.url = url
         self.html_code = None
@@ -17,6 +20,11 @@ class PageVisitor:
             self.html_code = self.get_quick_html()
 
     def get_quick_html(self):
+        """
+        This method returns the HTML code of the web page.
+        For speed purposes, Javascript is not supported.
+        :return: The HTML code of the web page.
+        """
         print("Requesting HTML web page with requests...")
         start = time()
         html = requests.get(self.url)
@@ -26,7 +34,10 @@ class PageVisitor:
 
     def get_info(self):
         """
-        Returns text containing information about the type of the web page analyzed.
+        This method gets information such as topic, summary and language from the web page.
+        If the web page has not been visited recently, Aylien APIs are used to extract the information.
+        If the web page has already been visited, the info is retrieved from the database.
+        :return: A text response to be shown to the user containing info about the page.
         """
         start = time()
 
@@ -42,8 +53,8 @@ class PageVisitor:
             # Save the info in the DB.
             Database().insert_page(url=self.url, topic=topic, summary=summary, language=language)
 
-            # Analyze page.
-            threading.Thread(target=self.analyze_page, args=()).start()
+            # Analyze the page in the background.
+            threading.Thread(target=self.extract_main_text, args=()).start()
         else:
             topic, summary, language = result[1], result[2], result[3]
 
@@ -63,58 +74,72 @@ class PageVisitor:
 
     def get_sentences(self, idx_sentence, n_sentences):
         """
-        Returns the text contained in the paragraph indicated in the request.
+        This method returns a number of sentences from the main text of the web page.
+        :param idx_sentence: The index of the first sentence to be retrieved.
+        :param n_sentences: The number of sentences to be retrieved.
+        :return: A string containing some sentences from the main text of the web page.
         """
-        # Extract text from the database, if present.
+        # Check if the text is actually present in the database.
         last_time_visited = Database().last_time_visited(url=self.url)
         if last_time_visited is None:
             raise FileNotFoundError
 
+        # Get the text from the database.
         text = last_time_visited[0]
 
-        # Add the links to the text.
+        # Add the links indicators to the text to be returned.
         links_positions = Database().get_page_links(page_url=self.url)
         for i, link in enumerate(links_positions, start=0):
+            # For each link in the main text, get the exact position in the main string.
             start_link = links_positions[i][0]
+
+            # These offsets are necessary because the indicators [LINK n] need to be considered when calculating
+            # the position of the next indicator in the string.
             if i < 10:
                 string_offset = i * len(f"[LINK {i}]")
             elif i < 100:
                 string_offset = 9 * len(f"[LINK 1]") + (i-9) * len(f"[LINK {i+1}]")
             else:
                 string_offset = 9 * len(f"[LINK 1]") + 90 * len(f"[LINK 10]") + (i-99) * len(f"[LINK {i+1}]")
+
+            # Add the indicator [LINK n] to the main string.
             offset = start_link + string_offset
             text = f"{text[:offset]}[LINK {i+1}]{text[offset:]}"
 
-        # Split up the sentences.
+        # Split up the main text in sentences.
         split_text = text.split('.')
 
-        # If we reached the end of the text, raise IndexError and reset the counter.
+        # Once the end of the main text has been reached, raise IndexError.
         if idx_sentence > len(split_text):
             raise IndexError
 
+        # Add only the requested sentences to the text to be returned.
         string = ""
         for text in split_text[idx_sentence:idx_sentence + n_sentences]:
             string += f"{text}."
 
+        # Let the user know about how long it will take to finish the reading of the main text.
         string += f"\n{min(idx_sentence + n_sentences, len(split_text))} out of {len(split_text)} sentence(s) read."
         return string
 
-    def analyze_page(self):
+    def extract_main_text(self):
+        """
+        This method uses an Aylien API to extract the main text (and its links) from a web page.
+        After the extraction, text and links of the web page are saved in the database.
+        """
+        # Get the main text of the web page.
         text = get_clean_text(url=self.url)
 
-        # Given the extracted text, get its main container.
+        # Given the extracted main text, get its main HTML container.
         container = get_main_container(url=self.url, text=text)
 
-        # Get all positions from the container's links.
+        # Retrieve all the links from the HTML element that contains the main text.
         # link = position, text, url
         links = get_links_positions(container=container, text=text, url=self.url)
 
-        # Save the text in the DB.
+        # Save the main text in the DB.
         Database().update_page(url=self.url, clean_text=text)
 
         # Save the links in the DB.
         for i, link in enumerate(links, start=1):
             Database().insert_page_link(page_url=self.url, link_num=i, link=link)
-        return
-
-# print(PageVisitor("https://en.wikipedia.org/wiki/Google_Stadia").get_main_content().text)

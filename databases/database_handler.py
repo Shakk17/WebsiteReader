@@ -45,12 +45,18 @@ sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
 
 
 class Database:
+    """
+    This class handles all the operations related to the database.
+    """
     name = "databases/database.db"
     conn = None
 
     def __init__(self):
         # Create a database connection.
-        self.create_connection()
+        try:
+            self.conn = sqlite3.connect(self.name, isolation_level=None)
+        except Error as e:
+            print(e)
 
         if self.conn is not None:
             # Create tables.
@@ -62,12 +68,6 @@ class Database:
         else:
             print("Error! cannot create the database connection.")
 
-    def create_connection(self):
-        try:
-            self.conn = sqlite3.connect(self.name, isolation_level=None)
-        except Error as e:
-            print(e)
-
     def create_table(self, create_table_sql):
         try:
             c = self.conn.cursor()
@@ -78,15 +78,24 @@ class Database:
     # HISTORY TABLE
 
     def insert_action(self, action, url):
+        """
+        This method inserts an action performed by the user into the history table of the database.
+        :param action: A string indicating the action performed by the user.
+        :param url: The url of the web page related to the action performed by the user.
+        """
         sql = '''INSERT INTO history (user, action, url, timestamp)
                     VALUES (?, ?, ?, current_timestamp) '''
         cur = self.conn.cursor()
         record = ("shakk", action, url)
         cur.execute(sql, record)
-        # Returns id of the tuple inserted.
-        return cur.lastrowid
 
     def get_previous_action(self, user):
+        """
+        This method retrieves the second to last action performed by the user.
+        Then it deletes the last two actions performed by the user.
+        :param user: A string that represents the user name.
+        :return: A tuple (action, url) containing the second to last action performed by the user.
+        """
         # First, get the second to last action performed.
         cur = self.conn.cursor()
         cur.execute("SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC ", (f"{user}",))
@@ -102,39 +111,61 @@ class Database:
     # WEBSITES TABLE
 
     def insert_website(self, domain):
+        """
+        This method inserts a website into the websites table of the database.
+        :param domain: The domain of the website to insert in the database.
+        """
         sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, current_timestamp)"
         cur = self.conn.cursor()
         record = domain
         cur.execute(sql, (record,))
-        # Returns id of the tuple inserted.
-        return cur.lastrowid
 
     def last_time_crawled(self, domain):
+        """
+        This method returns the timestamp of the last crawl on a website, if it has already been crawled.
+        :param domain: A string representing the domain of the website to search.
+        :return: The timestamp of the last crawl (if it has been crawled), None otherwise.
+        """
         sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
         cur = self.conn.cursor()
         cur.execute(sql, (domain,))
-        rows = cur.fetchall()
+        rows = cur.fetchone()
         # Returns True is it has been crawled, False otherwise.
         if len(rows) == 0:
             return None
-        return rows[0][1]
+        return rows[1]
 
     # PAGES TABLE
 
     def insert_page(self, url, topic, summary, language):
-        sql = "INSERT INTO pages (url, topic, summary, language, last_visit) " \
-              "VALUES (?, ?, ?, ?, current_timestamp)"
+        """
+        This method inserts a web page in the pages table of the database.
+        :param url: A string representing the URL of the web page.
+        :param topic: A string representing the topic of the web page.
+        :param summary: A string representing the summary of the web page.
+        :param language: A string representing the language of the web page.
+        """
+        sql = """INSERT INTO pages (url, topic, summary, language, last_visit) 
+                    VALUES (?, ?, ?, ?, current_timestamp)"""
         cur = self.conn.cursor()
         cur.execute(sql, (url, topic, summary, language))
-        return
 
     def update_page(self, url, clean_text):
+        """
+        This method updates a page in the pages table of the database.
+        :param url: A string representing the URL of the web page to update.
+        :param clean_text: A string representing the clear main text of the web page to insert.
+        """
         sql = "UPDATE pages SET clean_text=? WHERE url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (clean_text, url))
-        return cur.lastrowid
 
     def last_time_visited(self, url):
+        """
+        This method returns a tuple containing info about the last visit of a web page.
+        :param url: A string containing the URL of the web page.
+        :return: A tuple (url, topic, summary, language, clear_text, last_visit) or None.
+        """
         sql = "SELECT * FROM pages WHERE url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (url,))
@@ -144,13 +175,24 @@ class Database:
     # PAGE LINKS TABLE
 
     def insert_page_link(self, page_url, link_num, link):
+        """
+        This method inserts a link contained in the main text of a web page into the page_links table of the database.
+        :param page_url: A string containing the URL of the web page containing the link.
+        :param link_num: A number representing the index of the link to insert between all the other links of the text.
+        :param link: A tuple (position, link_text, link_url) containing info about the link.
+        :return: None.
+        """
         sql = "INSERT INTO page_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
-        # Returns id of the tuple inserted.
-        return cur.lastrowid
 
     def get_page_link(self, page_url, link_num):
+        """
+        This method returns a link contained in the main text of a web page.
+        :param page_url: A string containing the URL of the web page containing the link.
+        :param link_num: A number representing the index of the link to get between all the other links of the text.
+        :return: A tuple (link_url) containing the URL of the link requested or None.
+        """
         sql = "SELECT link_url FROM page_links WHERE page_url LIKE ? AND link_num = ?"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, link_num))
@@ -158,6 +200,11 @@ class Database:
         return result
 
     def get_page_links(self, page_url):
+        """
+        This method returns all the links contained in the main text of a web page.
+        :param page_url: A string containing the URL of the web page.
+        :return: An array containing tuples (position, link_text) with all the info about the links of the web page.
+        """
         sql = "SELECT position, link_text FROM page_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url,))
@@ -167,6 +214,11 @@ class Database:
     # CRAWLER LINKS TABLE
 
     def remove_old_website(self, domain):
+        """
+        This method removes the results of a previous crawl of a domain from the database.
+        :param domain: A string containing the domain to be un-crawled.
+        :return: None
+        """
         # First remove all the tuples in 'links' related to the domain.
         sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"
         cur = self.conn.cursor()
@@ -176,10 +228,13 @@ class Database:
         sql = "DELETE FROM websites WHERE domain LIKE ?;"
         cur = self.conn.cursor()
         cur.execute(sql, (domain,))
-        # Returns id of the tuple inserted.
-        return cur.lastrowid
 
     def analyze_scraping(self, domain):
+        """
+        This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
+        :param domain: A string containing the domain to analyse.
+        :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
+        """
         cur = self.conn.cursor()
         cur.execute("SELECT COUNT(*), link_text, link_url, "
                     "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
