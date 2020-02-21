@@ -23,15 +23,15 @@ options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
 
-'''
-HEROKU
+
+# HEROKU
 options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
-'''
+# LOCAL:
+# driver = webdriver.Chrome(options=options)
 
-driver = webdriver.Chrome(options=options)
 driver.header_overrides = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "Accept-Encoding": "gzip, deflate, br",
