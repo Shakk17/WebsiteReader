@@ -24,6 +24,11 @@ chrome_options.add_experimental_option("prefs", prefs)
 
 
 def strip_html_tags(text):
+    """
+    This method takes a string of text, unescapes special characters and removes any HTML tag from it.
+    :param text: A string of text.
+    :return: A string without escaped characters or HTML tags.
+    """
     # Unescape difficult character like &amp;.
     text = html.unescape(str(text))
     # Remove all the html tags.
@@ -32,14 +37,26 @@ def strip_html_tags(text):
 
 
 def get_url_from_google(query):
+    """
+    This method makes a search on Google and returns the first result.
+    :param query: A string containing the query to input into Google Search.
+    :return: A string containing the URL of the first result.
+    """
     start = time()
+    # Perform Google Search.
     result = search(query, tld='com', lang='en', num=1, start=0, pause=0.0)
+    # Return the first result obtained.
     for res in result:
         print("Time elapsed for Google Search: %.2f s" % (time() - start))
         return res
 
 
 def get_domain(url):
+    """
+    This method extracts the domain from the URL of a website.
+    :param url: A string containing the URL.
+    :return: A string containing the domain extracted from the URL.
+    """
     extracted_domain = tldextract.extract(url)
     domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
     return domain
@@ -47,34 +64,41 @@ def get_domain(url):
 
 def get_menu(url):
     """
-    Analyze the scraped pages from the url's domain, then returns the 10 most frequent links.
-    Returns a list of tuples (text, url) corresponding to the anchors present in the menu.
+    This method returns all the links belonging to the menu of a web page.
+    :param url: A string containing the URL of the web page.
+    :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
     """
-    # Get menu of domain.
+    # Get menu of the domain that contains the web page.
     domain = get_domain(url)
     menu = (Database().analyze_scraping(domain))
     menu = [list(element) for element in menu]
 
-    # Remove tags from text fields.
+    # Remove all the tags from the text fields of the links.
     for i, element in enumerate(menu):
         menu[i][1] = strip_html_tags(element[1])
 
-    # Remove elements with empty texts.
+    # Remove elements of the menu with empty texts.
     menu = list(filter(lambda x: len(x[1]) > 0, menu))
 
-    # Remove not frequent elements.
+    # Remove elements of the menu that are not frequent.
     highest_freq = menu[0][0]
-    menu = list(filter(lambda x: x[0] > highest_freq * 0.10, menu))
+    threshold = 0.10
+    menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
 
     return menu
 
 
 def get_menu_link(url, number):
     """
-    Given the name of one of the menu's entries, returns its URL.
+    This method returns the URL of a link belonging to the menu of a web page.
+    :param url: A string containing the URL of the web page.
+    :param number: The position of the link to be retrieved in the list of menu links. 0 is not valid.
+                    To get the first element, number has to be 1, not 0.
+    :return: A string containing the URL of the link requested.
     """
-    # Get menu.
+    # Get all the menu links.
     menu = get_menu(url)
+    # Get all the URLs of the menu links.
     menu_anchors = [tup[2] for tup in menu]
     index = number - 1
 
@@ -82,6 +106,11 @@ def get_menu_link(url, number):
 
 
 def fix_url(url):
+    """
+    This method takes a URL and returns a well-formed URL. If the schema is missing, it will get added.
+    :param url: A string containing a URL.
+    :return: A string containing a well-formed URL.
+    """
     if not re.match('(?:http|ftp|https)://', url):
         return 'http://{}'.format(url)
     return url
@@ -89,27 +118,23 @@ def fix_url(url):
 
 def get_main_container(url, text):
     """
-    Given the html_code, returns the element containing the main content of the web page.
-    It uses the SD algorithm to analyse the rendered HTML of the web page.
-    :return: The HTML element containing the main content of the page.
+    This method takes a web page and its main text, and returns the deepest element (in the DOM tree) containing it.
+    :param url: A string containing the URL of the web page.
+    :param text: A string containing the main text of the web page.
+    :return: The HTML code of the deepest element containing the main text.
     """
-    '''# Check in the database if the page has already been parsed.
-    html_element = Database().has_been_parsed(url)
-    # If this is not the first time visiting the page, I just return the text I already have.
-    if html_element:
-        return BeautifulSoup(html_element, 'lxml')'''
 
-    # First, I render the HTML code of the page.
+    # First, render the HTML code of the page to get the DOM tree. JavaScript is supported.
     rendered_html = render_page(url)
 
-    # Third, get all words from text composed by 4+ characters.
+    # Second, get all words composed by 4+ characters from the main text.
     words = re.findall(r'\w+', text)
     words = set([word for word in words if len(word) > 3])
 
-    # Fourth, get all the elements from the HTML code.
+    # Third, get all the elements from the HTML code.
     all_elements = BeautifulSoup(rendered_html, 'lxml').find_all()
 
-    # Fifth, for each element, check how many text words it contains.
+    # Fourth, for each element, check how many text words it contains.
     candidates = []
     for element in all_elements:
         element_text = element.get_text()
@@ -117,14 +142,14 @@ def get_main_container(url, text):
         for word in words:
             if word in element_text:
                 counter += 1
-        # If the element contains at least 75% of the words, it is a candidate element.
+        # If the element contains at least 75% of the main text words, it is a candidate element.
         if counter > len(words) * 0.75:
             candidates.append((element, counter))
 
-    # Sixth, order the candidates depending on their depth in the DOM tree.
+    # Fifth, order the candidates depending on their depth in the DOM tree.
     candidates.sort(key=lambda x: len(list(x[0].parents)), reverse=True)
 
-    # Seventh, select the deepest element.
+    # Sixth, select the deepest element in the DOM tree from all the candidates.
     html_element = candidates[0][0]
 
     return html_element
@@ -132,9 +157,9 @@ def get_main_container(url, text):
 
 def render_page(url):
     """
-    Returns the parsed HTML code of the web page reachable at the URL specified. It supports Javascript.
-    :param url: URL of the web page to parse.
-    :return: The parsed HTML code of the web page.
+    This method returns the HTML code of a web page. It uses Selenium, thus it supports Javascript.
+    :param url: A string containing the URL of the web page to parse.
+    :return: The HTML code of the web page.
     """
     start = time()
     try:
@@ -147,12 +172,18 @@ def render_page(url):
 
     print(f"Selenium request elapsed time: {(time() - start):.2f} s")
 
-    html = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
+    html_code = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
 
-    return html
+    return html_code
 
 
 def get_info_from_api(url):
+    """
+    This method returns info regarding a certain web page by using Aylien APIs.
+    :param url: A string containing the URL of the web page.
+    :return: A tuple (topic, summary, language) containing info about the web page.
+    """
+    # This is a combined call to the Aylien APIs.
     combined = client.Combined({
         'url': url,
         'endpoint': ["classify", "summarize", "language"]
@@ -160,6 +191,7 @@ def get_info_from_api(url):
 
     language = combined.get("results")[0].get("result").get("lang")
 
+    # The topic is returned only if it the level of confidence is over a certain threshold.
     topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
     if topic_confidence > 0.3:
         topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
@@ -173,9 +205,9 @@ def get_info_from_api(url):
 
 def get_clean_text(url):
     """
-    Utilizes Aylien APIs to extract the text from a web page.
-    :param url: URL of the web page.
-    :return: the text of the web page.
+    This method utilizes an Aylien API to extract the main text from a web page.
+    :param url: A string containing the URL of the web page.
+    :return: A string containing the main text of the web page.
     """
     start = time()
     text = client.Extract({'url': url})
@@ -184,6 +216,12 @@ def get_clean_text(url):
 
 
 def is_action_recent(timestamp, days):
+    """
+    This method compares a timestamp to the actual date.
+    :param timestamp: A string in the format "%Y-%m-%d %H:%M:%S".
+    :param days: An integer indicating the threshold defining when an action is recent.
+    :return: True is the timestamp inserted is a date that happened more than "days" days ago, False otherwise.
+    """
     t1 = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
     t2 = datetime.now()
     difference = t2 - t1
@@ -192,14 +230,25 @@ def is_action_recent(timestamp, days):
 
 
 def get_links_positions(container, text, url):
+    """
+    This is a method that returns the positions of the links in the string containing the main text of a web page.
+    :param container: The HTML element containing the main text of the web page.
+    :param text: A string containing the main text of the web page.
+    :param url: A string containing the URL of the web page.
+    :return: A list of tuples (position, text, url).
+    """
+
     # Get all the links present in the container.
     container_links = container.find_all('a')
+
     # Filter out the links that do not contain a string.
-    container_links = list(filter(lambda x: len(x.contents) > 0, container_links))
+    container_links = list(filter(lambda link: len(link.contents) > 0, container_links))
+
+    # Save the links in an array containing tuples (text, url).
     text_links = [(link.get_text(), link.get("href")) for link in container_links if isinstance(link.contents[0], str)]
 
     # Sort the links putting the ones with the longest texts first.
-    text_links.sort(key=lambda x: len(x[0]), reverse=True)
+    text_links.sort(key=lambda link: len(link[0]), reverse=True)
 
     # Create a list holding all the positions in the main text.
     links = []
@@ -212,7 +261,7 @@ def get_links_positions(container, text, url):
         # Get all the link's text occurrences in the main text.
         indexes = [m.start() for m in re.finditer(f"\\b{re.escape(text_link[0])}\\b", text)]
 
-        # Check if some index has already been chosen for another link.
+        # Assign the first position available to the new link.
         for index in indexes:
             if index not in positions_taken:
                 position = index
@@ -220,16 +269,19 @@ def get_links_positions(container, text, url):
 
         # Get absolute URL of link.
         link_url = urllib.parse.urljoin(url, text_link[1])
-        # If the link is valid, add it to the list of links to return.
+
+        # Check if the link has a position assigned in the main text and its text is not empty.
         if position >= 0 and text_link[0] != '':
-            # Occupy the positions taken.
+            # Occupy all the positions in the text now occupied by the link's text.
             for x in range(len(text_link[0])):
                 positions_taken.append(position + x)
-            # Accept the link.
+
+            # Append a tuple (position, text, url) to the links array.
             links.append((position, text_link[0], link_url))
 
     # Sort links depending on their position in the main text.
-    links.sort(key=lambda x: x[0], reverse=False)
+    links.sort(key=lambda link: link[0], reverse=False)
+
     # Add offset to positions in order to point at the end of the link text.
     links = [(link[0] + len(link[1]), link[1], link[2]) for link in links]
     return links
