@@ -1,4 +1,5 @@
 import html
+import os
 import re
 from datetime import datetime
 from time import time
@@ -18,9 +19,17 @@ client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
+
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 chrome_options.add_experimental_option("prefs", prefs)
+
+"""
+HEROKU:
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chrome_options.add_argument("--disable-dev-shm-usage")
+chrome_options.add_argument("--no-sandbox")
+"""
 
 
 def strip_html_tags(text):
@@ -164,7 +173,8 @@ def render_page(url):
     start = time()
     try:
         print("Rendering page with Selenium...")
-        driver = webdriver.Chrome(executable_path="chromedriver.exe", options=chrome_options)
+        # HEROKU: driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+        driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
     except Exception:
         print(f"Can't access this website: {url}")
