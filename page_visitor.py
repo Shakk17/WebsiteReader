@@ -45,7 +45,7 @@ class PageVisitor:
         result = Database().last_time_visited(url=self.url)
 
         # If there is already info about the web page, but it's not recent, delete it.
-        if result is not None and not is_action_recent(timestamp=result[5], days=1):
+        if result is not None and not is_action_recent(timestamp=result[4], days=1):
             Database().delete_page(url=self.url)
             Database().delete_page_links(url=self.url)
 
@@ -53,25 +53,23 @@ class PageVisitor:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
-            topic, summary, language_code = get_info_from_api(url=self.url)
+            topic, language_code = get_info_from_api(url=self.url)
             language = get_language_string(language_code)
 
             # Save the info in the DB.
-            Database().insert_page(url=self.url, topic=topic, summary=summary, language=language)
+            Database().insert_page(url=self.url, topic=topic, language=language)
 
             # Analyze the page in the background.
             threading.Thread(target=self.extract_main_text, args=()).start()
         else:
-            topic, summary, language = result[1], result[2], result[3]
+            topic, language = result[1], result[2]
 
         text_response = (
             f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
             f"The topic of this web page is {topic}. \n"
-            f"The summary of this web page is {summary}. \n"
             f"The language of this web page is {language}. \n"
         )
         print(f"TOPIC: {topic}")
-        print(f"SUMMARY: {summary}")
         print(f"LANGUAGE: {language}")
 
         print(f"Info retrieval elapsed time: {(time() - start):.2f} s")
@@ -91,7 +89,7 @@ class PageVisitor:
             raise FileNotFoundError
 
         # Get the text from the database.
-        text = last_time_visited[4]
+        text = last_time_visited[3]
 
         # Add the links indicators to the text to be returned.
         links_positions = Database().get_page_links(page_url=self.url)

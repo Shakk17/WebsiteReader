@@ -164,7 +164,7 @@ def render_page(url):
     start = time()
     try:
         print("Rendering page with Selenium...")
-        driver = webdriver.Chrome(options=chrome_options)
+        driver = webdriver.Chrome(executable_path="chromedriver.exe", options=chrome_options)
         driver.get(url)
     except Exception:
         print(f"Can't access this website: {url}")
@@ -181,12 +181,12 @@ def get_info_from_api(url):
     """
     This method returns info regarding a certain web page by using Aylien APIs.
     :param url: A string containing the URL of the web page.
-    :return: A tuple (topic, summary, language) containing info about the web page.
+    :return: A tuple (topic, language) containing info about the web page.
     """
     # This is a combined call to the Aylien APIs.
     combined = client.Combined({
         'url': url,
-        'endpoint': ["classify", "summarize", "language"]
+        'endpoint': ["classify", "language"]
     })
 
     language = combined.get("results")[0].get("result").get("lang")
@@ -198,9 +198,7 @@ def get_info_from_api(url):
     else:
         topic = "unknown"
 
-    summary = combined.get("results")[2].get("result").get("sentences")[0]
-
-    return topic, summary, language
+    return topic, language
 
 
 def get_clean_text(url):

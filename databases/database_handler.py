@@ -27,7 +27,6 @@ sql_create_crawler_links_table = """CREATE TABLE IF NOT EXISTS crawler_links (
 sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                     url text PRIMARY KEY,
                                     topic text,
-                                    summary text,
                                     language text,
                                     clean_text text,
                                     last_visit text NOT NULL
@@ -136,18 +135,17 @@ class Database:
 
     # PAGES TABLE
 
-    def insert_page(self, url, topic, summary, language):
+    def insert_page(self, url, topic, language):
         """
         This method inserts a web page in the pages table of the database.
         :param url: A string representing the URL of the web page.
         :param topic: A string representing the topic of the web page.
-        :param summary: A string representing the summary of the web page.
         :param language: A string representing the language of the web page.
         """
-        sql = """INSERT INTO pages (url, topic, summary, language, last_visit) 
-                    VALUES (?, ?, ?, ?, current_timestamp)"""
+        sql = """INSERT INTO pages (url, topic, language, last_visit) 
+                    VALUES (?, ?, ?, current_timestamp)"""
         cur = self.conn.cursor()
-        cur.execute(sql, (url, topic, summary, language))
+        cur.execute(sql, (url, topic, language))
 
     def update_page(self, url, clean_text):
         """
