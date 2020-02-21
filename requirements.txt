@@ -31,7 +31,7 @@ PyDispatcher==2.0.5
 PyHamcrest==2.0.0
 pyOpenSSL==19.1.0
 pysemantics==1.0.3
-pywin32==225
+pywin32==227
 queuelib==1.5.0
 requests==2.23.0
 requests-file==1.4.3
