@@ -43,17 +43,18 @@ class PageVisitor:
 
         # Check in the database if the web page has already been visited.
         result = Database().last_time_visited(url=self.url)
-        action_recent = is_action_recent(timestamp=result[5], days=1)
-        if result is None or not action_recent:
+
+        # If there is already info about the web page, but it's not recent, delete it.
+        if result is not None and not is_action_recent(timestamp=result[5], days=1):
+            Database().delete_page(url=self.url)
+            Database().delete_page_links(url=self.url)
+
+        if result is None:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
             topic, summary, language_code = get_info_from_api(url=self.url)
             language = get_language_string(language_code)
-
-            if not action_recent:
-                Database().delete_page(url=self.url)
-                Database().delete_page_links(url=self.url)
 
             # Save the info in the DB.
             Database().insert_page(url=self.url, topic=topic, summary=summary, language=language)
