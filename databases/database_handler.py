@@ -131,9 +131,8 @@ class Database:
         cur.execute(sql, (domain,))
         rows = cur.fetchone()
         # Returns True is it has been crawled, False otherwise.
-        if len(rows) == 0:
-            return None
-        return rows[1]
+        if rows is not None:
+            return rows[1]
 
     # PAGES TABLE
 
@@ -159,6 +158,16 @@ class Database:
         sql = "UPDATE pages SET clean_text=? WHERE url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (clean_text, url))
+
+    def delete_page(self, url):
+        """
+        This method deletes a page from the pages table of the database.
+        :param url: A string containing the URl of the web page to delete.
+        :return: None
+        """
+        sql = "DELETE FROM pages WHERE url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url, ))
 
     def last_time_visited(self, url):
         """
@@ -210,6 +219,16 @@ class Database:
         cur.execute(sql, (page_url,))
         result = cur.fetchall()
         return result
+
+    def delete_page_links(self, url):
+        """
+        This method deletes all the page links from the page_links table of the database.
+        :param url: A string containing the URl of the web page to delete.
+        :return: None
+        """
+        sql = "DELETE FROM page_links WHERE page_url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url,))
 
     # CRAWLER LINKS TABLE
 

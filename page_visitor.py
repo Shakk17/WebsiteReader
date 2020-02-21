@@ -43,12 +43,17 @@ class PageVisitor:
 
         # Check in the database if the web page has already been visited.
         result = Database().last_time_visited(url=self.url)
-        if result is None or not is_action_recent(timestamp=result[5], days=1):
+        action_recent = is_action_recent(timestamp=result[5], days=1)
+        if result is None or not action_recent:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
             topic, summary, language_code = get_info_from_api(url=self.url)
             language = get_language_string(language_code)
+
+            if not action_recent:
+                Database().delete_page(url=self.url)
+                Database().delete_page_links(url=self.url)
 
             # Save the info in the DB.
             Database().insert_page(url=self.url, topic=topic, summary=summary, language=language)
@@ -85,7 +90,7 @@ class PageVisitor:
             raise FileNotFoundError
 
         # Get the text from the database.
-        text = last_time_visited[0]
+        text = last_time_visited[4]
 
         # Add the links indicators to the text to be returned.
         links_positions = Database().get_page_links(page_url=self.url)
