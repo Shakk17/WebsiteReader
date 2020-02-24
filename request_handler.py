@@ -1,13 +1,14 @@
 import queue
 import threading
 import time
+import requests
 
 from colorama import Fore, Style
 
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, get_menu_link, get_domain, get_url_from_google, fix_url, is_action_recent
+from helper import get_menu, get_menu_link, get_domain, get_urls_from_google, fix_url, is_action_recent
 
 TIMEOUT = 4
 
@@ -102,21 +103,21 @@ class RequestHandler:
         contexts = request.get("queryResult").get("outputContexts")
         cursor_context = next((x for x in contexts if "cursor" in x.get("name")), None)
 
-        # URL is either in parameters (VisitPage) or in the context.
-        try:
-            url = request.get("queryResult").get("parameters").get("url")
-            if url is None:
-                raise AttributeError
-        except AttributeError:
+        # Understand if the string passed is a URL or a query.
+
+        # URL is either in the parameters (VisitPage) or in the context.
+        if action == "VisitPage":
+            string = request.get("queryResult").get("parameters").get("string")
+            try:
+                # Fix the URL if it's not well-formed (missing schema).
+                url = fix_url(url=string)
+                # Try to visit the URL.
+                requests.get(url=string)
+            except requests.exceptions.RequestException:
+                # The string passed is actually a query, get the URL of the first result from Google Search.
+                url = get_urls_from_google(string)
+        else:
             url = cursor_context.get("parameters").get("url")
-
-        # Fix the URL if it's not well-formed (missing schema).
-        url = fix_url(url)
-
-        # If a query is passed to the server, get the URL of the first result from Google Search.
-        query = request.get("queryResult").get("parameters").get("query")
-        if query != '' and query is not None:
-            url = get_url_from_google(query)
 
         # If the action is GoBack, get the previous action from the database and execute it.
         if action == "GoBack":

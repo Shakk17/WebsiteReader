@@ -8,6 +8,7 @@ import urllib.parse
 import tldextract
 from aylienapiclient import textapi
 from bs4 import BeautifulSoup
+from googleapiclient.discovery import build
 from googlesearch import search
 
 from databases.database_handler import Database
@@ -43,19 +44,22 @@ def strip_html_tags(text):
     return regex.sub('', text)
 
 
-def get_url_from_google(query):
+def get_urls_from_google(query):
     """
-    This method makes a search on Google and returns the first result.
+    This method makes a search on Google and returns the first 5 results.
     :param query: A string containing the query to input into Google Search.
-    :return: A string containing the URL of the first result.
+    :return: A list containing tuples (title, URL, snippet) of the first 5 results.
     """
     start = time()
     # Perform Google Search.
-    result = search(query, tld='com', lang='en', num=1, start=0, pause=0.0)
-    # Return the first result obtained.
-    for res in result:
-        print("Time elapsed for Google Search: %.2f s" % (time() - start))
-        return res
+    api_key = "AIzaSyBxmCvHuuBmno25vybpLHEmVL1sOZusYa0"
+    cse_id = "001618926378962890992:ri89cvvqaiw"
+    query_service = build(serviceName="customsearch", version="v1", developerKey=api_key)
+    query_results = query_service.cse().list(q=query, cx=cse_id).execute().get("items")
+
+    results = [(result.get("title"), result.get("link"), result.get("snippet")) for result in query_results]
+
+    return results
 
 
 def get_domain(url):
@@ -202,10 +206,13 @@ def get_info_from_api(url):
     language = combined.get("results")[0].get("result").get("lang")
 
     # The topic is returned only if it the level of confidence is over a certain threshold.
-    topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
-    if topic_confidence > 0.3:
-        topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
-    else:
+    try:
+        topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
+        if topic_confidence > 0.3:
+            topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
+        else:
+            topic = "unknown"
+    except IndexError:
         topic = "unknown"
 
     return topic, language
