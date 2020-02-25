@@ -26,9 +26,9 @@ prefs = {"profile.managed_default_content_settings.images": 2}
 chrome_options.add_experimental_option("prefs", prefs)
 
 # HEROKU
-"""chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")"""
+chrome_options.add_argument("--no-sandbox")
 
 
 def strip_html_tags(text):
@@ -176,9 +176,9 @@ def render_page(url):
     try:
         print("Rendering page with Selenium...")
         # HEROKU:
-        # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+        driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
         # LOCAL:
-        driver = webdriver.Chrome(options=chrome_options)
+        # driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
     except Exception:
         print(f"Can't access this website: {url}")
