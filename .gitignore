@@ -202,4 +202,4 @@ dmypy.json
 /vips_algorithm/chromedriver.exe
 /databases/database.db
 /.google-cookie
-/analyze_scraping.py
+analyze_scraping.py
