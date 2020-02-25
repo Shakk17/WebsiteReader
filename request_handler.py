@@ -117,7 +117,7 @@ class RequestHandler:
         # URL is either in the parameters (VisitPage) or in the context.
         url = ""
         query_results = None
-        if action == "SearchPage":
+        if action.startswith("SearchPage"):
             string = self.cursor.string
             try:
                 # Fix the URL if it's not well-formed (missing schema).
@@ -133,7 +133,7 @@ class RequestHandler:
         self.cursor.url = url
 
         # If the action is GoBack, get the previous action from the database and execute it.
-        if action == "GoBack":
+        if action.startswith("GoBack"):
             action, url = Database().get_previous_action("shakk")
 
         # Save the action performed by the user into the history table of the database.
@@ -142,27 +142,44 @@ class RequestHandler:
 
         text_response = "Action not recognized by the server."
 
-        if action == "SearchPage":
-            # If the parameter given by the user was a valid URL, visit the page.
-            if query_results is None:
-                text_response = self.visit_page()
-            # Otherwise, return one of the Google Search results.
-            else:
-                text_response = self.get_google_result(query_results=query_results)
-        elif action == "VisitPage":
+        if action.startswith("SearchPage"):
+            text_response = self.search_page(query_results=query_results, reset=(not action.endswith("next")))
+        elif action.startswith("VisitPage"):
             text_response = self.visit_page()
-        elif action == 'GetInfo':
+        elif action.startswith("GetInfo"):
             text_response = self.get_info()
-        elif action == 'GetMenu':
+        elif action.startswith("GetMenu"):
             text_response = self.get_menu()
-        elif action == 'ReadPage':
+        elif action.startswith("ReadPage"):
             text_response = self.read_page()
-        elif action == "OpenPageLink":
+        elif action.startswith("OpenPageLink"):
             text_response = self.open_page_link()
-        elif action == "OpenMenuLink":
+        elif action.startswith("OpenMenuLink"):
             text_response = self.open_menu_link()
 
         return self.build_response(text_response=text_response)
+
+    def search_page(self, query_results, reset):
+        """
+        This method:
+            - if the user has performed a search, it returns one of the results of the Google search;
+            - if the user has requested a specific URL, it returns info about the website reachable at that URL.
+        :param query_results: A list containing the results of the Google search.
+        :param reset: True if the counter of the results needs to be reset, False otherwise.
+        :return: A string containing info about one result of the Google search or info about a web page.
+        """
+        # Reset the counter if a new search is performed.
+        if reset:
+            self.cursor.search_result_number = 0
+
+        # If the parameter given by the user was a valid URL, visit the page.
+        if query_results is None:
+            text_response = self.visit_page()
+        # Otherwise, return one of the Google Search results.
+        else:
+            text_response = self.get_google_result(query_results=query_results)
+
+        return text_response
 
     def visit_page(self):
         """

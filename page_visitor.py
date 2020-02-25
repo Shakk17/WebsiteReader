@@ -90,6 +90,9 @@ class PageVisitor:
 
         # Get the text from the database.
         text = last_time_visited[3]
+        # Check that the web page has already been analyzed.
+        if text is None:
+            raise FileNotFoundError
 
         # Add the links indicators to the text to be returned.
         links_positions = Database().get_page_links(page_url=self.url)
