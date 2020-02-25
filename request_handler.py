@@ -18,21 +18,26 @@ class Cursor:
     An object that keeps track of the current state of the user.
     It is sent and received by the server (as a JSON) in requests and responses to the agent.
     """
-    def __init__(self, cursor_context, url):
+
+    def __init__(self, cursor_context):
+        self.url = "https://www.google.com"
         # Number that indicates the paragraph to read in the current article.
         self.idx_sentence = 0
         # Number that indicates the article to read in the current section.
         self.idx_menu = 0
-        # Link selected.
-        self.link = None
         # Sentence read in current web page.
         self.sentence_number = 0
+        # Number of GoogleSearch result to show.
+        self.search_result_number = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
             if not key.endswith("original"):
+                try:
+                    value = int(value)
+                except ValueError:
+                    pass
                 setattr(self, key, value)
-        self.url = url
 
     def __repr__(self):
         return (
@@ -41,8 +46,8 @@ class Cursor:
             f"\tURL: {self.url}\n"
             f"\tIdx sentence: {self.idx_sentence}\n"
             f"\tIdx menu: {self.idx_menu}\n"
-            f"\tLink: {self.link}\n"
             f"\tSentence number: {self.sentence_number}\n"
+            f"\tSearch result number: {self.search_result_number}\n"
             f"{Style.RESET_ALL}")
 
 
@@ -103,28 +108,33 @@ class RequestHandler:
         contexts = request.get("queryResult").get("outputContexts")
         cursor_context = next((x for x in contexts if "cursor" in x.get("name")), None)
 
+        # Create a Cursor object containing details about the web page.
+        self.cursor = Cursor(cursor_context)
+        print(self.cursor)
+
         # Understand if the string passed is a URL or a query.
 
         # URL is either in the parameters (VisitPage) or in the context.
-        if action == "VisitPage":
-            string = request.get("queryResult").get("parameters").get("string")
+        url = ""
+        query_results = None
+        if action == "SearchPage":
+            string = self.cursor.string
             try:
                 # Fix the URL if it's not well-formed (missing schema).
                 url = fix_url(url=string)
                 # Try to visit the URL.
                 requests.get(url=string)
             except requests.exceptions.RequestException:
-                # The string passed is actually a query, get the URL of the first result from Google Search.
-                url = get_urls_from_google(string)
+                # The string passed is actually a query, get the first 5 results from Google Search.
+                query_results = get_urls_from_google(string)
         else:
-            url = cursor_context.get("parameters").get("url")
+            url = self.cursor.url
+
+        self.cursor.url = url
 
         # If the action is GoBack, get the previous action from the database and execute it.
         if action == "GoBack":
             action, url = Database().get_previous_action("shakk")
-
-        # Create a Cursor object containing details about the web page.
-        self.cursor = Cursor(cursor_context, url)
 
         # Save the action performed by the user into the history table of the database.
         Database().insert_action(action, url)
@@ -132,18 +142,25 @@ class RequestHandler:
 
         text_response = "Action not recognized by the server."
 
-        if action == "VisitPage":
+        if action == "SearchPage":
+            # If the parameter given by the user was a valid URL, visit the page.
+            if query_results is None:
+                text_response = self.visit_page()
+            # Otherwise, return one of the Google Search results.
+            else:
+                text_response = self.get_google_result(query_results=query_results)
+        elif action == "VisitPage":
             text_response = self.visit_page()
         elif action == 'GetInfo':
-            text_response =  self.get_info()
+            text_response = self.get_info()
         elif action == 'GetMenu':
             text_response = self.get_menu()
         elif action == 'ReadPage':
             text_response = self.read_page()
         elif action == "OpenPageLink":
-            text_response = self.open_page_link(link_num=int(cursor_context.get("parameters").get("number")))
+            text_response = self.open_page_link()
         elif action == "OpenMenuLink":
-            text_response = self.open_menu_link(link_num=int(cursor_context.get("parameters").get("number")))
+            text_response = self.open_menu_link()
 
         return self.build_response(text_response=text_response)
 
@@ -191,6 +208,18 @@ class RequestHandler:
             thread.start()
 
         # Update the url in context and return info about the web page to the user.
+        return text_response
+
+    def get_google_result(self, query_results):
+        result_index = int(self.cursor.search_result_number)
+        result = query_results[result_index]
+        self.cursor.url = result[1]
+        text_response = f"""Result number {self.cursor.search_result_number + 1}.
+                            Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
+        if self.cursor.search_result_number < 4:
+            self.cursor.search_result_number += 1
+        else:
+            self.cursor.search_result_number = 0
         return text_response
 
     def get_menu(self):
@@ -263,14 +292,13 @@ class RequestHandler:
 
         return text_response
 
-    def open_page_link(self, link_num):
+    def open_page_link(self):
         """
         This method visits the link chosen from the page by the user.
-        :param link_num: The position in the page of the link to be visited.
         :return: A text response containing info about the new web page.
         """
         # Get URL to visit from the DB.
-        link_url = Database().get_page_link(page_url=self.cursor.url, link_num=link_num)
+        link_url = Database().get_page_link(page_url=self.cursor.url, link_num=self.cursor.number)
 
         # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
@@ -279,15 +307,14 @@ class RequestHandler:
         else:
             return "Wrong input."
 
-    def open_menu_link(self, link_num):
+    def open_menu_link(self):
         """
         This method visits the link chosen from the menu by the user.
-        :param link_num: The position in the menu of the link to be visited.
         :return: A text response containing info about the new web page.
         """
         try:
             # Get URL to visit from the DB.
-            new_url = get_menu_link(url=self.cursor.url, number=link_num)
+            new_url = get_menu_link(url=self.cursor.url, number=self.cursor.number)
             # Update cursor and visit the page.
             self.cursor.url = new_url
             return self.visit_page()
