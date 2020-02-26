@@ -38,8 +38,13 @@ def strip_html_tags(text):
     text = html.unescape(str(text))
     # Remove all the html tags.
     regex = re.compile(r'<[^>]+>')
-    return regex.sub('', text)
-
+    text = regex.sub('', text)
+    # Remove \n and \t.
+    text = text.replace("\\n", " ")
+    text = text.replace("\\t", " ")
+    # Remove spaces at the beginning and at the end of the string.
+    text = text.strip()
+    return text
 
 def get_urls_from_google(query):
     """
