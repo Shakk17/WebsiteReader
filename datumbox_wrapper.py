@@ -216,9 +216,6 @@ class DatumBox:
     base_url = "http://api.datumbox.com:80/1.0/"
     api_key = "3670edf305888ab66dc6d9756d0f8498"
 
-    def __init__(self, api_key):
-        self.api_key = api_key
-
     def topic_classification(self, text):
         """Possible topics are "Arts", "Business & Economy", "Computers & Technology", "Health", "Home & Domestic
         Life", "News", "Recreation & Activities", "Reference & Education", "Science", "Shopping","Society" or "Sports

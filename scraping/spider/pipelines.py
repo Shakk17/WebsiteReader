@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from scraping.spider.models import db_connect, create_table, Link
 
-from helper import get_domain
+from helper import strip_html_tags
 
 
 # -*- coding: utf-8 -*-
@@ -31,9 +31,15 @@ class SpiderPipeline(object):
         link = Link()
         link.page_url = item["page_url"]
         link.link_url = item["link_url"]
-        link.link_text = item["link_text"]
+        link.link_text = strip_html_tags(item["link_text"])
         link.x_position = item["x_position"]
         link.y_position = item["y_position"]
+
+        # Do not save the link in the DB if these conditions apply.
+        if link.link_text == "" or link.y_position > 1080 or link.y_position == 0:
+            session.close()
+            return item
+
 
         ''' check whether the author exists
         exist_author = session.query(Author).filter_by(name=author.name).first()
