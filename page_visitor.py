@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
 from datumbox_wrapper import get_language_string
-from helper import get_main_container, get_clean_text, is_action_recent, get_links_positions, get_info_from_api
+from helper import get_main_container, get_clean_text, is_action_recent, \
+    get_links_positions, get_info_from_api, extract_search_forms
 
 
 class PageVisitor:
@@ -64,11 +65,17 @@ class PageVisitor:
         else:
             topic, language = result[1], result[2]
 
+        search_form = extract_search_forms(self.html_code)
+
         text_response = (
             f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
             f"The topic of this web page is {topic}. \n"
             f"The language of this web page is {language}. \n"
         )
+
+        if len(search_form) > 0:
+            text_response += f"There are search forms in this page called {search_form}"
+
         print(f"TOPIC: {topic}")
         print(f"LANGUAGE: {language}")
 
@@ -150,3 +157,4 @@ class PageVisitor:
         # Save the links in the DB.
         for i, link in enumerate(links, start=1):
             Database().insert_page_link(page_url=self.url, link_num=i, link=link)
+

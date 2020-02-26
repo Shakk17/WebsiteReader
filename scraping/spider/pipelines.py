@@ -36,7 +36,7 @@ class SpiderPipeline(object):
         link.y_position = item["y_position"]
 
         # Do not save the link in the DB if these conditions apply.
-        if link.link_text == "" or link.y_position > 1080 or link.y_position == 0:
+        if link.link_text == "" or int(link.y_position) > 1080 or int(link.y_position) == 0:
             session.close()
             return item
 

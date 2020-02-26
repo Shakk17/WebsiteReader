@@ -1,3 +1,4 @@
+googleapiclient
 attrs==19.3.0
 Automat==20.2.0
 aylien-apiclient==0.7.0

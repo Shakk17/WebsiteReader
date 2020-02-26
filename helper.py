@@ -1,20 +1,17 @@
 import html
-import os
 import re
+import urllib.parse
 from datetime import datetime
 from time import time
-import urllib.parse
 
 import tldextract
 from aylienapiclient import textapi
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
-from googlesearch import search
-
-from databases.database_handler import Database
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+from databases.database_handler import Database
 
 client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
@@ -300,3 +297,16 @@ def get_links_positions(container, text, url):
     # Add offset to positions in order to point at the end of the link text.
     links = [(link[0] + len(link[1]), link[1], link[2]) for link in links]
     return links
+
+
+def extract_search_forms(html_code):
+    """
+    This method searches in the web page if there is an input form used to search something in the page.
+    :return: The text of the input form, if present. None otherwise.
+    """
+    webpage = BeautifulSoup(html_code, "lxml")
+    search_input_forms = webpage.find_all(name='input', attrs={"type": "search"})
+    text_input_forms = webpage.find_all(name='input', attrs={"type": "text"})
+    input_forms = search_input_forms + text_input_forms
+    input_forms_text = [x.get("placeholder") for x in input_forms]
+    return input_forms_text
