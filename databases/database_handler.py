@@ -253,12 +253,19 @@ class Database:
         :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
         """
         cur = self.conn.cursor()
-        cur.execute("SELECT COUNT(*), link_text, link_url, "
-                    "       round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y "
-                    "FROM crawler_links "
-                    "WHERE page_url LIKE ? AND y_position < 1000 "
-                    "GROUP BY link_url "
-                    "ORDER BY COUNT(*) DESC ", (f"%{domain}%",))
+        sql = """
+        SELECT max(times) AS max_times, link_text, link_url, avg_x, avg_y
+        FROM (
+            SELECT COUNT(*) AS times, link_text, link_url, 
+                round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y 
+            FROM crawler_links
+            WHERE page_url LIKE ?
+            GROUP BY link_text, link_url
+            ORDER BY times DESC
+        )
+        GROUP BY link_url
+        ORDER BY max_times DESC"""
+        cur.execute(sql, (f"%{domain}%",))
 
         rows = cur.fetchall()
         return rows
