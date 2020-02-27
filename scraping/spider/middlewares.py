@@ -128,6 +128,10 @@ class SpiderDownloaderMiddleware(object):
         links = driver.find_elements(By.XPATH, '//a[@href]')
 
         for link in links:
+            # If the link links to the same page, discard it.
+            if link.get_attribute("href").replace("#", "") == request.url:
+                continue
+            # Add the link to the string of bytes to be returned.
             try:
                 string_links += link.get_attribute('href') + "*" + link.get_attribute('innerHTML') + "*" \
                                 + str(link.location.get("x")) + "*" \

@@ -40,8 +40,8 @@ def strip_html_tags(text):
     regex = re.compile(r'<[^>]+>')
     text = regex.sub('', text)
     # Remove \n and \t.
-    text = text.replace("\\n", " ")
-    text = text.replace("\\t", " ")
+    text = text.replace("\n", " ")
+    text = text.replace("\t", " ")
     # Remove spaces at the beginning and at the end of the string.
     text = text.strip()
     return text
