@@ -1,5 +1,6 @@
 import html
 import re
+import threading
 import urllib.parse
 from datetime import datetime
 from time import time
@@ -45,6 +46,7 @@ def strip_html_tags(text):
     # Remove spaces at the beginning and at the end of the string.
     text = text.strip()
     return text
+
 
 def get_urls_from_google(query):
     """
@@ -315,3 +317,4 @@ def extract_search_forms(html_code):
     input_forms = search_input_forms + text_input_forms
     input_forms_text = [x.get("placeholder") for x in input_forms]
     return input_forms_text
+

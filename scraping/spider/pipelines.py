@@ -40,24 +40,6 @@ class SpiderPipeline(object):
             session.close()
             return item
 
-
-        ''' check whether the author exists
-        exist_author = session.query(Author).filter_by(name=author.name).first()
-        if exist_author is not None:  # the current author exists
-            quote.author = exist_author
-        else:
-            quote.author = author '''
-
-        '''# check whether the current quote has tags or not
-        if "tags" in item:
-            for tag_name in item["tags"]:
-                tag = Tag(name=tag_name)
-                # check whether the current tag already exists in the database
-                exist_tag = session.query(Tag).filter_by(name=tag.name).first()
-                if exist_tag is not None:  # the current tag exists
-                    tag = exist_tag
-                quote.tags.append(tag)'''
-
         try:
             session.add(link)
             session.commit()

@@ -10,15 +10,19 @@ from scrapy import signals
 from scrapy.http import HtmlResponse
 from seleniumwire import webdriver
 
+from helper import get_domain
+
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import StaleElementReferenceException
 
 from colorama import Fore, Style
 
+from scraping.spider.items import UrlItem
+
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
-options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
+options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36")
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
@@ -113,8 +117,7 @@ class SpiderDownloaderMiddleware(object):
         # - return None: continue processing this request
         # - or return a Response object
         # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
+        # - or raise IgnoreRequest: process_exception() methods of installed downloader middleware will be called
         driver.get(request.url)
         print(f"{Fore.MAGENTA}Scraping {request.url}{Style.RESET_ALL}")
 
@@ -128,11 +131,12 @@ class SpiderDownloaderMiddleware(object):
         links = driver.find_elements(By.XPATH, '//a[@href]')
 
         for link in links:
-            # If the link links to the same page, discard it.
-            if link.get_attribute("href").replace("#", "") == request.url:
-                continue
-            # Add the link to the string of bytes to be returned.
             try:
+                # If the link links to the same page, discard it.
+                hash_position = link.get_attribute("href").find("#")
+                if link.get_attribute("href")[:hash_position] == request.url:
+                    continue
+                # Add the link to the string of bytes to be returned.
                 string_links += link.get_attribute('href') + "*" + link.get_attribute('innerHTML') + "*" \
                                 + str(link.location.get("x")) + "*" \
                                 + str(link.location.get("y")) + "$"
@@ -147,10 +151,26 @@ class SpiderDownloaderMiddleware(object):
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
 
-        # Must either;
-        # - return a Response object
-        # - return a Request object
-        # - or raise IgnoreRequest
+        # Decode the bytes string contained in the response body.
+        links = response.body.decode(encoding='UTF-8').split("$")
+        # Unpack the string in order to read the fields.
+        # FORMAT: href * text * x_position * y_position $
+        links = [link.split("*") for link in links]
+        links = list(filter(lambda x: len(x) == 4, links))
+
+        # Analyze each link found in the page.
+        for (i, link) in enumerate(links):
+            url_item = UrlItem()
+            url_item["link_url"] = link[0]
+            url_item["link_text"] = link[1]
+            url_item["x_position"] = link[2]
+            url_item["y_position"] = link[3]
+            url_item["page_url"] = response.url
+            # We save the link in the DB only if it belongs to the domain.
+            if get_domain(response.url) in link[0]:
+                # Call pipeline.
+                pipeline = spider.crawler.engine.scraper.itemproc
+                pipeline.process_item(url_item, self)
         return response
 
     def process_exception(self, request, exception, spider):

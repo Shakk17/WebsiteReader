@@ -10,7 +10,7 @@ from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
 from helper import get_menu, get_menu_link, get_domain, get_urls_from_google, fix_url, is_action_recent
 
-TIMEOUT = 4
+TIMEOUT = 3
 
 
 class Cursor:
