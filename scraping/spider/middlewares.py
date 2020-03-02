@@ -15,6 +15,8 @@ from seleniumwire import webdriver
 from helper import get_domain
 from scraping.spider.items import UrlItem
 
+from bs4 import BeautifulSoup
+
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=500x1024')
@@ -125,13 +127,17 @@ class SpiderDownloaderMiddleware(object):
 
         # Extract all links from the page.
         links = driver.find_elements(By.XPATH, '//a[@href]')
+        links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
+        links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 
-        for link in links:
+        for i, link in enumerate(links):
             try:
                 href = link.get_attribute("href")
                 text = link.get_attribute("innerHTML")
                 x_position = str(link.location.get('x'))
                 y_position = str(link.location.get('y'))
+                # True if the element is contained in a list container.
+                in_list = "li" in [parent.name for parent in links_bs4[i].parents]
 
                 # If the link links to the same page, discard it.
                 hash_position = link.get_attribute("href").find("#")
@@ -139,7 +145,7 @@ class SpiderDownloaderMiddleware(object):
                     continue
 
                 # Add the link to the string of bytes to be returned.
-                string_links += href + "*" + text + "*" + x_position + "*" + y_position + "$"
+                string_links += href + "*" + text + "*" + x_position + "*" + y_position + "*" + str(int(in_list)) + "$"
             except StaleElementReferenceException:
                 continue
 
@@ -156,7 +162,7 @@ class SpiderDownloaderMiddleware(object):
         # Unpack the string in order to read the fields.
         # FORMAT: href * text * x_position * y_position $
         links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 4, links))
+        links = list(filter(lambda x: len(x) == 5, links))
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
@@ -166,6 +172,7 @@ class SpiderDownloaderMiddleware(object):
             url_item["x_position"] = link[2]
             url_item["y_position"] = link[3]
             url_item["page_url"] = response.url
+            url_item["in_list"] = link[4]
             # We save the link in the DB only if it belongs to the domain.
             if get_domain(response.url) in link[0]:
                 # Call pipeline.

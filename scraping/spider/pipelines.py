@@ -34,6 +34,7 @@ class SpiderPipeline(object):
         link.link_text = strip_html_tags(item["link_text"])
         link.x_position = item["x_position"]
         link.y_position = item["y_position"]
+        link.in_list = item["in_list"]
 
         # Do not save the link in the DB if these conditions apply.
         if link.link_text == "" or int(link.y_position) == 0:

@@ -34,9 +34,9 @@ class LinksSpider(scrapy.Spider):
         # Decode the bytes string contained in the response body.
         links = response.body.decode(encoding='UTF-8').split("$")
         # Unpack the string in order to read the fields.
-        # FORMAT: href * text * x_position * y_position $
+        # FORMAT: href * text * x_position * y_position * in_list $
         links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 4, links))
+        links = list(filter(lambda x: len(x) == 5, links))
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):

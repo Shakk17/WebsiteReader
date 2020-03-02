@@ -346,11 +346,24 @@ class RequestHandler:
             return "Wrong input."
 
     def read_everything(self):
-        page_links = Database().get_content_links(url=self.cursor.url)
-        if page_links is None:
-            text_response = "Wait for it."
+        links = Database().get_crawling_links(url=self.cursor.url)
+        texts = []
+        if len(links) > 0:
+            # Keep only links with 4 words or more in text.
+            links = list(filter(lambda x: len(helper.extract_words(x[0])) > 3, links))
+            # Keep only links not contained in lists.
+            links = list(filter(lambda x: x[2] == 0, links))
+            # Order link depending on their y_position.
+            links.sort(key=lambda x: x[1])
+            # Remove duplicates.
+            new_links = []
+            for link in links:
+                if link[0] not in texts:
+                    new_links.append(link)
+                    texts.append(link[0])
+            text_response = links[0][0]
         else:
-            text_response = page_links[0][0]
+            text_response = "Wait for the page to be analyzed."
         return text_response
 
     def build_response(self, text_response):

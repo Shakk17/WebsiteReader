@@ -21,6 +21,7 @@ sql_create_crawler_links_table = """CREATE TABLE IF NOT EXISTS crawler_links (
                                     link_text text NOT NULL,
                                     x_position integer NOT NULL,
                                     y_position integer NOT NULL,
+                                    in_list integer NOT NULL,
                                     FOREIGN KEY (page_url) REFERENCES websites (domain)
                                 );"""
 
@@ -246,14 +247,14 @@ class Database:
         cur = self.conn.cursor()
         cur.execute(sql, (domain,))
 
-    def insert_crawler_link(self, page_url, href, text, x_position, y_position):
-        sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position)
-              VALUES (?, ?, ?, ?, ?)"""
+    def insert_crawler_link(self, page_url, href, text, x_position, y_position, in_list):
+        sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position, in_list)
+              VALUES (?, ?, ?, ?, ?, ?)"""
         cur = self.conn.cursor()
-        cur.execute(sql, (page_url, href, text, x_position, y_position))
+        cur.execute(sql, (page_url, href, text, x_position, y_position, in_list))
 
     def get_crawling_links(self, url):
-        sql = "SELECT link_text FROM crawler_links WHERE page_url LIKE ?"
+        sql = "SELECT link_text, y_position, in_list FROM crawler_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (url, ))
         rows = cur.fetchall()

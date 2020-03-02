@@ -18,18 +18,20 @@ from databases.database_handler import Database
 
 client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
-chrome_options = Options()
-chrome_options.add_argument("--headless")
+options = Options()
+options.add_argument("--headless")
+options.add_argument('window-size=500x1024')
+
 
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
-chrome_options.add_experimental_option("prefs", prefs)
-driver = webdriver.Chrome(options=chrome_options)
+options.add_experimental_option("prefs", prefs)
+driver = webdriver.Chrome(options=options)
 # HEROKU
-"""chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)"""
+"""options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--no-sandbox")
+driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
 
 
 def strip_html_tags(text):
@@ -322,12 +324,18 @@ def crawl_single_page(url):
     print(f"Crawling single page [{url}] with Selenium...")
     driver.get(url)
     links = driver.find_elements(By.XPATH, '//a[@href]')
-    for link in links:
+    links_bs4 = BeautifulSoup(driver.page_source, "lxml").find_all("a")
+    links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
+
+    for i, link in enumerate(links):
         try:
             href = link.get_attribute("href")
             text = strip_html_tags(link.get_attribute("innerHTML"))
             x_position = str(link.location.get('x'))
             y_position = str(link.location.get('y'))
+            # True if the element is contained in a list container.
+            parents = [parent.name for parent in links_bs4[i].parents]
+            in_list = int("li" in parents)
 
             # If the link links to the same page, discard it.
             hash_position = href.find("#")
@@ -336,6 +344,13 @@ def crawl_single_page(url):
         except StaleElementReferenceException:
             continue
         # Save link in database.
-        Database().insert_crawler_link(page_url=url, href=href, text=text, x_position=x_position, y_position=y_position)
+        Database().insert_crawler_link(
+            page_url=url, href=href, text=text, x_position=x_position, y_position=y_position, in_list=in_list)
     print("Crawling of single page terminated.")
     return
+
+
+def extract_words(string):
+    regex = r'\b\w+\b'
+    words = re.findall(regex, string)
+    return words
