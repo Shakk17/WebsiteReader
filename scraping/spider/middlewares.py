@@ -4,29 +4,25 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-import os
 
+from colorama import Fore, Style
 from scrapy import signals
 from scrapy.http import HtmlResponse
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
 from helper import get_domain
-
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import StaleElementReferenceException
-
-from colorama import Fore, Style
-
 from scraping.spider.items import UrlItem
 
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=1920x1080')
-options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36")
+options.add_argument(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36")
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
-
 
 # HEROKU
 """options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -132,14 +128,18 @@ class SpiderDownloaderMiddleware(object):
 
         for link in links:
             try:
+                href = link.get_attribute("href")
+                text = link.get_attribute("innerHTML")
+                x_position = str(link.location.get('x'))
+                y_position = str(link.location.get('y'))
+
                 # If the link links to the same page, discard it.
                 hash_position = link.get_attribute("href").find("#")
                 if link.get_attribute("href")[:hash_position] == request.url:
                     continue
+
                 # Add the link to the string of bytes to be returned.
-                string_links += link.get_attribute('href') + "*" + link.get_attribute('innerHTML') + "*" \
-                                + str(link.location.get("x")) + "*" \
-                                + str(link.location.get("y")) + "$"
+                string_links += href + "*" + text + "*" + x_position + "*" + y_position + "$"
             except StaleElementReferenceException:
                 continue
 

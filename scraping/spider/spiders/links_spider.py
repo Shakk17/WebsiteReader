@@ -7,6 +7,8 @@ from scrapy import signals
 
 class LinksSpider(scrapy.Spider):
     name = "links"
+    MAX_COUNT = 30
+    visited_links = []
 
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
@@ -27,7 +29,6 @@ class LinksSpider(scrapy.Spider):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.visited_links = []
 
     def parse(self, response):
         # Decode the bytes string contained in the response body.
@@ -39,6 +40,9 @@ class LinksSpider(scrapy.Spider):
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
+            # Stop crawling after a while.
+            if len(self.visited_links) > self.MAX_COUNT:
+                return
             # If the link has not been visited yet, visit it.
             if link[0] not in self.visited_links and self.allowed_domains[0] in link[0]:
                 self.visited_links.append(link[0])
