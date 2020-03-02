@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 from databases.database_handler import Database
-from helper import get_domain
+from helper import get_domain, fix_url
 
 
 class Crawler:
@@ -19,8 +19,9 @@ class Crawler:
         # Open a shell in the scrapy directory and start crawling in a new subprocess.
         path = str(Path(os.getcwd()))
         shell_path = path + "/scraping/"
-        command = f"scrapy crawl links -s url={self.start_url}"
-        print(f"Started scraping website {self.start_url}")
+        homepage_url = fix_url(f"www.{domain}")
+        command = f"scrapy crawl links -s url={homepage_url}"
+        print(f"Started scraping domain {homepage_url}")
         subprocess.call(command, cwd=shell_path, shell=True)
 
 

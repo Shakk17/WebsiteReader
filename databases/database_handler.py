@@ -32,7 +32,7 @@ sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                     last_visit text NOT NULL
                                 );"""
 
-sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
+sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS text_links (
                                     page_url text NOT NULL,
                                     link_num integer NOT NULL,
                                     position integer NOT NULL,
@@ -179,7 +179,7 @@ class Database:
         result = cur.fetchone()
         return result
 
-    # PAGE LINKS TABLE
+    # TEXT LINKS TABLE
 
     def insert_page_link(self, page_url, link_num, link):
         """
@@ -189,7 +189,7 @@ class Database:
         :param link: A tuple (position, link_text, link_url) containing info about the link.
         :return: None.
         """
-        sql = "INSERT INTO page_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
+        sql = "INSERT INTO text_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
 
@@ -200,7 +200,7 @@ class Database:
         :param link_num: A number representing the index of the link to get between all the other links of the text.
         :return: A tuple (link_url) containing the URL of the link requested or None.
         """
-        sql = "SELECT link_url FROM page_links WHERE page_url LIKE ? AND link_num = ?"
+        sql = "SELECT link_url FROM text_links WHERE page_url LIKE ? AND link_num = ?"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, link_num))
         result = cur.fetchone()
@@ -212,7 +212,7 @@ class Database:
         :param page_url: A string containing the URL of the web page.
         :return: An array containing tuples (position, link_text) with all the info about the links of the web page.
         """
-        sql = "SELECT position, link_text FROM page_links WHERE page_url LIKE ?"
+        sql = "SELECT position, link_text FROM text_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (page_url,))
         result = cur.fetchall()
@@ -224,7 +224,7 @@ class Database:
         :param url: A string containing the URl of the web page to delete.
         :return: None
         """
-        sql = "DELETE FROM page_links WHERE page_url LIKE ?"
+        sql = "DELETE FROM text_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (url,))
 
@@ -246,6 +246,19 @@ class Database:
         cur = self.conn.cursor()
         cur.execute(sql, (domain,))
 
+    def insert_crawler_link(self, page_url, href, text, x_position, y_position):
+        sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position)
+              VALUES (?, ?, ?, ?, ?)"""
+        cur = self.conn.cursor()
+        cur.execute(sql, (page_url, href, text, x_position, y_position))
+
+    def get_crawling_links(self, url):
+        sql = "SELECT link_text FROM crawler_links WHERE page_url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (url, ))
+        rows = cur.fetchall()
+        return rows
+
     def analyze_scraping(self, domain):
         """
         This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
@@ -259,7 +272,7 @@ class Database:
             SELECT COUNT(*) AS times, link_text, link_url, 
                 round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y 
             FROM crawler_links
-            WHERE page_url LIKE ?
+            WHERE page_url LIKE ? AND y_position < 1080
             GROUP BY link_text, link_url
             ORDER BY times DESC
         )

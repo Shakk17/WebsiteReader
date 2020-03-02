@@ -10,7 +10,9 @@ from aylienapiclient import textapi
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from selenium import webdriver
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 from databases.database_handler import Database
 
@@ -22,11 +24,12 @@ chrome_options.add_argument("--headless")
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 chrome_options.add_experimental_option("prefs", prefs)
-
+driver = webdriver.Chrome(options=chrome_options)
 # HEROKU
 """chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 chrome_options.add_argument("--disable-dev-shm-usage")
-chrome_options.add_argument("--no-sandbox")"""
+chrome_options.add_argument("--no-sandbox")
+driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)"""
 
 
 def strip_html_tags(text):
@@ -179,10 +182,6 @@ def render_page(url):
     start = time()
     try:
         print("Rendering page with Selenium...")
-        # HEROKU:
-        # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
-        # LOCAL:
-        driver = webdriver.Chrome(options=chrome_options)
         driver.get(url)
     except Exception:
         print(f"Can't access this website: {url}")
@@ -190,7 +189,7 @@ def render_page(url):
 
     print(f"Selenium request elapsed time: {(time() - start):.2f} s")
 
-    html_code = driver.find_element_by_tag_name('html').get_attribute('innerHTML')
+    html_code = driver.find_element_by_tag_name("html").get_attribute("innerHTML")
 
     return html_code
 
@@ -318,3 +317,25 @@ def extract_search_forms(html_code):
     input_forms_text = [x.get("placeholder") for x in input_forms]
     return input_forms_text
 
+
+def crawl_single_page(url):
+    print(f"Crawling single page [{url}] with Selenium...")
+    driver.get(url)
+    links = driver.find_elements(By.XPATH, '//a[@href]')
+    for link in links:
+        try:
+            href = link.get_attribute("href")
+            text = strip_html_tags(link.get_attribute("innerHTML"))
+            x_position = str(link.location.get('x'))
+            y_position = str(link.location.get('y'))
+
+            # If the link links to the same page, discard it.
+            hash_position = href.find("#")
+            if href[:hash_position] == url or text == "" or int(y_position) == 0:
+                continue
+        except StaleElementReferenceException:
+            continue
+        # Save link in database.
+        Database().insert_crawler_link(page_url=url, href=href, text=text, x_position=x_position, y_position=y_position)
+    print("Crawling of single page terminated.")
+    return

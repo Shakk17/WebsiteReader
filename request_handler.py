@@ -8,7 +8,7 @@ from colorama import Fore, Style
 from databases.database_handler import Database
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helper import get_menu, get_menu_link, get_domain, get_urls_from_google, fix_url, is_action_recent
+import helper
 
 TIMEOUT = 3
 
@@ -121,12 +121,12 @@ class RequestHandler:
             string = self.cursor.string
             try:
                 # Fix the URL if it's not well-formed (missing schema).
-                url = fix_url(url=string)
+                url = helper.fix_url(url=string)
                 # Try to visit the URL.
                 requests.get(url=string)
             except requests.exceptions.RequestException:
                 # The string passed is actually a query, get the first 5 results from Google Search.
-                query_results = get_urls_from_google(string)
+                query_results = helper.get_urls_from_google(string)
         else:
             url = self.cursor.url
 
@@ -156,6 +156,8 @@ class RequestHandler:
             text_response = self.open_page_link()
         elif action.startswith("OpenMenuLink"):
             text_response = self.open_menu_link()
+        elif action.startswith("ReadEverything"):
+            text_response = self.read_everything()
 
         return self.build_response(text_response=text_response)
 
@@ -202,7 +204,7 @@ class RequestHandler:
         self.cursor.idx_menu = 0
 
         # Checks if domain has been already crawled.
-        domain = get_domain(url=self.page_visitor.url)
+        domain = helper.get_domain(url=self.page_visitor.url)
         to_crawl = False
         last_time_crawled = Database().last_time_crawled(domain=domain)
 
@@ -212,17 +214,22 @@ class RequestHandler:
             to_crawl = True
 
         # If the domain hasn't been crawled in the last week, cancel the result of the previous crawl. Then crawl again.
-        elif not is_action_recent(timestamp=last_time_crawled, days=7):
+        elif not helper.is_action_recent(timestamp=last_time_crawled, days=7):
             print(f"The domain {domain} was last crawled too many days ago.")
             # Remove previous crawling results.
             Database().remove_old_website(domain)
             to_crawl = True
 
-        # If necessary, start crawling in the background.
+        # Crawl in the background.
         if to_crawl:
             crawler = Crawler(start_url=self.page_visitor.url)
-            thread = threading.Thread(target=crawler.run, args=())
-            thread.start()
+            threading.Thread(target=crawler.run, args=()).start()
+
+        # Check if the web page requested has already been visited by a crawling before.
+        crawling_links = Database().get_crawling_links(self.page_visitor.url)
+        if len(crawling_links) == 0:
+            print("This page has never been visited by a crawling before.")
+            threading.Thread(target=helper.crawl_single_page, args=(self.page_visitor.url, )).start()
 
         # Update the url in context and return info about the web page to the user.
         return text_response
@@ -232,7 +239,7 @@ class RequestHandler:
         result = query_results[result_index]
         self.cursor.url = result[1]
         text_response = f"""Result number {self.cursor.search_result_number + 1}.
-                            Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
+                            Do you want to visit the page: {result[0]} at {helper.get_domain(result[1])}?"""
         if self.cursor.search_result_number < 4:
             self.cursor.search_result_number += 1
         else:
@@ -250,7 +257,7 @@ class RequestHandler:
         num_choices = 10
 
         # Extract the menu from the crawl results.
-        menu = get_menu(self.cursor.url)
+        menu = helper.get_menu(self.cursor.url)
 
         # Get how many elements of the menu have already been shown.
         idx_start = int(self.cursor.idx_menu)
@@ -331,12 +338,20 @@ class RequestHandler:
         """
         try:
             # Get URL to visit from the DB.
-            new_url = get_menu_link(url=self.cursor.url, number=self.cursor.number)
+            new_url = helper.get_menu_link(url=self.cursor.url, number=self.cursor.number)
             # Update cursor and visit the page.
             self.cursor.url = new_url
             return self.visit_page()
         except ValueError:
             return "Wrong input."
+
+    def read_everything(self):
+        page_links = Database().get_content_links(url=self.cursor.url)
+        if page_links is None:
+            text_response = "Wait for it."
+        else:
+            text_response = page_links[0][0]
+        return text_response
 
     def build_response(self, text_response):
         """
