@@ -6,8 +6,7 @@ from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
 from datumbox_wrapper import get_language_string
-from helper import get_main_container, get_clean_text, is_action_recent, \
-    get_links_positions, get_info_from_api, extract_search_forms
+import helper
 
 
 class PageVisitor:
@@ -46,15 +45,15 @@ class PageVisitor:
         result = Database().last_time_visited(url=self.url)
 
         # If there is already info about the web page, but it's not recent, delete it.
-        if result is not None and not is_action_recent(timestamp=result[4], days=1):
+        if result is not None and not helper.is_action_recent(timestamp=result[4], days=1):
             Database().delete_page(url=self.url)
-            Database().delete_page_links(url=self.url)
+            Database().delete_text_links(url=self.url)
 
         if result is None:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
-            topic, language_code = get_info_from_api(url=self.url)
+            topic, language_code = helper.get_info_from_api(url=self.url)
             language = get_language_string(language_code)
 
             # Save the info in the DB.
@@ -65,7 +64,7 @@ class PageVisitor:
         else:
             topic, language = result[1], result[2]
 
-        search_form = extract_search_forms(self.html_code)
+        search_form = helper.extract_search_forms(self.html_code)
 
         text_response = (
             f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
@@ -102,7 +101,7 @@ class PageVisitor:
             raise FileNotFoundError
 
         # Add the links indicators to the text to be returned.
-        links_positions = Database().get_page_links(page_url=self.url)
+        links_positions = Database().get_text_links(page_url=self.url)
         for i, link in enumerate(links_positions, start=0):
             # For each link in the main text, get the exact position in the main string.
             start_link = links_positions[i][0]
@@ -142,19 +141,37 @@ class PageVisitor:
         After the extraction, text and links of the web page are saved in the database.
         """
         # Get the main text of the web page.
-        text = get_clean_text(url=self.url)
+        text = helper.get_clean_text(url=self.url)
 
         # Given the extracted main text, get its main HTML container.
-        container = get_main_container(url=self.url, text=text)
+        container = helper.get_main_container(url=self.url, text=text)
 
         # Retrieve all the links from the HTML element that contains the main text.
         # link = position, text, url
-        links = get_links_positions(container=container, text=text, url=self.url)
+        links = helper.get_links_positions(container=container, text=text, url=self.url)
 
         # Save the main text in the DB.
         Database().update_page(url=self.url, clean_text=text)
 
         # Save the links in the DB.
         for i, link in enumerate(links, start=1):
-            Database().insert_page_link(page_url=self.url, link_num=i, link=link)
+            Database().insert_text_link(page_url=self.url, link_num=i, link=link)
 
+    def read_links(self, url):
+        links = Database().get_crawler_links(url=url)
+        texts = []
+        if len(links) > 0:
+            # Keep only links with 4 words or more in text.
+            links = list(filter(lambda x: len(helper.extract_words(x[0])) > 3, links))
+            # Keep only links not contained in lists.
+            links = list(filter(lambda x: x[3] == 0, links))
+            # Order link depending on their y_position.
+            links.sort(key=lambda x: x[2])
+            # Remove duplicates.
+            new_links = []
+            for link in links:
+                if link[0] not in texts:
+                    new_links.append(link)
+                    texts.append(link[0])
+
+        return new_links

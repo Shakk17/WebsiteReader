@@ -29,6 +29,8 @@ class Cursor:
         self.sentence_number = 0
         # Number of GoogleSearch result to show.
         self.search_result_number = 0
+        # Index of next link to read in the page.
+        self.idx_link = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
@@ -152,12 +154,14 @@ class RequestHandler:
             text_response = self.get_menu()
         elif action.startswith("ReadPage"):
             text_response = self.read_page()
-        elif action.startswith("OpenPageLink"):
-            text_response = self.open_page_link()
+        elif action.startswith("OpenTextLink"):
+            text_response = self.open_text_link()
         elif action.startswith("OpenMenuLink"):
             text_response = self.open_menu_link()
-        elif action.startswith("ReadEverything"):
-            text_response = self.read_everything()
+        elif action.startswith("OpenPageLink"):
+            text_response = self.open_page_link()
+        elif action.startswith("ReadLinks"):
+            text_response = self.read_links()
 
         return self.build_response(text_response=text_response)
 
@@ -202,6 +206,7 @@ class RequestHandler:
         self.cursor.url = self.page_visitor.url
         self.cursor.idx_sentence = 0
         self.cursor.idx_menu = 0
+        self.cursor.idx_link = 0
 
         # Checks if domain has been already crawled.
         domain = helper.get_domain(url=self.page_visitor.url)
@@ -226,7 +231,7 @@ class RequestHandler:
             threading.Thread(target=crawler.run, args=()).start()
 
         # Check if the web page requested has already been visited by a crawling before.
-        crawling_links = Database().get_crawling_links(self.page_visitor.url)
+        crawling_links = Database().get_crawler_links(self.page_visitor.url)
         if len(crawling_links) == 0:
             print("This page has never been visited by a crawling before.")
             threading.Thread(target=helper.crawl_single_page, args=(self.page_visitor.url, )).start()
@@ -316,13 +321,13 @@ class RequestHandler:
 
         return text_response
 
-    def open_page_link(self):
+    def open_text_link(self):
         """
         This method visits the link chosen from the page by the user.
         :return: A text response containing info about the new web page.
         """
         # Get URL to visit from the DB.
-        link_url = Database().get_page_link(page_url=self.cursor.url, link_num=self.cursor.number)
+        link_url = Database().get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
 
         # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
@@ -345,23 +350,27 @@ class RequestHandler:
         except ValueError:
             return "Wrong input."
 
-    def read_everything(self):
-        links = Database().get_crawling_links(url=self.cursor.url)
-        texts = []
+    def open_page_link(self):
+        # Get URL to visit from the DB.
+        links = self.page_visitor.read_links(url=self.cursor.url)
+        link_url = links[self.cursor.idx_link - 1]
+
+        # If the link is valid, update the cursor and visit the page.
+        if link_url is not None:
+            self.cursor.url = link_url[1]
+            return self.visit_page()
+        else:
+            return "Wrong input."
+
+    def read_links(self):
+        links = self.page_visitor.read_links(url=self.cursor.url)
         if len(links) > 0:
-            # Keep only links with 4 words or more in text.
-            links = list(filter(lambda x: len(helper.extract_words(x[0])) > 3, links))
-            # Keep only links not contained in lists.
-            links = list(filter(lambda x: x[2] == 0, links))
-            # Order link depending on their y_position.
-            links.sort(key=lambda x: x[1])
-            # Remove duplicates.
-            new_links = []
-            for link in links:
-                if link[0] not in texts:
-                    new_links.append(link)
-                    texts.append(link[0])
-            text_response = links[0][0]
+            try:
+                text_response = f"Do you want to visit:\n '{links[self.cursor.idx_link][0]}'?"
+                self.cursor.idx_link += 1
+            except IndexError:
+                text_response = "No more links in the page."
+                self.cursor.idx_link = 0
         else:
             text_response = "Wait for the page to be analyzed."
         return text_response

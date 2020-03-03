@@ -182,7 +182,7 @@ class Database:
 
     # TEXT LINKS TABLE
 
-    def insert_page_link(self, page_url, link_num, link):
+    def insert_text_link(self, page_url, link_num, link):
         """
         This method inserts a link contained in the main text of a web page into the page_links table of the database.
         :param page_url: A string containing the URL of the web page containing the link.
@@ -194,7 +194,7 @@ class Database:
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
 
-    def get_page_link(self, page_url, link_num):
+    def get_text_link(self, page_url, link_num):
         """
         This method returns a link contained in the main text of a web page.
         :param page_url: A string containing the URL of the web page containing the link.
@@ -207,7 +207,7 @@ class Database:
         result = cur.fetchone()
         return result
 
-    def get_page_links(self, page_url):
+    def get_text_links(self, page_url):
         """
         This method returns all the links contained in the main text of a web page.
         :param page_url: A string containing the URL of the web page.
@@ -219,7 +219,7 @@ class Database:
         result = cur.fetchall()
         return result
 
-    def delete_page_links(self, url):
+    def delete_text_links(self, url):
         """
         This method deletes all the page links from the page_links table of the database.
         :param url: A string containing the URl of the web page to delete.
@@ -253,8 +253,8 @@ class Database:
         cur = self.conn.cursor()
         cur.execute(sql, (page_url, href, text, x_position, y_position, in_list))
 
-    def get_crawling_links(self, url):
-        sql = "SELECT link_text, y_position, in_list FROM crawler_links WHERE page_url LIKE ?"
+    def get_crawler_links(self, url):
+        sql = "SELECT link_text, link_url, y_position, in_list FROM crawler_links WHERE page_url LIKE ?"
         cur = self.conn.cursor()
         cur.execute(sql, (url, ))
         rows = cur.fetchall()
