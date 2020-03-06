@@ -31,3 +31,5 @@ class Link(Base):
     link_text = Column('link_text', String(200))
     x_position = Column('x_position', Integer)
     y_position = Column('y_position', Integer)
+    in_list = Column('in_list', Integer)
+
