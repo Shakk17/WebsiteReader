@@ -28,7 +28,7 @@ class Cursor:
         # Sentence read in current web page.
         self.sentence_number = 0
         # Number of GoogleSearch result to show.
-        self.search_result_number = 0
+        self.idx_search_result = 0
         # Index of next link to read in the page.
         self.idx_link = 0
 
@@ -49,7 +49,7 @@ class Cursor:
             f"\tIdx sentence: {self.idx_sentence}\n"
             f"\tIdx menu: {self.idx_menu}\n"
             f"\tSentence number: {self.sentence_number}\n"
-            f"\tSearch result number: {self.search_result_number}\n"
+            f"\tSearch result number: {self.idx_search_result}\n"
             f"{Style.RESET_ALL}")
 
 
@@ -145,7 +145,7 @@ class RequestHandler:
         text_response = "Action not recognized by the server."
 
         if action.startswith("SearchPage"):
-            text_response = self.search_page(query_results=query_results, reset=(not action.endswith("next")))
+            text_response = self.search_page(query_results=query_results, action=action.split("_")[-1])
         elif action.startswith("VisitPage"):
             text_response = self.visit_page()
         elif action.startswith("GetInfo"):
@@ -165,18 +165,23 @@ class RequestHandler:
 
         return self.build_response(text_response=text_response)
 
-    def search_page(self, query_results, reset):
+    def search_page(self, query_results, action):
         """
         This method:
             - if the user has performed a search, it returns one of the results of the Google search;
             - if the user has requested a specific URL, it returns info about the website reachable at that URL.
         :param query_results: A list containing the results of the Google search.
-        :param reset: True if the counter of the results needs to be reset, False otherwise.
+        :param action: a string containing "previous", "next" or "reset".
         :return: A string containing info about one result of the Google search or info about a web page.
         """
         # Reset the counter if a new search is performed.
-        if reset:
-            self.cursor.search_result_number = 0
+        idx = self.cursor.idx_search_result
+        if action == "reset":
+            self.cursor.idx_search_result = 0
+        elif action == "next":
+            self.cursor.idx_search_result += 1 if idx != 4 else 0
+        elif action == "previous":
+            self.cursor.idx_search_result -= 1 if idx != 0 else 0
 
         # If the parameter given by the user was a valid URL, visit the page.
         if query_results is None:
@@ -234,21 +239,17 @@ class RequestHandler:
         crawling_links = Database().get_crawler_links(self.page_visitor.url)
         if len(crawling_links) == 0:
             print("This page has never been visited by a crawling before.")
-            threading.Thread(target=helper.crawl_single_page, args=(self.page_visitor.url, )).start()
+            threading.Thread(target=helper.crawl_single_page, args=(self.page_visitor.url,)).start()
 
         # Update the url in context and return info about the web page to the user.
         return text_response
 
     def get_google_result(self, query_results):
-        result_index = int(self.cursor.search_result_number)
+        result_index = int(self.cursor.idx_search_result)
         result = query_results[result_index]
         self.cursor.url = result[1]
-        text_response = f"""Result number {self.cursor.search_result_number + 1}.
+        text_response = f"""Result number {self.cursor.idx_search_result + 1}.
                             Do you want to visit the page: {result[0]} at {helper.get_domain(result[1])}?"""
-        if self.cursor.search_result_number < 4:
-            self.cursor.search_result_number += 1
-        else:
-            self.cursor.search_result_number = 0
         return text_response
 
     def get_menu(self):
