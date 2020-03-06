@@ -22,7 +22,6 @@ options = Options()
 options.add_argument("--headless")
 options.add_argument('window-size=500x1024')
 
-
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
@@ -355,3 +354,15 @@ def extract_words(string):
     regex = r'\b\w+\b'
     words = re.findall(regex, string)
     return words
+
+
+def update_cursor_index(action, old_idx, step, size):
+    new_idx = old_idx
+    if action == "reset":
+        new_idx = 0
+    elif action == "next":
+        new_idx = new_idx + step if (old_idx + step) < size else 0
+    elif action == "previous":
+        new_idx = new_idx - step if (old_idx - step) > 0 else 0
+
+    return new_idx

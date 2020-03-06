@@ -25,8 +25,6 @@ class Cursor:
         self.idx_sentence = 0
         # Number that indicates the article to read in the current section.
         self.idx_menu = 0
-        # Sentence read in current web page.
-        self.sentence_number = 0
         # Number of GoogleSearch result to show.
         self.idx_search_result = 0
         # Index of next link to read in the page.
@@ -48,8 +46,8 @@ class Cursor:
             f"\tURL: {self.url}\n"
             f"\tIdx sentence: {self.idx_sentence}\n"
             f"\tIdx menu: {self.idx_menu}\n"
-            f"\tSentence number: {self.sentence_number}\n"
-            f"\tSearch result number: {self.idx_search_result}\n"
+            f"\tIdx search result: {self.idx_search_result}\n"
+            f"\tIdx link: {self.idx_link}\n"
             f"{Style.RESET_ALL}")
 
 
@@ -151,9 +149,9 @@ class RequestHandler:
         elif action.startswith("GetInfo"):
             text_response = self.get_info()
         elif action.startswith("GetMenu"):
-            text_response = self.get_menu()
+            text_response = self.get_menu(action=action.split("_")[-1])
         elif action.startswith("ReadPage"):
-            text_response = self.read_page()
+            text_response = self.read_page(action=action.split("_")[-1])
         elif action.startswith("OpenTextLink"):
             text_response = self.open_text_link()
         elif action.startswith("OpenMenuLink"):
@@ -161,7 +159,7 @@ class RequestHandler:
         elif action.startswith("OpenPageLink"):
             text_response = self.open_page_link()
         elif action.startswith("ReadLinks"):
-            text_response = self.read_links()
+            text_response = self.read_links(action=action.split("_")[-1])
 
         return self.build_response(text_response=text_response)
 
@@ -175,13 +173,8 @@ class RequestHandler:
         :return: A string containing info about one result of the Google search or info about a web page.
         """
         # Reset the counter if a new search is performed.
-        idx = self.cursor.idx_search_result
-        if action == "reset":
-            self.cursor.idx_search_result = 0
-        elif action == "next":
-            self.cursor.idx_search_result += 1 if idx != 4 else 0
-        elif action == "previous":
-            self.cursor.idx_search_result -= 1 if idx != 0 else 0
+        self.cursor.idx_search_result = helper.update_cursor_index(
+            action=action, old_idx=self.cursor.idx_search_result, step=1, size=5)
 
         # If the parameter given by the user was a valid URL, visit the page.
         if query_results is None:
@@ -252,18 +245,22 @@ class RequestHandler:
                             Do you want to visit the page: {result[0]} at {helper.get_domain(result[1])}?"""
         return text_response
 
-    def get_menu(self):
+    def get_menu(self, action):
         """
         This method:
         - analyzes the result of the crawl of a domain and extracts its menu;
         - selects which options are to be shown to the user.
         :return: A text response containing the options to be shown to the user.
         """
-        # Number of choices that will get displayed to the user at once.
-        num_choices = 10
-
         # Extract the menu from the crawl results.
         menu = helper.get_menu(self.cursor.url)
+
+        # Update cursor.
+        self.cursor.idx_menu = helper.update_cursor_index(
+            action=action, old_idx=self.cursor.idx_menu, step=10, size=len(menu))
+
+        # Number of choices that will get displayed to the user at once.
+        num_choices = 10
 
         # Get how many elements of the menu have already been shown.
         idx_start = int(self.cursor.idx_menu)
@@ -283,9 +280,6 @@ class RequestHandler:
             text_response += f"{idx_start + i}: {string}. \n"
         text_response += f"\n{min(idx_start + num_choices, len(menu))} out of {len(menu)} option(s) read."
 
-        # Update cursor.
-        self.cursor.idx_menu = idx_start + num_choices
-
         return text_response
 
     def get_info(self):
@@ -298,20 +292,20 @@ class RequestHandler:
         text_response = self.page_visitor.get_info()
         return text_response
 
-    def read_page(self):
+    def read_page(self, action):
         """
         This method gets the main text of the web page and returns a part of it to be shown to the user.
         It also updates the cursor.
         :return: A text response containing a part of the main text of the web page.
         """
+        self.cursor.idx_sentence = helper.update_cursor_index(
+            action=action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
         self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         try:
             # Get actual position of the cursor in the main text.
             idx_sentence = int(self.cursor.idx_sentence)
             # Get sentences from the main text to be shown to the user.
             text_response = self.page_visitor.get_sentences(idx_sentence=idx_sentence, n_sentences=2)
-            # Update cursor.
-            self.cursor.idx_sentence += 2
         except IndexError:
             # There are no more sentences to be read.
             text_response = "You have reached the end of the page."
@@ -354,7 +348,7 @@ class RequestHandler:
     def open_page_link(self):
         # Get URL to visit from the DB.
         links = self.page_visitor.read_links(url=self.cursor.url)
-        link_url = links[self.cursor.idx_link - 1]
+        link_url = links[self.cursor.idx_link]
 
         # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
@@ -363,12 +357,13 @@ class RequestHandler:
         else:
             return "Wrong input."
 
-    def read_links(self):
+    def read_links(self, action):
         links = self.page_visitor.read_links(url=self.cursor.url)
+        self.cursor.idx_link = helper.update_cursor_index(
+            action=action, old_idx=self.cursor.idx_link, step=1, size=len(links))
         if len(links) > 0:
             try:
                 text_response = f"Do you want to visit:\n '{links[self.cursor.idx_link][0]}'?"
-                self.cursor.idx_link += 1
             except IndexError:
                 text_response = "No more links in the page."
                 self.cursor.idx_link = 0
