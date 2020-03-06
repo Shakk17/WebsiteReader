@@ -2,7 +2,7 @@ import html
 import re
 import threading
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import time
 
 import tldextract
@@ -235,18 +235,20 @@ def get_clean_text(url):
     return text.get("article")
 
 
-def is_action_recent(timestamp, days):
+def is_action_recent(timestamp, days=0, minutes=0):
     """
     This method compares a timestamp to the actual date.
     :param timestamp: A string in the format "%Y-%m-%d %H:%M:%S".
-    :param days: An integer indicating the threshold defining when an action is recent.
-    :return: True is the timestamp inserted is a date that happened more than "days" days ago, False otherwise.
+    :param days: An integer indicating the number of days defining when an action is recent.
+    :param minutes: An integer indicating the number of minutes defining when an action is recent.
+    :return: True is the timestamp inserted is a date that happened recently, False otherwise.
     """
     t1 = datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
     t2 = datetime.now()
+
     difference = t2 - t1
 
-    return difference.days < days
+    return difference < timedelta(days=days, minutes=minutes)
 
 
 def get_links_positions(container, text, url):
@@ -366,3 +368,10 @@ def update_cursor_index(action, old_idx, step, size):
         new_idx = new_idx - step if (old_idx - step) > 0 else 0
 
     return new_idx
+
+
+def get_google_result(query_results, idx):
+    result = query_results[idx]
+    text_response = f"""Result number {idx + 1}.
+                        Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
+    return result[1], text_response

@@ -150,16 +150,16 @@ class RequestHandler:
             text_response = self.get_info()
         elif action.startswith("GetMenu"):
             text_response = self.get_menu(action=action.split("_")[-1])
-        elif action.startswith("ReadPage"):
-            text_response = self.read_page(action=action.split("_")[-1])
-        elif action.startswith("OpenTextLink"):
-            text_response = self.open_text_link()
         elif action.startswith("OpenMenuLink"):
             text_response = self.open_menu_link()
+        elif action.startswith("ReadPage"):
+            text_response = self.read_page(action=action.split("_")[-1])
         elif action.startswith("OpenPageLink"):
             text_response = self.open_page_link()
         elif action.startswith("ReadLinks"):
             text_response = self.read_links(action=action.split("_")[-1])
+        elif action.startswith("OpenTextLink"):
+            text_response = self.open_text_link()
 
         return self.build_response(text_response=text_response)
 
@@ -181,7 +181,8 @@ class RequestHandler:
             text_response = self.visit_page()
         # Otherwise, return one of the Google Search results.
         else:
-            text_response = self.get_google_result(query_results=query_results)
+            self.cursor.url, text_response = helper.get_google_result(
+                query_results=query_results, idx=self.cursor.idx_search_result)
 
         return text_response
 
@@ -237,12 +238,14 @@ class RequestHandler:
         # Update the url in context and return info about the web page to the user.
         return text_response
 
-    def get_google_result(self, query_results):
-        result_index = int(self.cursor.idx_search_result)
-        result = query_results[result_index]
-        self.cursor.url = result[1]
-        text_response = f"""Result number {self.cursor.idx_search_result + 1}.
-                            Do you want to visit the page: {result[0]} at {helper.get_domain(result[1])}?"""
+    def get_info(self):
+        """
+        This method returns info about the web page currently visited to the user.
+        :return: A text response containing info about the web page currently visited.
+        """
+        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
+        # Get info about the web page.
+        text_response = self.page_visitor.get_info()
         return text_response
 
     def get_menu(self, action):
@@ -282,15 +285,19 @@ class RequestHandler:
 
         return text_response
 
-    def get_info(self):
+    def open_menu_link(self):
         """
-        This method returns info about the web page currently visited to the user.
-        :return: A text response containing info about the web page currently visited.
+        This method visits the link chosen from the menu by the user.
+        :return: A text response containing info about the new web page.
         """
-        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
-        # Get info about the web page.
-        text_response = self.page_visitor.get_info()
-        return text_response
+        try:
+            # Get URL to visit from the DB.
+            new_url = helper.get_menu_link(url=self.cursor.url, number=self.cursor.number)
+            # Update cursor and visit the page.
+            self.cursor.url = new_url
+            return self.visit_page()
+        except ValueError:
+            return "Wrong input."
 
     def read_page(self, action):
         """
@@ -316,6 +323,18 @@ class RequestHandler:
 
         return text_response
 
+    def open_page_link(self):
+        # Get URL to visit from the DB.
+        links = self.page_visitor.read_links(url=self.cursor.url)
+        link_url = links[self.cursor.idx_link]
+
+        # If the link is valid, update the cursor and visit the page.
+        if link_url is not None:
+            self.cursor.url = link_url[1]
+            return self.visit_page()
+        else:
+            return "Wrong input."
+
     def open_text_link(self):
         """
         This method visits the link chosen from the page by the user.
@@ -327,32 +346,6 @@ class RequestHandler:
         # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
             self.cursor.url = link_url[0]
-            return self.visit_page()
-        else:
-            return "Wrong input."
-
-    def open_menu_link(self):
-        """
-        This method visits the link chosen from the menu by the user.
-        :return: A text response containing info about the new web page.
-        """
-        try:
-            # Get URL to visit from the DB.
-            new_url = helper.get_menu_link(url=self.cursor.url, number=self.cursor.number)
-            # Update cursor and visit the page.
-            self.cursor.url = new_url
-            return self.visit_page()
-        except ValueError:
-            return "Wrong input."
-
-    def open_page_link(self):
-        # Get URL to visit from the DB.
-        links = self.page_visitor.read_links(url=self.cursor.url)
-        link_url = links[self.cursor.idx_link]
-
-        # If the link is valid, update the cursor and visit the page.
-        if link_url is not None:
-            self.cursor.url = link_url[1]
             return self.visit_page()
         else:
             return "Wrong input."

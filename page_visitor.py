@@ -45,7 +45,7 @@ class PageVisitor:
         result = Database().last_time_visited(url=self.url)
 
         # If there is already info about the web page, but it's not recent, delete it.
-        if result is not None and not helper.is_action_recent(timestamp=result[4], days=1):
+        if result is not None and not helper.is_action_recent(timestamp=result[4], days=0, minutes=30):
             Database().delete_page(url=self.url)
             Database().delete_text_links(url=self.url)
 
