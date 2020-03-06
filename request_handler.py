@@ -10,7 +10,7 @@ from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
 import helper
 
-TIMEOUT = 3
+TIMEOUT = 2
 
 
 class Cursor:
@@ -121,11 +121,11 @@ class RequestHandler:
         query_results = None
         if action.startswith("SearchPage"):
             string = self.cursor.string
+            # Try both http and https schemas.
             try:
-                # Fix the URL if it's not well-formed (missing schema).
-                url = helper.fix_url(url=string)
+                url = helper.add_schema(url=string)
                 # Try to visit the URL.
-                requests.get(url=string)
+                requests.get(url=url)
             except requests.exceptions.RequestException:
                 # The string passed is actually a query, get the first 5 results from Google Search.
                 query_results = helper.get_urls_from_google(string)

@@ -125,9 +125,10 @@ def get_menu_link(url, number):
     return menu_anchors[index]
 
 
-def fix_url(url):
+def add_schema(url):
     """
     This method takes a URL and returns a well-formed URL. If the schema is missing, it will get added.
+    :param https: True is the missing schema to be added is https, False if http.
     :param url: A string containing a URL.
     :return: A string containing a well-formed URL.
     """
