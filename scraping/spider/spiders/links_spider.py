@@ -40,6 +40,9 @@ class LinksSpider(scrapy.Spider):
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
+            # Skip PDF files.
+            if link[0].endswith("pdf"):
+                continue
             # Stop crawling after a while.
             if len(self.visited_links) > self.MAX_COUNT:
                 return
