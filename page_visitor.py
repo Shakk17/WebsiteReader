@@ -6,7 +6,9 @@ from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
 from datumbox_wrapper import get_language_string
-import helper
+from helpers import helper
+from helpers.api import get_info_from_aylien_api, get_text_from_aylien_api
+from helpers.utility import extract_words
 
 
 class PageVisitor:
@@ -53,7 +55,7 @@ class PageVisitor:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
-            topic, language_code = helper.get_info_from_api(url=self.url)
+            topic, language_code = get_info_from_aylien_api(url=self.url)
             language = get_language_string(language_code)
 
             # Save the info in the DB.
@@ -141,7 +143,7 @@ class PageVisitor:
         After the extraction, text and links of the web page are saved in the database.
         """
         # Get the main text of the web page.
-        text = helper.get_clean_text(url=self.url)
+        text = get_text_from_aylien_api(url=self.url)
 
         # Given the extracted main text, get its main HTML container.
         container = helper.get_main_container(url=self.url, text=text)
@@ -160,9 +162,10 @@ class PageVisitor:
     def read_links(self, url):
         links = Database().get_crawler_links(url=url)
         texts = []
+        new_links = []
         if len(links) > 0:
             # Keep only links with 4 words or more in text.
-            links = list(filter(lambda x: len(helper.extract_words(x[0])) > 3, links))
+            links = list(filter(lambda x: len(extract_words(x[0])) > 3, links))
             # Keep only links not contained in lists.
             links = list(filter(lambda x: x[3] == 0, links))
             # Order link depending on their y_position.

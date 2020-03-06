@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 from databases.database_handler import Database
-from helper import get_domain, add_schema
+from helpers.helper import get_domain, add_schema
 
 
 class Crawler:

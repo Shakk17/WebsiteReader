@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from scraping.spider.models import db_connect, create_table, Link
 
-from helper import strip_html_tags
+from helpers.helper import strip_html_tags
 
 
 # -*- coding: utf-8 -*-

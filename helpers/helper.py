@@ -1,84 +1,12 @@
-import html
 import re
-import threading
 import urllib.parse
 from datetime import datetime, timedelta
-from time import time
 
-import tldextract
-from aylienapiclient import textapi
 from bs4 import BeautifulSoup
-from googleapiclient.discovery import build
-from selenium import webdriver
-from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
 
 from databases.database_handler import Database
-
-client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
-
-options = Options()
-options.add_argument("--headless")
-options.add_argument('window-size=500x1024')
-
-# Avoid loading images.
-prefs = {"profile.managed_default_content_settings.images": 2}
-options.add_experimental_option("prefs", prefs)
-driver = webdriver.Chrome(options=options)
-# HEROKU
-"""options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
-
-
-def strip_html_tags(text):
-    """
-    This method takes a string of text, unescapes special characters and removes any HTML tag from it.
-    :param text: A string of text.
-    :return: A string without escaped characters or HTML tags.
-    """
-    # Unescape difficult character like &amp;.
-    text = html.unescape(str(text))
-    # Remove all the html tags.
-    regex = re.compile(r'<[^>]+>')
-    text = regex.sub('', text)
-    # Remove \n and \t.
-    text = text.replace("\n", " ")
-    text = text.replace("\t", " ")
-    # Remove spaces at the beginning and at the end of the string.
-    text = text.strip()
-    return text
-
-
-def get_urls_from_google(query):
-    """
-    This method makes a search on Google and returns the first 5 results.
-    :param query: A string containing the query to input into Google Search.
-    :return: A list containing tuples (title, URL, snippet) of the first 5 results.
-    """
-    start = time()
-    # Perform Google Search.
-    api_key = "AIzaSyBxmCvHuuBmno25vybpLHEmVL1sOZusYa0"
-    cse_id = "001618926378962890992:ri89cvvqaiw"
-    query_service = build(serviceName="customsearch", version="v1", developerKey=api_key)
-    query_results = query_service.cse().list(q=query, cx=cse_id).execute().get("items")
-
-    results = [(result.get("title"), result.get("link"), result.get("snippet")) for result in query_results]
-
-    return results
-
-
-def get_domain(url):
-    """
-    This method extracts the domain from the URL of a website.
-    :param url: A string containing the URL.
-    :return: A string containing the domain extracted from the URL.
-    """
-    extracted_domain = tldextract.extract(url)
-    domain = "{}.{}".format(extracted_domain.domain, extracted_domain.suffix)
-    return domain
+from helpers.renderer import render_page
+from helpers.utility import strip_html_tags, get_domain
 
 
 def get_menu(url):
@@ -124,18 +52,6 @@ def get_menu_link(url, number):
     return menu_anchors[index]
 
 
-def add_schema(url):
-    """
-    This method takes a URL and returns a well-formed URL. If the schema is missing, it will get added.
-    :param https: True is the missing schema to be added is https, False if http.
-    :param url: A string containing a URL.
-    :return: A string containing a well-formed URL.
-    """
-    if not re.match('(?:http|ftp|https)://', url):
-        return 'http://{}'.format(url)
-    return url
-
-
 def get_main_container(url, text):
     """
     This method takes a web page and its main text, and returns the deepest element (in the DOM tree) containing it.
@@ -173,66 +89,6 @@ def get_main_container(url, text):
     html_element = candidates[0][0]
 
     return html_element
-
-
-def render_page(url):
-    """
-    This method returns the HTML code of a web page. It uses Selenium, thus it supports Javascript.
-    :param url: A string containing the URL of the web page to parse.
-    :return: The HTML code of the web page.
-    """
-    start = time()
-    try:
-        print("Rendering page with Selenium...")
-        driver.get(url)
-    except Exception:
-        print(f"Can't access this website: {url}")
-        raise Exception("Error while visiting the page.")
-
-    print(f"Selenium request elapsed time: {(time() - start):.2f} s")
-
-    html_code = driver.find_element_by_tag_name("html").get_attribute("innerHTML")
-
-    return html_code
-
-
-def get_info_from_api(url):
-    """
-    This method returns info regarding a certain web page by using Aylien APIs.
-    :param url: A string containing the URL of the web page.
-    :return: A tuple (topic, language) containing info about the web page.
-    """
-    # This is a combined call to the Aylien APIs.
-    combined = client.Combined({
-        'url': url,
-        'endpoint': ["classify", "language"]
-    })
-
-    language = combined.get("results")[0].get("result").get("lang")
-
-    # The topic is returned only if it the level of confidence is over a certain threshold.
-    try:
-        topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
-        if topic_confidence > 0.3:
-            topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
-        else:
-            topic = "unknown"
-    except IndexError:
-        topic = "unknown"
-
-    return topic, language
-
-
-def get_clean_text(url):
-    """
-    This method utilizes an Aylien API to extract the main text from a web page.
-    :param url: A string containing the URL of the web page.
-    :return: A string containing the main text of the web page.
-    """
-    start = time()
-    text = client.Extract({'url': url})
-    print(f"Aylien API extract text elapsed time: {(time() - start):.2f}")
-    return text.get("article")
 
 
 def is_action_recent(timestamp, days=0, minutes=0):
@@ -311,7 +167,7 @@ def get_links_positions(container, text, url):
 
 def extract_search_forms(html_code):
     """
-    This method searches in the web page if there is an input form used to search something in the page.
+    This method searches in the web-page if there is an input form used to search something in the page.
     :return: The text of the input form, if present. None otherwise.
     """
     webpage = BeautifulSoup(html_code, "lxml")
@@ -322,43 +178,15 @@ def extract_search_forms(html_code):
     return input_forms_text
 
 
-def crawl_single_page(url):
-    print(f"Crawling single page [{url}] with Selenium...")
-    driver.get(url)
-    links = driver.find_elements(By.XPATH, '//a[@href]')
-    links_bs4 = BeautifulSoup(driver.page_source, "lxml").find_all("a")
-    links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
-
-    for i, link in enumerate(links):
-        try:
-            href = link.get_attribute("href")
-            text = strip_html_tags(link.get_attribute("innerHTML"))
-            x_position = str(link.location.get('x'))
-            y_position = str(link.location.get('y'))
-            # True if the element is contained in a list container.
-            parents = [parent.name for parent in links_bs4[i].parents]
-            in_list = int("li" in parents)
-
-            # If the link links to the same page, discard it.
-            hash_position = href.find("#")
-            if href[:hash_position] == url or text == "" or int(y_position) == 0:
-                continue
-        except StaleElementReferenceException:
-            continue
-        # Save link in database.
-        Database().insert_crawler_link(
-            page_url=url, href=href, text=text, x_position=x_position, y_position=y_position, in_list=in_list)
-    print("Crawling of single page terminated.")
-    return
-
-
-def extract_words(string):
-    regex = r'\b\w+\b'
-    words = re.findall(regex, string)
-    return words
-
-
 def update_cursor_index(action, old_idx, step, size):
+    """
+    This method takes an index as an input, and returns an updated index which value depends on the other parameters.
+    :param action: "reset", "next" or "previous".
+    :param old_idx: An integer representing the old index to modify.
+    :param step: An integer representing the variation of the index.
+    :param size: An integer representing the size of the element related to the index.
+    :return: An integer representing the new index.
+    """
     new_idx = old_idx
     if action == "reset":
         new_idx = 0
@@ -366,12 +194,4 @@ def update_cursor_index(action, old_idx, step, size):
         new_idx = new_idx + step if (old_idx + step) < size else 0
     elif action == "previous":
         new_idx = new_idx - step if (old_idx - step) > 0 else 0
-
     return new_idx
-
-
-def get_google_result(query_results, idx):
-    result = query_results[idx]
-    text_response = f"""Result number {idx + 1}.
-                        Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
-    return result[1], text_response

@@ -6,9 +6,12 @@ import requests
 from colorama import Fore, Style
 
 from databases.database_handler import Database
+from helpers.api import get_urls_from_google
+from helpers.renderer import crawl_single_page
+from helpers.utility import add_schema, get_domain
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-import helper
+from helpers import helper
 
 TIMEOUT = 2
 
@@ -121,12 +124,12 @@ class RequestHandler:
             string = self.cursor.string
             # Try both http and https schemas.
             try:
-                url = helper.add_schema(url=string)
+                url = add_schema(url=string)
                 # Try to visit the URL.
                 requests.get(url=url)
             except requests.exceptions.RequestException:
                 # The string passed is actually a query, get the first 5 results from Google Search.
-                query_results = helper.get_urls_from_google(string)
+                query_results = get_urls_from_google(string)
         else:
             url = self.cursor.url
 
@@ -181,17 +184,16 @@ class RequestHandler:
             text_response = self.visit_page()
         # Otherwise, return one of the Google Search results.
         else:
-            self.cursor.url, text_response = helper.get_google_result(
-                query_results=query_results, idx=self.cursor.idx_search_result)
-
+            result = query_results[self.cursor.idx_search_result]
+            text_response = f"""Result number {self.cursor.idx_search_result + 1}.
+                                    Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
+            self.cursor.url = result[1]
         return text_response
 
     def visit_page(self):
         """
         This method:
-        - gets the HTML of the web page;
         - extracts information about the web page;
-        - updates the cursor;
         - checks if the domain has been already crawled. If not, it starts a new crawl.
         :return: A text response containing information to show to the user about the web page.
         """
@@ -208,7 +210,7 @@ class RequestHandler:
         self.cursor.idx_link = 0
 
         # Checks if domain has been already crawled.
-        domain = helper.get_domain(url=self.page_visitor.url)
+        domain = get_domain(url=self.page_visitor.url)
         to_crawl = False
         last_time_crawled = Database().last_time_crawled(domain=domain)
 
@@ -233,7 +235,7 @@ class RequestHandler:
         crawling_links = Database().get_crawler_links(self.page_visitor.url)
         if len(crawling_links) == 0:
             print("This page has never been visited by a crawling before.")
-            threading.Thread(target=helper.crawl_single_page, args=(self.page_visitor.url,)).start()
+            threading.Thread(target=crawl_single_page, args=(self.page_visitor.url,)).start()
 
         # Update the url in context and return info about the web page to the user.
         return text_response

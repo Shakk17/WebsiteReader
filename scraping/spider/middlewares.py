@@ -8,11 +8,11 @@
 from colorama import Fore, Style
 from scrapy import signals
 from scrapy.http import HtmlResponse
-from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver.common.by import By
+from helpers.renderer import StaleElementReferenceException
+from helpers.renderer import By
 from seleniumwire import webdriver
 
-from helper import get_domain
+from helpers.helper import get_domain
 from scraping.spider.items import UrlItem
 
 from bs4 import BeautifulSoup

@@ -1,7 +1,6 @@
 import scrapy
-from helper import get_domain
+from helpers.helper import get_domain
 
-from scraping.spider.items import UrlItem
 from scrapy import signals
 
 
