@@ -137,7 +137,10 @@ class SpiderDownloaderMiddleware(object):
                 x_position = str(link.location.get('x'))
                 y_position = str(link.location.get('y'))
                 # True if the element is contained in a list container.
-                in_list = "li" in [parent.name for parent in links_bs4[i].parents]
+                try:
+                    in_list = "li" in [parent.name for parent in links_bs4[i].parents]
+                except IndexError:
+                    in_list = False
 
                 # If the link links to the same page, discard it.
                 hash_position = link.get_attribute("href").find("#")

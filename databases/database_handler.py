@@ -245,7 +245,7 @@ class Database:
         # Then remove the tuple in 'websites' containing the domain.
         sql = "DELETE FROM websites WHERE domain LIKE ?;"
         cur = self.conn.cursor()
-        cur.execute(sql, (domain,))
+        cur.execute(sql, (f"%{domain}",))
 
     def insert_crawler_link(self, page_url, href, text, x_position, y_position, in_list):
         sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position, in_list)

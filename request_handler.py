@@ -135,13 +135,9 @@ class RequestHandler:
 
         self.cursor.url = url
 
-        # If the action is GoBack, get the previous action from the database and execute it.
-        if action.startswith("GoBack"):
+        # If the action is History, get the previous action from the database and execute it.
+        if action.startswith("History"):
             action, url = Database().get_previous_action("shakk")
-
-        # Save the action performed by the user into the history table of the database.
-        Database().insert_action(action, url)
-        print(f"Action {action} saved in history.")
 
         text_response = "Action not recognized by the server."
 
@@ -149,6 +145,8 @@ class RequestHandler:
             text_response = self.search_page(query_results=query_results, action=action.split("_")[-1])
         elif action.startswith("VisitPage"):
             text_response = self.visit_page()
+        elif action.startswith("GoToHomepage"):
+            text_response = self.go_to_homepage()
         elif action.startswith("GetInfo"):
             text_response = self.get_info()
         elif action.startswith("GetMenu"):
@@ -193,10 +191,14 @@ class RequestHandler:
     def visit_page(self):
         """
         This method:
+        - save the action performed in the database;
         - extracts information about the web page;
         - checks if the domain has been already crawled. If not, it starts a new crawl.
         :return: A text response containing information to show to the user about the web page.
         """
+        # Save the action performed by the user into the history table of the database.
+        Database().insert_action("VisitPage", self.cursor.url)
+
         # Get the HTML of the web page.
         self.page_visitor = PageVisitor(url=self.cursor.url)
 
@@ -228,8 +230,11 @@ class RequestHandler:
 
         # Crawl in the background.
         if to_crawl:
-            crawler = Crawler(start_url=self.page_visitor.url)
-            threading.Thread(target=crawler.run, args=()).start()
+            threading.Thread(target=Crawler(start_url=domain).run, args=()).start()
+            # If the URL contains a subdomain, crawl it too.
+            complete_domain = get_domain(self.page_visitor.url, complete=True)
+            if domain != complete_domain:
+                threading.Thread(target=Crawler(start_url=complete_domain).run, args=()).start()
 
         # Check if the web page requested has already been visited by a crawling before.
         crawling_links = Database().get_crawler_links(self.page_visitor.url)
@@ -238,6 +243,15 @@ class RequestHandler:
             threading.Thread(target=crawl_single_page, args=(self.page_visitor.url,)).start()
 
         # Update the url in context and return info about the web page to the user.
+        return text_response
+
+    def go_to_homepage(self):
+        """
+        This method visits the homepage of the current website.
+        :return:
+        """
+        self.cursor.url = add_schema(get_domain(self.cursor.url))
+        text_response = self.visit_page()
         return text_response
 
     def get_info(self):
