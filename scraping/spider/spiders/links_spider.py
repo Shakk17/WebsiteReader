@@ -1,7 +1,8 @@
 import scrapy
-from helpers.helper import get_domain
-
+from colorama import Fore, Style
 from scrapy import signals
+
+from helpers.helper import get_domain
 
 
 class LinksSpider(scrapy.Spider):
@@ -47,6 +48,7 @@ class LinksSpider(scrapy.Spider):
                 return
             # If the link has not been visited yet, visit it.
             if link[0] not in self.visited_links and self.allowed_domains[0] in link[0]:
+                print(f"{Fore.MAGENTA}Scraping {link[0]}{Style.RESET_ALL} ({len(self.visited_links)})")
                 self.visited_links.append(link[0])
                 yield response.follow(link[0], callback=self.parse)
 

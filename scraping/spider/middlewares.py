@@ -5,7 +5,6 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from colorama import Fore, Style
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from helpers.renderer import StaleElementReferenceException
@@ -117,7 +116,6 @@ class SpiderDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of installed downloader middleware will be called
         driver.get(request.url)
-        print(f"{Fore.MAGENTA}Scraping {request.url}{Style.RESET_ALL}")
 
         body = driver.page_source
 
