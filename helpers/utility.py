@@ -31,8 +31,9 @@ def get_domain(url, complete=False):
     :return: A string containing the domain extracted from the URL.
     """
     extracted_domain = tldextract.extract(url)
-    if complete and len(extracted_domain.subdomain) > 0:
-        domain = f"{extracted_domain.subdomain}.{extracted_domain.domain}.{extracted_domain.suffix}"
+    subdomain = extracted_domain.subdomain.replace("www", "")
+    if complete and len(subdomain) > 0:
+        domain = f"{subdomain}.{extracted_domain.domain}.{extracted_domain.suffix}"
     else:
         domain = f"{extracted_domain.domain}.{extracted_domain.suffix}"
     return domain
