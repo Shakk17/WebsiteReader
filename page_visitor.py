@@ -28,10 +28,9 @@ class PageVisitor:
         For speed purposes, Javascript is not supported.
         :return: The HTML code of the web page.
         """
-        print(f"{get_time()} [WEB PAGE] Getting HTML code (requests).")
-        start = time()
+        print(f"{get_time()} [WEB PAGE] HTML code retrieval (requests) started.")
         html = requests.get(self.url)
-        print(f"{get_time()} [WEB PAGE] Quick HTML request elapsed time: {(time() - start):.2f} s")
+        print(f"{get_time()} [WEB PAGE] HTML code retrieval (requests) finished.")
 
         return html.text
 
@@ -42,7 +41,6 @@ class PageVisitor:
         If the web page has already been visited, the info is retrieved from the database.
         :return: A text response to be shown to the user containing info about the page.
         """
-        start = time()
         print(f"{get_time()} [WEB PAGE] Information extraction started.")
 
         # Check in the database if the web page has already been visited.

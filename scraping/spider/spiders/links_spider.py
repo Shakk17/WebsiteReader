@@ -3,11 +3,11 @@ from colorama import Fore, Style
 from scrapy import signals
 
 from helpers.helper import get_domain
+from helpers.printer import magenta
 
 
 class LinksSpider(scrapy.Spider):
     name = "links"
-    MAX_COUNT = 30
     visited_links = []
 
     @classmethod
@@ -33,6 +33,7 @@ class LinksSpider(scrapy.Spider):
     def parse(self, response):
         # Decode the bytes string contained in the response body.
         links = response.body.decode(encoding='UTF-8').split("$")
+
         # Unpack the string in order to read the fields.
         # FORMAT: href * text * x_position * y_position * in_list $
         links = [link.split("*") for link in links]
@@ -40,18 +41,16 @@ class LinksSpider(scrapy.Spider):
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
+            link_url = link[0]
+
             # Skip PDF files.
-            if link[0][-3:] in ["pdf", "jpg", "png"]:
+            if link_url[-3:] in ["pdf", "jpg", "png"]:
                 continue
-            # Stop crawling after a while.
-            if len(self.visited_links) > self.MAX_COUNT:
-                return
+
             # If the link has not been visited yet, visit it.
-            if link[0] not in self.visited_links and self.allowed_domains[0] in link[0]:
-                print(f"({len(self.visited_links)}) {Fore.MAGENTA}Scraping {link[0]}{Style.RESET_ALL}")
-                self.visited_links.append(link[0])
-                yield response.follow(link[0], callback=self.parse)
+            if link_url not in self.visited_links and self.allowed_domains[0] in link_url:
+                yield response.follow(link_url, callback=self.parse)
 
     def spider_closed(self, spider):
-        print(f"Scraping of {self.start_urls[0]} finished.")
+        print(magenta(f"Scraping of {self.start_urls[0]} finished."))
         spider.logger.info('Spider closed: %s', spider.name)

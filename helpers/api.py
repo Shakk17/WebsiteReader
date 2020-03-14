@@ -16,13 +16,16 @@ def get_urls_from_google(query):
     :return: A list containing tuples (title, URL, snippet) of the first 5 results.
     """
     print(yellow(f"{get_time()} [GOOGLE API] Search started."))
+
     # Perform Google Search.
     api_key = "AIzaSyBxmCvHuuBmno25vybpLHEmVL1sOZusYa0"
     cse_id = "001618926378962890992:ri89cvvqaiw"
     query_service = build(serviceName="customsearch", version="v1", developerKey=api_key)
     query_results = query_service.cse().list(q=query, cx=cse_id).execute().get("items")
+
     # Get results.
     results = [(result.get("title"), result.get("link"), result.get("snippet")) for result in query_results]
+
     print(yellow(f"{get_time()} [GOOGLE API] Search finished."))
     return results
 
@@ -34,11 +37,15 @@ def get_info_from_aylien_api(url):
     :return: A tuple (topic, language) containing info about the web page.
     """
     print(yellow(f"{get_time()} [AYLIEN API] Info extraction started."))
-    # This is a combined call to the Aylien APIs.
-    combined = aylien_client.Combined({
-        'url': url,
-        'endpoint': ["classify", "language"]
-    })
+
+    try:
+        # This is a combined call to the Aylien APIs.
+        combined = aylien_client.Combined({
+            'url': url,
+            'endpoint': ["classify", "language"]
+        })
+    except TimeoutError:
+        return "unknown", "unknown"
 
     language = combined.get("results")[0].get("result").get("lang")
 
@@ -62,6 +69,9 @@ def get_text_from_aylien_api(url):
     :return: A string containing the main text of the web page.
     """
     print(yellow(f"{get_time()} [AYLIEN API] Main text extraction started."))
-    text = aylien_client.Extract({'url': url})
+    try:
+        text = aylien_client.Extract({'url': url})
+    except TimeoutError:
+        text = "Error during API call."
     print(yellow(f"{get_time()} [AYLIEN API] Main text extraction finished."))
     return text.get("article")

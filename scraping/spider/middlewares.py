@@ -8,6 +8,8 @@ import os
 
 from scrapy import signals
 from scrapy.http import HtmlResponse
+
+from helpers.printer import magenta
 from helpers.renderer import StaleElementReferenceException
 from helpers.renderer import By
 from seleniumwire import webdriver
@@ -110,14 +112,11 @@ class SpiderDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
-        # Called for each request that goes through the downloader
-        # middleware.
+        # Called for each request that goes through the downloader middleware.
 
-        # Must either:
-        # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of installed downloader middleware will be called
+        spider.visited_links.append(request.url)
+        print(magenta(f"({len(spider.visited_links)}) Scraping {request.url}"))
+
         driver.get(request.url)
 
         body = driver.page_source
@@ -168,6 +167,7 @@ class SpiderDownloaderMiddleware(object):
         links = [link.split("*") for link in links]
         links = list(filter(lambda x: len(x) == 5, links))
 
+        num_links = 0
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
             url_item = UrlItem()
@@ -179,9 +179,12 @@ class SpiderDownloaderMiddleware(object):
             url_item["in_list"] = link[4]
             # We save the link in the DB only if it belongs to the domain.
             if get_domain(response.url) in link[0]:
+                num_links += 1
                 # Call pipeline.
                 pipeline = spider.crawler.engine.scraper.itemproc
                 pipeline.process_item(url_item, self)
+
+        print(f"({len(spider.visited_links)}) {num_links} links saved.")
         return response
 
     def process_exception(self, request, exception, spider):
