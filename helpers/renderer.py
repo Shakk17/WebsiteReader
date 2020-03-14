@@ -13,8 +13,8 @@ from helpers.utility import strip_html_tags
 options = Options()
 options.add_argument("--headless")
 options.add_argument('window-size=500x1024')
-options.add_argument("load-extension=extensions/uBlock")
-options.add_argument("load-extension=extensions/no_cookies")
+options.add_argument("load-extension=chrome_extensions/uBlock")
+options.add_argument("load-extension=chrome_extensions/no_cookies")
 
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}

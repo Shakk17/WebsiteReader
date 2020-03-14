@@ -20,8 +20,8 @@ from bs4 import BeautifulSoup
 options = webdriver.ChromeOptions()
 options.add_argument('headless')
 options.add_argument('window-size=500x1024')
-options.add_argument("load-extension=extensions/uBlock")
-options.add_argument("load-extension=extensions/no_cookies")
+options.add_argument("load-extension=chrome_extensions/uBlock")
+options.add_argument("load-extension=chrome_extensions/no_cookies")
 options.add_argument(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36")
 # Avoid loading images.
@@ -35,8 +35,6 @@ driver = webdriver.Chrome(options=options)
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
 driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
-
-
 
 driver.header_overrides = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
