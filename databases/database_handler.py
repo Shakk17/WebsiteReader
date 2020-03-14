@@ -273,7 +273,7 @@ class Database:
             SELECT COUNT(*) AS times, link_text, link_url, 
                 round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y 
             FROM crawler_links
-            WHERE page_url LIKE ? AND y_position < 1080
+            WHERE page_url LIKE ? AND y_position < 2000
             GROUP BY link_text, link_url
             ORDER BY times DESC
         )
