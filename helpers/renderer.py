@@ -13,16 +13,17 @@ from helpers.utility import strip_html_tags
 options = Options()
 options.add_argument("--headless")
 options.add_argument('window-size=500x1024')
+options.add_argument("load-extension=uBlock")
 
 # Avoid loading images.
 prefs = {"profile.managed_default_content_settings.images": 2}
 options.add_experimental_option("prefs", prefs)
 driver = webdriver.Chrome(options=options)
 # HEROKU
-options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+"""options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)
+driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
 
 
 def render_page(url):

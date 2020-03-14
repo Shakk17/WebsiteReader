@@ -55,8 +55,8 @@ class PageVisitor:
             print("Calling Aylien API to extract information...")
 
             # Get info from the Aylien API.
-            topic, language_code = get_info_from_aylien_api(url=self.url)
-            language = get_language_string(language_code)
+            topic = "unknown"
+            language = "unknown"
 
             # Save the info in the DB.
             Database().insert_page(url=self.url, topic=topic, language=language)

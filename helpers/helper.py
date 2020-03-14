@@ -86,7 +86,11 @@ def get_main_container(url, text):
     candidates.sort(key=lambda x: len(list(x[0].parents)), reverse=True)
 
     # Sixth, select the deepest element in the DOM tree from all the candidates.
-    html_element = candidates[0][0]
+    try:
+        html_element = candidates[0][0]
+    except IndexError:
+        # If error, returns the whole page.
+        html_element = all_elements[0]
 
     return html_element
 

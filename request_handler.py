@@ -13,7 +13,7 @@ from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
 from helpers import helper
 
-TIMEOUT = 3
+TIMEOUT = 4
 
 
 class Cursor:
