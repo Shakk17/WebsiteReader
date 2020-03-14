@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
 from helpers.renderer import render_page
-from helpers.utility import strip_html_tags, get_domain
+from helpers.utility import strip_html_tags, get_domain, extract_words
 
 
 def get_menu(url):
@@ -26,6 +26,9 @@ def get_menu(url):
 
     # Remove elements of the menu with empty texts.
     menu = list(filter(lambda x: len(x[1]) > 0, menu))
+
+    # Remove elements with more than 3 words.
+    menu = list(filter(lambda x: len(extract_words(x[1])) < 4, menu))
 
     # Remove elements of the menu that are not frequent.
     highest_freq = menu[0][0]

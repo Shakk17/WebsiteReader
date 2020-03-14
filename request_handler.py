@@ -124,7 +124,8 @@ class RequestHandler:
             string = self.cursor.string
             # Try both http and https schemas.
             try:
-                url = add_schema(url=string)
+                url = string.replace("www.", "")
+                url = add_schema(url=url)
                 # Try to visit the URL.
                 requests.get(url=url)
             except requests.exceptions.RequestException:
