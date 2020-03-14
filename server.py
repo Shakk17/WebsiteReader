@@ -1,11 +1,17 @@
 from flask import Flask, request, make_response, jsonify
-from time import time
+from helpers.utility import get_time
 
 from request_handler import RequestHandler
+from colorama import Fore, Style
+
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 
 parser = RequestHandler()
+
 
 
 # default route
@@ -16,12 +22,15 @@ def index():
 
 # function for responses
 def results():
-    start = time()
+    print("-" * 20)
+    print(f"{Fore.CYAN}{get_time()} [SERVER] New request received.{Style.RESET_ALL}")
+
     # Parse JSON request into a readable object.
     req = request.get_json(force=True)
 
     obj_response = parser.get_response(req)
-    print("Total time elapsed: %.2f" % (time() - start))
+
+    print(f"{Fore.CYAN}{get_time()} [SERVER] Response sent to the agent.{Style.RESET_ALL}")
     return jsonify(obj_response)
 
 

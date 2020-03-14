@@ -35,13 +35,13 @@ def render_page(url):
     """
     start = time()
     try:
-        print("Rendering page with Selenium...")
+        print("[SELENIUM] Rendering page.")
         driver.get(url)
     except Exception:
-        print(f"Can't access this website: {url}")
+        print(f"[SELENIUM] Can't access this website: {url}")
         raise Exception("Error while visiting the page.")
 
-    print(f"Selenium request elapsed time: {(time() - start):.2f} s")
+    print(f"[SELENIUM] Time: {(time() - start):.2f} s")
 
     html_code = driver.find_element_by_tag_name("html").get_attribute("innerHTML")
 
@@ -54,7 +54,7 @@ def crawl_single_page(url):
     :param url: A string containing the URL of the web page to analyse.
     :return: None.
     """
-    print(f"Crawling single page [{url}] with Selenium...")
+    print(f"[SELENIUM] Scraping of {url} started.")
     driver.get(url)
     links = driver.find_elements(By.XPATH, '//a[@href]')
     links_bs4 = BeautifulSoup(driver.page_source, "lxml").find_all("a")
@@ -79,5 +79,5 @@ def crawl_single_page(url):
         # Save link in database.
         Database().insert_crawler_link(
             page_url=url, href=href, text=text, x_position=x_position, y_position=y_position, in_list=in_list)
-    print("Crawling of single page terminated.")
+    print(f"[SELENIUM] Scraping of {url} terminated.")
     return

@@ -172,19 +172,6 @@ def get_links_positions(container, text, url):
     return links
 
 
-def extract_search_forms(html_code):
-    """
-    This method searches in the web-page if there is an input form used to search something in the page.
-    :return: The text of the input form, if present. None otherwise.
-    """
-    webpage = BeautifulSoup(html_code, "lxml")
-    search_input_forms = webpage.find_all(name='input', attrs={"type": "search"})
-    text_input_forms = webpage.find_all(name='input', attrs={"type": "text"})
-    input_forms = search_input_forms + text_input_forms
-    input_forms_text = [x.get("placeholder") for x in input_forms]
-    return input_forms_text
-
-
 def update_cursor_index(action, old_idx, step, size):
     """
     This method takes an index as an input, and returns an updated index which value depends on the other parameters.

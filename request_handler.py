@@ -3,17 +3,18 @@ import threading
 import time
 import requests
 
-from colorama import Fore, Style
-
 from databases.database_handler import Database
 from helpers.api import get_urls_from_google
+from helpers.helper import update_cursor_index, is_action_recent, get_menu, get_menu_link
+from helpers.printer import green, blue
 from helpers.renderer import crawl_single_page
 from helpers.utility import add_schema, get_domain
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor
-from helpers import helper
+from helpers.utility import get_time
+from colorama import Style
 
-TIMEOUT = 4
+TIMEOUT = 3
 
 
 class Cursor:
@@ -43,15 +44,14 @@ class Cursor:
                 setattr(self, key, value)
 
     def __repr__(self):
-        return (
-            f"{Fore.GREEN}"
+        return (green(
             f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
             f"\tURL: {self.url}\n"
             f"\tIdx sentence: {self.idx_sentence}\n"
             f"\tIdx menu: {self.idx_menu}\n"
             f"\tIdx search result: {self.idx_search_result}\n"
             f"\tIdx link: {self.idx_link}\n"
-            f"{Style.RESET_ALL}")
+        ))
 
 
 class RequestHandler:
@@ -105,7 +105,6 @@ class RequestHandler:
 
         # Get action from request.
         action = request.get('queryResult').get('action')
-        print("-" * 20)
 
         # Get main context from request, if available.
         contexts = request.get("queryResult").get("outputContexts")
@@ -113,7 +112,6 @@ class RequestHandler:
 
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context)
-        print(self.cursor)
 
         # Understand if the string passed is a URL or a query.
 
@@ -175,7 +173,7 @@ class RequestHandler:
         :return: A string containing info about one result of the Google search or info about a web page.
         """
         # Reset the counter if a new search is performed.
-        self.cursor.idx_search_result = helper.update_cursor_index(
+        self.cursor.idx_search_result = update_cursor_index(
             action=action, old_idx=self.cursor.idx_search_result, step=1, size=5)
 
         # If the parameter given by the user was a valid URL, visit the page.
@@ -223,7 +221,7 @@ class RequestHandler:
             to_crawl = True
 
         # If the domain hasn't been crawled in the last week, cancel the result of the previous crawl. Then crawl again.
-        elif not helper.is_action_recent(timestamp=last_time_crawled, days=7):
+        elif not is_action_recent(timestamp=last_time_crawled, days=7):
             print(f"The domain {domain} was last crawled too many days ago.")
             # Remove previous crawling results.
             Database().remove_old_website(domain)
@@ -273,10 +271,10 @@ class RequestHandler:
         :return: A text response containing the options to be shown to the user.
         """
         # Extract the menu from the crawl results.
-        menu = helper.get_menu(self.cursor.url)
+        menu = get_menu(self.cursor.url)
 
         # Update cursor.
-        self.cursor.idx_menu = helper.update_cursor_index(
+        self.cursor.idx_menu = update_cursor_index(
             action=action, old_idx=self.cursor.idx_menu, step=10, size=len(menu))
 
         # Number of choices that will get displayed to the user at once.
@@ -309,7 +307,7 @@ class RequestHandler:
         """
         try:
             # Get URL to visit from the DB.
-            new_url = helper.get_menu_link(url=self.cursor.url, number=self.cursor.number)
+            new_url = get_menu_link(url=self.cursor.url, number=self.cursor.number)
             # Update cursor and visit the page.
             self.cursor.url = new_url
             return self.visit_page()
@@ -322,7 +320,7 @@ class RequestHandler:
         It also updates the cursor.
         :return: A text response containing a part of the main text of the web page.
         """
-        self.cursor.idx_sentence = helper.update_cursor_index(
+        self.cursor.idx_sentence = update_cursor_index(
             action=action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
         self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         try:
@@ -369,7 +367,7 @@ class RequestHandler:
 
     def read_links(self, action):
         links = self.page_visitor.read_links(url=self.cursor.url)
-        self.cursor.idx_link = helper.update_cursor_index(
+        self.cursor.idx_link = update_cursor_index(
             action=action, old_idx=self.cursor.idx_link, step=1, size=len(links))
         if len(links) > 0:
             try:
@@ -417,7 +415,7 @@ class RequestHandler:
         time.sleep(seconds)
         # After the timer is over, if the main thread has not finished yet, send the request for more time.
         if self.q.empty():
-            print(f"{Fore.CYAN}Sent request for more time.{Style.RESET_ALL}")
+            print(blue(f"{get_time()} [SERVER] Sent request for more time."))
             # Send a response to server to ask for more time. Valid only two times.
             self.q.put(
                 {

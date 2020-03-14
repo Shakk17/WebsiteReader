@@ -15,6 +15,7 @@ class PageVisitor:
     """
     An object that holds the HTML code (no JS support to be loaded quicker) of a web page.
     """
+
     def __init__(self, url, quick_download=True):
         self.url = url
         self.html_code = None
@@ -27,10 +28,10 @@ class PageVisitor:
         For speed purposes, Javascript is not supported.
         :return: The HTML code of the web page.
         """
-        print("Requesting HTML web page with requests...")
+        print("[WEB PAGE] Getting HTML code (requests).")
         start = time()
         html = requests.get(self.url)
-        print(f"Quick HTML request elapsed time: {(time() - start):.2f} s")
+        print(f"[WEB PAGE] Quick HTML request elapsed time: {(time() - start):.2f} s")
 
         return html.text
 
@@ -42,6 +43,7 @@ class PageVisitor:
         :return: A text response to be shown to the user containing info about the page.
         """
         start = time()
+        print("[WEB PAGE] Extracting information.")
 
         # Check in the database if the web page has already been visited.
         result = Database().last_time_visited(url=self.url)
@@ -52,8 +54,6 @@ class PageVisitor:
             Database().delete_text_links(url=self.url)
 
         if result is None:
-            print("Calling Aylien API to extract information...")
-
             # Get info from the Aylien API.
             topic = "unknown"
             language = "unknown"
@@ -66,7 +66,7 @@ class PageVisitor:
         else:
             topic, language = result[1], result[2]
 
-        search_form = helper.extract_search_forms(self.html_code)
+        search_form = self.extract_search_forms()
 
         text_response = (
             f"The title of this page is {BeautifulSoup(self.html_code, 'lxml').title.string}.\n"
@@ -77,10 +77,7 @@ class PageVisitor:
         if len(search_form) > 0:
             text_response += f"There are search forms in this page called {search_form}"
 
-        print(f"TOPIC: {topic}")
-        print(f"LANGUAGE: {language}")
-
-        print(f"Info retrieval elapsed time: {(time() - start):.2f} s")
+        print(f"[WEB PAGE] Info retrieval: {(time() - start):.2f} s")
 
         return text_response
 
@@ -113,13 +110,13 @@ class PageVisitor:
             if i < 10:
                 string_offset = i * len(f"[LINK {i}]")
             elif i < 100:
-                string_offset = 9 * len(f"[LINK 1]") + (i-9) * len(f"[LINK {i+1}]")
+                string_offset = 9 * len(f"[LINK 1]") + (i - 9) * len(f"[LINK {i + 1}]")
             else:
-                string_offset = 9 * len(f"[LINK 1]") + 90 * len(f"[LINK 10]") + (i-99) * len(f"[LINK {i+1}]")
+                string_offset = 9 * len(f"[LINK 1]") + 90 * len(f"[LINK 10]") + (i - 99) * len(f"[LINK {i + 1}]")
 
             # Add the indicator [LINK n] to the main string.
             offset = start_link + string_offset
-            text = f"{text[:offset]}[LINK {i+1}]{text[offset:]}"
+            text = f"{text[:offset]}[LINK {i + 1}]{text[offset:]}"
 
         # Split up the main text in sentences.
         split_text = text.split('.')
@@ -178,3 +175,15 @@ class PageVisitor:
                     texts.append(link[0])
 
         return new_links
+
+    def extract_search_forms(self):
+        """
+        This method searches in the web-page if there is an input form used to search something in the page.
+        :return: The text of the input form, if present. None otherwise.
+        """
+        webpage = BeautifulSoup(self.html_code, "lxml")
+        search_input_forms = webpage.find_all(name='input', attrs={"type": "search"})
+        text_input_forms = webpage.find_all(name='input', attrs={"type": "text"})
+        input_forms = search_input_forms + text_input_forms
+        input_forms_text = [x.get("placeholder") for x in input_forms]
+        return input_forms_text

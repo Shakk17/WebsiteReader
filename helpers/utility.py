@@ -1,3 +1,4 @@
+import datetime
 import html
 import re
 
@@ -59,3 +60,13 @@ def extract_words(string):
     regex = r'\b\w+\b'
     words = re.findall(regex, string)
     return words
+
+
+def get_time():
+    """
+    This method returns a string containing the current time.
+    :return: String in format HH:MM:SS.
+    """
+    time = datetime.datetime.now().time()
+    string = time.strftime("%H:%M:%S")
+    return string
