@@ -5,13 +5,13 @@ from request_handler import RequestHandler
 from colorama import Fore, Style
 
 import logging
+
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 
 parser = RequestHandler()
-
 
 
 # default route
@@ -30,7 +30,6 @@ def results():
 
     obj_response = parser.get_response(req)
 
-    print(f"{Fore.CYAN}{get_time()} [SERVER] Response sent to the agent.{Style.RESET_ALL}")
     return jsonify(obj_response)
 
 

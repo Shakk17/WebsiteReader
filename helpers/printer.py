@@ -11,3 +11,7 @@ def red(string):
 
 def green(string):
     return f"{Fore.GREEN}{string}{Style.RESET_ALL}"
+
+
+def yellow(string):
+    return f"{Fore.YELLOW}{string}{Style.RESET_ALL}"

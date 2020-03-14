@@ -2,6 +2,8 @@ from time import time
 
 from aylienapiclient import textapi
 from googleapiclient.discovery import build
+
+from helpers.printer import yellow
 from helpers.utility import get_time
 
 aylien_client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
@@ -13,7 +15,7 @@ def get_urls_from_google(query):
     :param query: A string containing the query to input into Google Search.
     :return: A list containing tuples (title, URL, snippet) of the first 5 results.
     """
-    print(f"{get_time()} [GOOGLE API] Search started.")
+    print(yellow(f"{get_time()} [GOOGLE API] Search started."))
     # Perform Google Search.
     api_key = "AIzaSyBxmCvHuuBmno25vybpLHEmVL1sOZusYa0"
     cse_id = "001618926378962890992:ri89cvvqaiw"
@@ -21,7 +23,7 @@ def get_urls_from_google(query):
     query_results = query_service.cse().list(q=query, cx=cse_id).execute().get("items")
     # Get results.
     results = [(result.get("title"), result.get("link"), result.get("snippet")) for result in query_results]
-    print(f"{get_time()} [GOOGLE API] Search finished.")
+    print(yellow(f"{get_time()} [GOOGLE API] Search finished."))
     return results
 
 
@@ -31,7 +33,7 @@ def get_info_from_aylien_api(url):
     :param url: A string containing the URL of the web page.
     :return: A tuple (topic, language) containing info about the web page.
     """
-    print(f"{get_time()} [AYLIEN API] Info extraction started.")
+    print(yellow(f"{get_time()} [AYLIEN API] Info extraction started."))
     # This is a combined call to the Aylien APIs.
     combined = aylien_client.Combined({
         'url': url,
@@ -49,7 +51,7 @@ def get_info_from_aylien_api(url):
             topic = "unknown"
     except IndexError:
         topic = "unknown"
-    print(f"{get_time()} [AYLIEN API] Info extraction finished.")
+    print(yellow(f"{get_time()} [AYLIEN API] Info extraction finished."))
     return topic, language
 
 
@@ -59,7 +61,7 @@ def get_text_from_aylien_api(url):
     :param url: A string containing the URL of the web page.
     :return: A string containing the main text of the web page.
     """
-    print(f"{get_time()} [AYLIEN API] Main text extraction started.")
+    print(yellow(f"{get_time()} [AYLIEN API] Main text extraction started."))
     text = aylien_client.Extract({'url': url})
-    print(f"{get_time()} [AYLIEN API] Main text extraction finished.")
+    print(yellow(f"{get_time()} [AYLIEN API] Main text extraction finished."))
     return text.get("article")

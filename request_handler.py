@@ -6,7 +6,7 @@ import requests
 from databases.database_handler import Database
 from helpers.api import get_urls_from_google
 from helpers.helper import update_cursor_index, is_action_recent, get_menu, get_menu_link
-from helpers.printer import green, blue
+from helpers.printer import green, blue, red
 from helpers.renderer import crawl_single_page
 from helpers.utility import add_schema, get_domain
 from scraping.crawler_handler import Crawler
@@ -91,7 +91,10 @@ class RequestHandler:
 
         # Print the cursor in the console only if the action asked by the user has been completed.
         if result.get("fulfillmentText") is not None:
-            print(self.cursor)
+            # print(self.cursor)
+            print(blue(f"{get_time()} [SERVER] Response sent to the server."))
+        else:
+            print(red(f"{get_time()} [SERVER] Sent request for more time."))
 
         return result
 
@@ -415,7 +418,6 @@ class RequestHandler:
         time.sleep(seconds)
         # After the timer is over, if the main thread has not finished yet, send the request for more time.
         if self.q.empty():
-            print(blue(f"{get_time()} [SERVER] Sent request for more time."))
             # Send a response to server to ask for more time. Valid only two times.
             self.q.put(
                 {

@@ -8,7 +8,7 @@ from databases.database_handler import Database
 from datumbox_wrapper import get_language_string
 from helpers import helper
 from helpers.api import get_info_from_aylien_api, get_text_from_aylien_api
-from helpers.utility import extract_words
+from helpers.utility import extract_words, get_time
 
 
 class PageVisitor:
@@ -28,10 +28,10 @@ class PageVisitor:
         For speed purposes, Javascript is not supported.
         :return: The HTML code of the web page.
         """
-        print("[WEB PAGE] Getting HTML code (requests).")
+        print(f"{get_time()} [WEB PAGE] Getting HTML code (requests).")
         start = time()
         html = requests.get(self.url)
-        print(f"[WEB PAGE] Quick HTML request elapsed time: {(time() - start):.2f} s")
+        print(f"{get_time()} [WEB PAGE] Quick HTML request elapsed time: {(time() - start):.2f} s")
 
         return html.text
 
@@ -43,7 +43,7 @@ class PageVisitor:
         :return: A text response to be shown to the user containing info about the page.
         """
         start = time()
-        print("[WEB PAGE] Extracting information.")
+        print(f"{get_time()} [WEB PAGE] Information extraction started.")
 
         # Check in the database if the web page has already been visited.
         result = Database().last_time_visited(url=self.url)
@@ -77,7 +77,7 @@ class PageVisitor:
         if len(search_form) > 0:
             text_response += f"There are search forms in this page called {search_form}"
 
-        print(f"[WEB PAGE] Info retrieval: {(time() - start):.2f} s")
+        print(f"{get_time()} [WEB PAGE] Information extraction finished.")
 
         return text_response
 
