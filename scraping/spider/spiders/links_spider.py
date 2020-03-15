@@ -1,5 +1,4 @@
 import scrapy
-from colorama import Fore, Style
 from scrapy import signals
 
 from helpers.helper import get_domain
@@ -52,5 +51,5 @@ class LinksSpider(scrapy.Spider):
                 yield response.follow(link_url, callback=self.parse)
 
     def spider_closed(self, spider):
-        print(magenta(f"Scraping of {self.start_urls[0]} finished."))
+        print(magenta(f"[CRAWLER] Crawling of {self.start_urls[0]} finished."))
         spider.logger.info('Spider closed: %s', spider.name)

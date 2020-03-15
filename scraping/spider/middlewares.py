@@ -4,51 +4,17 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-import os
-
-from scrapy import signals
-from scrapy.http import HtmlResponse
-
-from helpers.printer import magenta
-from helpers.renderer import StaleElementReferenceException
-from helpers.renderer import By
-from seleniumwire import webdriver
-
-from helpers.helper import get_domain
-from scraping.spider.items import UrlItem
 
 from bs4 import BeautifulSoup
+from scrapy import signals
+from scrapy.http import HtmlResponse
+from selenium.webdriver.common.by import By
 
-options = webdriver.ChromeOptions()
-options.add_argument('headless')
-options.add_argument('window-size=500x1024')
-options.add_argument("load-extension=chrome_extensions/uBlock")
-options.add_argument("load-extension=chrome_extensions/no_cookies")
-options.add_argument(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36")
-# Avoid loading images.
-prefs = {"profile.managed_default_content_settings.images": 2}
-options.add_experimental_option("prefs", prefs)
-
-driver = webdriver.Chrome(options=options)
-
-# HEROKU
-"""options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
-
-driver.header_overrides = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7,es;q=0.6,fr;q=0.5,nl;q=0.4,sv;q=0.3",
-    "Dnt": "1",
-    "Referer": "https://www.google.com/",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "cross-site",
-    "Sec-Fetch-User": "?1",
-    "Upgrade-Insecure-Requests": "1"
-}
+from helpers.helper import get_domain
+from helpers.printer import magenta
+from helpers.renderer import get_firefox_browser
+from helpers.renderer import StaleElementReferenceException
+from scraping.spider.items import UrlItem
 
 
 class SpiderSpiderMiddleware(object):
@@ -117,18 +83,19 @@ class SpiderDownloaderMiddleware(object):
         spider.visited_links.append(request.url)
         print(magenta(f"({len(spider.visited_links)}) Scraping {request.url}"))
 
-        driver.get(request.url)
+        browser = get_firefox_browser()
+        browser.get(request.url)
+        body = browser.page_source
+        url = browser.current_url
 
-        body = driver.page_source
+        # Extract all links from the page.
+        links = browser.find_elements(By.XPATH, '//a[@href]')
+        links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
+        links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 
         # Create a string containing all the links in the page, with location.
         # FORMAT: href * text * x_position * y_position $
         string_links = ""
-
-        # Extract all links from the page.
-        links = driver.find_elements(By.XPATH, '//a[@href]')
-        links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
-        links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 
         for i, link in enumerate(links):
             try:
@@ -155,7 +122,7 @@ class SpiderDownloaderMiddleware(object):
         # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = string_links.encode(encoding='UTF-8')
 
-        return HtmlResponse(driver.current_url, body=bytes_links, encoding='utf-8', request=request)
+        return HtmlResponse(url, body=bytes_links, encoding='utf-8', request=request)
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
@@ -198,4 +165,5 @@ class SpiderDownloaderMiddleware(object):
         pass
 
     def spider_opened(self, spider):
+        print(magenta(f"[CRAWLER] Crawling of {spider.start_urls[0]} started."))
         spider.logger.info('Spider opened: %s' % spider.name)
