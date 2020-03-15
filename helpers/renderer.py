@@ -9,12 +9,7 @@ from databases.database_handler import Database
 from helpers.utility import strip_html_tags, get_time
 
 
-def get_firefox_browser(heroku=False):
-    options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
-    options.add_argument("window-size=500x1024")
-    options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0")
-
+def get_firefox_profile():
     profile = webdriver.FirefoxProfile()
     # AdBlockPlus extension.
     profile.add_extension("firefox_extensions/{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi")
@@ -25,6 +20,14 @@ def get_firefox_browser(heroku=False):
     # I don't care about cookies extension.
     profile.add_extension("firefox_extensions/jid1-KKzOGWgsW3Ao4Q@jetpack.xpi")
     profile.set_preference("extensions.idontcareaboutcookies.currentVersion", "3.1.3")
+    return profile
+
+
+def get_firefox_options(heroku=False):
+    options = webdriver.FirefoxOptions()
+    options.add_argument("--headless")
+    options.add_argument("window-size=500x1024")
+    options.add_argument("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0")
 
     if heroku:
         # HEROKU
@@ -33,8 +36,10 @@ def get_firefox_browser(heroku=False):
         options.add_argument("--no-sandbox")
         driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=options)"""
         pass
+    return options
 
-    driver = webdriver.Firefox(options=options, firefox_profile=profile)
+
+def add_headers_to_driver(driver):
     header_overrides = {
         "Accept": """text/html,application/xhtml+xml,application/xml;
                     q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9""",
@@ -60,7 +65,7 @@ def render_page(url):
     """
     try:
         print(f"{get_time()} [SELENIUM] Page rendering started.")
-        browser = get_firefox_browser()
+        browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
         browser.get(url)
     except Exception:
         print(f"[SELENIUM] Can't access this website: {url}")
@@ -69,7 +74,6 @@ def render_page(url):
     print(f"{get_time()} [SELENIUM] Page rendering finished.")
 
     html_code = browser.find_element_by_tag_name("html").get_attribute("innerHTML")
-    browser.quit()
 
     return html_code
 
@@ -81,11 +85,10 @@ def crawl_single_page(url):
     :return: None.
     """
     print(f"[SELENIUM] Scraping of {url} started.")
-    browser = get_firefox_browser()
+    browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
     browser.get(url)
     links = browser.find_elements(By.XPATH, '//a[@href]')
     body = browser.page_source
-    browser.quit()
 
     links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
     links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))

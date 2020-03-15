@@ -9,11 +9,11 @@ from bs4 import BeautifulSoup
 from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium.webdriver.common.by import By
+from seleniumwire import webdriver
 
 from helpers.helper import get_domain
 from helpers.printer import magenta
-from helpers.renderer import get_firefox_browser
-from helpers.renderer import StaleElementReferenceException
+from helpers.renderer import StaleElementReferenceException, get_firefox_options, get_firefox_profile
 from scraping.spider.items import UrlItem
 
 
@@ -83,7 +83,7 @@ class SpiderDownloaderMiddleware(object):
         spider.visited_links.append(request.url)
         print(magenta(f"({len(spider.visited_links)}) Scraping {request.url}"))
 
-        browser = get_firefox_browser()
+        browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
         browser.get(request.url)
         body = browser.page_source
         url = browser.current_url
@@ -151,7 +151,7 @@ class SpiderDownloaderMiddleware(object):
                 pipeline = spider.crawler.engine.scraper.itemproc
                 pipeline.process_item(url_item, self)
 
-        print(f"({len(spider.visited_links)}) {num_links} links saved.")
+        print(f"({get_domain(request.url)} - {len(spider.visited_links)}) {num_links} links saved.")
         return response
 
     def process_exception(self, request, exception, spider):
