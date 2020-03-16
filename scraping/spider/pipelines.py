@@ -31,13 +31,11 @@ class SpiderPipeline(object):
         session = self.Session()
 
         try:
-            if len(item) == 6:
+            if len(item) == 4:
                 link = Link()
                 link.page_url = item["page_url"]
                 link.link_url = item["link_url"]
-                link.link_text = strip_html_tags(item["link_text"])
-                link.x_position = item["x_position"]
-                link.y_position = item["y_position"]
+                link.link_text = item["link_text"]
                 link.in_list = item["in_list"]
                 self.links.append(link)
             else:

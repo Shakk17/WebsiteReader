@@ -11,10 +11,10 @@ from scrapy.http import HtmlResponse
 from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
-from helpers.utility import get_time, get_domain
+from helpers.utility import get_time, get_domain, strip_html_tags
 from helpers.printer import magenta
-from helpers.renderer import StaleElementReferenceException, get_firefox_options, get_firefox_profile, \
-    add_headers_to_driver
+from helpers.browser import StaleElementReferenceException, get_firefox_options, get_firefox_profile, \
+    add_headers_to_driver, get_quick_html
 from scraping.spider.items import UrlItem
 
 
@@ -84,16 +84,11 @@ class SpiderDownloaderMiddleware(object):
         spider.visited_links.append(request.url)
         print(magenta(f"{get_time()} ({len(spider.visited_links)}) Scraping {request.url}"))
 
-        browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
-        browser = add_headers_to_driver(browser)
-        browser.get(request.url)
-        body = browser.page_source
-        url = browser.current_url
+        body = get_quick_html(request.url)
 
         # Extract all links from the page.
-        links = browser.find_elements(By.XPATH, '//a[@href]')
-        links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
-        links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
+        links = BeautifulSoup(body, "lxml").find_all("a")
+        links = list(filter(lambda x: x.get("href") is not None, links))
 
         # Create a string containing all the links in the page, with location.
         # FORMAT: href * text * x_position * y_position $
@@ -101,32 +96,28 @@ class SpiderDownloaderMiddleware(object):
 
         for i, link in enumerate(links):
             try:
-                href = link.get_attribute("href")
-                text = link.get_attribute("innerHTML")
-                x_position = str(link.location.get('x'))
-                y_position = str(link.location.get('y'))
+                href = link.get("href")
+                text = strip_html_tags(link.text)
                 # True if the element is contained in a list container.
                 try:
-                    in_list = "li" in [parent.name for parent in links_bs4[i].parents]
+                    in_list = "li" in [parent.name for parent in links[i].parents]
                 except IndexError:
                     in_list = False
 
                 # If the link links to the same page, discard it.
-                hash_position = link.get_attribute("href").find("#")
-                if link.get_attribute("href")[:hash_position] == request.url:
+                hash_position = href.find("#")
+                if href[:hash_position] == request.url:
                     continue
 
                 # Add the link to the string of bytes to be returned.
-                string_links += href + "*" + text + "*" + x_position + "*" + y_position + "*" + str(int(in_list)) + "$"
+                string_links += href + "*" + text + "*" + str(int(in_list)) + "$"
             except StaleElementReferenceException:
                 continue
 
         # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = string_links.encode(encoding='UTF-8')
 
-        browser.close()
-
-        return HtmlResponse(url, body=bytes_links, encoding='utf-8', request=request)
+        return HtmlResponse(request.url, body=bytes_links, encoding='utf-8', request=request)
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
@@ -134,9 +125,9 @@ class SpiderDownloaderMiddleware(object):
         # Decode the bytes string contained in the response body.
         links = response.body.decode(encoding='UTF-8').split("$")
         # Unpack the string in order to read the fields.
-        # FORMAT: href * text * x_position * y_position $
+        # FORMAT: href * text * in_list $
         links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 5, links))
+        links = list(filter(lambda x: len(x) == 3, links))
 
         num_links = 0
         # Analyze each link found in the page.
@@ -144,12 +135,10 @@ class SpiderDownloaderMiddleware(object):
             url_item = UrlItem()
             url_item["link_url"] = link[0]
             url_item["link_text"] = link[1]
-            url_item["x_position"] = link[2]
-            url_item["y_position"] = link[3]
             url_item["page_url"] = response.url
-            url_item["in_list"] = link[4]
+            url_item["in_list"] = link[2]
             # We save the link in the DB only if it belongs to the domain.
-            if get_domain(response.url) in link[0] and not (link[1] == "" or int(link[3]) == 0):
+            if get_domain(response.url) in link[0]:
                 num_links += 1
                 # Call pipeline.
                 pipeline = spider.crawler.engine.scraper.itemproc

@@ -7,7 +7,7 @@ from databases.database_handler import Database
 from helpers.api import get_urls_from_google
 from helpers.helper import update_cursor_index, is_action_recent, get_menu, get_menu_link
 from helpers.printer import green, blue, red
-from helpers.renderer import crawl_single_page
+from helpers.browser import crawl_single_page
 from helpers.utility import add_schema, get_domain
 from scraping.crawler_handler import Crawler
 from page_visitor import PageVisitor

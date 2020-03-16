@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 
 from databases.database_handler import Database
 from helpers.utility import strip_html_tags, get_time
+import requests
 
 
 def get_firefox_profile():
@@ -57,6 +58,11 @@ def add_headers_to_driver(driver):
     return driver
 
 
+def get_quick_html(url):
+    html = requests.get(url=url).text
+    return html
+
+
 def render_page(url):
     """
     This method returns the HTML code of a web page. It uses Selenium, thus it supports Javascript.
@@ -91,7 +97,7 @@ def crawl_single_page(url):
     browser.get(url)
     links = browser.find_elements(By.XPATH, '//a[@href]')
     body = browser.page_source
-    
+
     links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
     links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 

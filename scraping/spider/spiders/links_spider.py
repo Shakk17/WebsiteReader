@@ -37,9 +37,9 @@ class LinksSpider(scrapy.Spider):
         links = response.body.decode(encoding='UTF-8').split("$")
 
         # Unpack the string in order to read the fields.
-        # FORMAT: href * text * x_position * y_position * in_list $
+        # FORMAT: href * text * in_list $
         links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 5, links))
+        links = list(filter(lambda x: len(x) == 3, links))
 
         # Shuffle the links to improve variance.
         random.shuffle(links)

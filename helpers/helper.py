@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
-from helpers.renderer import render_page
+from helpers.browser import render_page
 from helpers.utility import strip_html_tags, get_domain, extract_words
 
 

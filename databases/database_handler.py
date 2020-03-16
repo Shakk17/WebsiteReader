@@ -19,8 +19,8 @@ sql_create_crawler_links_table = """CREATE TABLE IF NOT EXISTS crawler_links (
                                     page_url text NOT NULL,
                                     link_url text NOT NULL,
                                     link_text text NOT NULL,
-                                    x_position integer NOT NULL,
-                                    y_position integer NOT NULL,
+                                    x_position integer,
+                                    y_position integer,
                                     in_list integer NOT NULL,
                                     FOREIGN KEY (page_url) REFERENCES websites (domain)
                                 );"""
