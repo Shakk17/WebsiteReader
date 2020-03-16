@@ -145,11 +145,15 @@ class SpiderDownloaderMiddleware(object):
             url_item["page_url"] = response.url
             url_item["in_list"] = link[4]
             # We save the link in the DB only if it belongs to the domain.
-            if get_domain(response.url) in link[0]:
+            if get_domain(response.url) in link[0] and not (link[1] == "" or int(link[3]) == 0):
                 num_links += 1
                 # Call pipeline.
                 pipeline = spider.crawler.engine.scraper.itemproc
                 pipeline.process_item(url_item, self)
+
+        # Order the pipeline to perform a bulk insertion.
+        pipeline = spider.crawler.engine.scraper.itemproc
+        pipeline.process_item("Bulk insertion.", self)
 
         print(f"({get_domain(request.url)} - {len(spider.visited_links)}) {num_links} links saved.")
         return response

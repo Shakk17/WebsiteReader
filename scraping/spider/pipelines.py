@@ -22,33 +22,31 @@ class SpiderPipeline(object):
         engine = db_connect()
         create_table(engine)
         self.Session = sessionmaker(bind=engine)
+        self.links = []
 
     def process_item(self, item, spider):
-        """Save quotes in the database
+        """
         This method is called for every item pipeline component
         """
         session = self.Session()
-        link = Link()
-        link.page_url = item["page_url"]
-        link.link_url = item["link_url"]
-        link.link_text = strip_html_tags(item["link_text"])
-        link.x_position = item["x_position"]
-        link.y_position = item["y_position"]
-        link.in_list = item["in_list"]
-
-        # Do not save the link in the DB if these conditions apply.
-        if link.link_text == "" or int(link.y_position) == 0:
-            session.close()
-            return item
 
         try:
-            session.add(link)
-            session.commit()
-
-        except:
+            if len(item) == 6:
+                link = Link()
+                link.page_url = item["page_url"]
+                link.link_url = item["link_url"]
+                link.link_text = strip_html_tags(item["link_text"])
+                link.x_position = item["x_position"]
+                link.y_position = item["y_position"]
+                link.in_list = item["in_list"]
+                self.links.append(link)
+            else:
+                session.bulk_save_objects(self.links)
+                session.commit()
+                self.links = []
+        except Exception:
             session.rollback()
             raise
-
         finally:
             session.close()
 

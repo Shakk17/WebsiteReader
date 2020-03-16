@@ -3,6 +3,7 @@ from scrapy import signals
 
 from helpers.helper import get_domain
 from helpers.printer import magenta
+from helpers.utility import add_schema
 
 
 class LinksSpider(scrapy.Spider):
@@ -40,7 +41,7 @@ class LinksSpider(scrapy.Spider):
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
-            link_url = link[0]
+            link_url = add_schema(link[0])
 
             # Skip PDF files.
             if link_url[-3:] in ["pdf", "jpg", "png"]:
