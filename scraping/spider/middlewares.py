@@ -11,9 +11,10 @@ from scrapy.http import HtmlResponse
 from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
-from helpers.helper import get_domain
+from helpers.utility import get_time, get_domain
 from helpers.printer import magenta
-from helpers.renderer import StaleElementReferenceException, get_firefox_options, get_firefox_profile
+from helpers.renderer import StaleElementReferenceException, get_firefox_options, get_firefox_profile, \
+    add_headers_to_driver
 from scraping.spider.items import UrlItem
 
 
@@ -81,9 +82,10 @@ class SpiderDownloaderMiddleware(object):
         # Called for each request that goes through the downloader middleware.
 
         spider.visited_links.append(request.url)
-        print(magenta(f"({len(spider.visited_links)}) Scraping {request.url}"))
+        print(magenta(f"{get_time()} ({len(spider.visited_links)}) Scraping {request.url}"))
 
         browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
+        browser = add_headers_to_driver(browser)
         browser.get(request.url)
         body = browser.page_source
         url = browser.current_url
@@ -121,6 +123,8 @@ class SpiderDownloaderMiddleware(object):
 
         # Transform the string to binary code in order to be passed as a parameter.
         bytes_links = string_links.encode(encoding='UTF-8')
+
+        browser.close()
 
         return HtmlResponse(url, body=bytes_links, encoding='utf-8', request=request)
 

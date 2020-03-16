@@ -5,6 +5,8 @@ from helpers.helper import get_domain
 from helpers.printer import magenta
 from helpers.utility import add_schema
 
+import random
+
 
 class LinksSpider(scrapy.Spider):
     name = "links"
@@ -38,6 +40,9 @@ class LinksSpider(scrapy.Spider):
         # FORMAT: href * text * x_position * y_position * in_list $
         links = [link.split("*") for link in links]
         links = list(filter(lambda x: len(x) == 5, links))
+
+        # Shuffle the links to improve variance.
+        random.shuffle(links)
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):

@@ -75,6 +75,8 @@ def render_page(url):
 
     html_code = browser.find_element_by_tag_name("html").get_attribute("innerHTML")
 
+    browser.close()
+
     return html_code
 
 
@@ -89,7 +91,7 @@ def crawl_single_page(url):
     browser.get(url)
     links = browser.find_elements(By.XPATH, '//a[@href]')
     body = browser.page_source
-
+    
     links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
     links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 
@@ -112,5 +114,7 @@ def crawl_single_page(url):
         # Save link in database.
         Database().insert_crawler_link(
             page_url=url, href=href, text=text, x_position=x_position, y_position=y_position, in_list=in_list)
+
     print(f"[SELENIUM] Scraping of {url} terminated.")
+    browser.close()
     return
