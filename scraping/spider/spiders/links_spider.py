@@ -1,9 +1,11 @@
 import scrapy
-from colorama import Fore, Style
 from scrapy import signals
 
 from helpers.helper import get_domain
 from helpers.printer import magenta
+from helpers.utility import add_schema
+
+import random
 
 
 class LinksSpider(scrapy.Spider):
@@ -39,9 +41,12 @@ class LinksSpider(scrapy.Spider):
         links = [link.split("*") for link in links]
         links = list(filter(lambda x: len(x) == 5, links))
 
+        # Shuffle the links to improve variance.
+        random.shuffle(links)
+
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
-            link_url = link[0]
+            link_url = add_schema(link[0])
 
             # Skip PDF files.
             if link_url[-3:] in ["pdf", "jpg", "png"]:
@@ -52,5 +57,5 @@ class LinksSpider(scrapy.Spider):
                 yield response.follow(link_url, callback=self.parse)
 
     def spider_closed(self, spider):
-        print(magenta(f"Scraping of {self.start_urls[0]} finished."))
+        print(magenta(f"[CRAWLER] Crawling of {self.start_urls[0]} finished."))
         spider.logger.info('Spider closed: %s', spider.name)

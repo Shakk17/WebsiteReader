@@ -1,0 +1,529 @@
+1584353190427	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofiledA7wA8"
+*** You are running in headless mode.
+1584353191417	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584353191596	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584353191706	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584353191735	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584353191735	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584353191735	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584353191735	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584353194386	Marionette	INFO	Listening on port 54498
+1584353194473	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584353194542	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584353194554	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:54479","noProxy":[],"sslProxy":"127.0.0.1:54479"}
+JavaScript warning: moz-extension://82ede743-373c-4722-8e76-b5f721ab454a/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+JavaScript error: moz-extension://82ede743-373c-4722-8e76-b5f721ab454a/lib/adblockplus.js, line 0: Error: frame.state is undefined
+1584353920221	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofilem0RevP"
+*** You are running in headless mode.
+1584353920961	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584353921151	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584353921262	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584353921275	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584353921275	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584353921275	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584353921275	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584353923436	Marionette	INFO	Listening on port 56827
+1584353923515	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://7617d8d4-43fa-45b6-88fb-ce43e7286f56/include.preload.js, line 560: TypeError: response is undefined
+JavaScript warning: moz-extension://7617d8d4-43fa-45b6-88fb-ce43e7286f56/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584353923894	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584353923910	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:56811","noProxy":[],"sslProxy":"127.0.0.1:56811"}
+JavaScript error: resource://gre/modules/NetworkGeolocationProvider.jsm, line 555: TypeError: xhr.response.location is undefined
+JavaScript error: resource://gre/modules/WebNavigationContent.js, line 271: NS_NOINTERFACE: Component returned failure code: 0x80004002 (NS_NOINTERFACE) [nsIWebProgress.DOMWindow]
+JavaScript error: resource://gre/modules/WebNavigationContent.js, line 271: NS_NOINTERFACE: Component returned failure code: 0x80004002 (NS_NOINTERFACE) [nsIWebProgress.DOMWindow]
+1584356047691	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofilegrj7WJ"
+*** You are running in headless mode.
+1584356048353	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584356048479	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584356048574	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584356048606	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584356048606	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584356048606	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584356048606	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584356050251	Marionette	INFO	Listening on port 61037
+1584356050316	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584356050332	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584356050345	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:61025","noProxy":[],"sslProxy":"127.0.0.1:61025"}
+JavaScript warning: moz-extension://13cd1e4c-844e-409f-8216-eaac5d7335df/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+JavaScript error: moz-extension://13cd1e4c-844e-409f-8216-eaac5d7335df/lib/adblockplus.js, line 0: Error: frame.state is undefined
+JavaScript error: https://www.open.online/ line 1 > scriptElement, line 2: ReferenceError: COOKIES_ENABLER is not defined
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+Exiting due to channel error.
+eveloper Edition\\firefox.exe" "-marionette" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile56sZyS"
+1584356157745	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584356158252	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584356158252	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584356158252	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584356158252	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584356160555	Marionette	INFO	Listening on port 61430
+1584356160927	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584356165853	Marionette	INFO	Stopped listening on port 61430
+
+###!!! [Child][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+
+###!!! [Child][MessageChannel::SendAndWait] Error: Channel error: cannot send/recv
+
+1584370491450	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile924jQG"
+*** You are running in headless mode.
+1584370492142	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584370492307	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584370492431	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584370492451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584370492451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584370492451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584370492451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584370494978	Marionette	INFO	Listening on port 50180
+1584370495066	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584370495088	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584370495100	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:50156","noProxy":[],"sslProxy":"127.0.0.1:50156"}
+JavaScript warning: moz-extension://003e1568-8cc7-4853-952b-14fcf2aa7175/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+JavaScript error: moz-extension://003e1568-8cc7-4853-952b-14fcf2aa7175/lib/adblockplus.js, line 0: Error: frame.state is undefined
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+Extension error: [Exception... "Component returned failure code: 0x80070057 (NS_ERROR_ILLEGAL_VALUE) [nsIDOMWindowUtils.addSheet]"  nsresult: "0x80070057 (NS_ERROR_ILLEGAL_VALUE)"  location: "JS frame :: resource://gre/modules/ExtensionCommon.jsm :: runSafeSyncWithoutClone :: line 75"  data: no] undefined 75
+[[Exception stack
+runSafeSyncWithoutClone@resource://gre/modules/ExtensionCommon.jsm:75:12
+inject/cssPromise<@resource://gre/modules/ExtensionContent.jsm:516:36
+Current stack
+runSafeSyncWithoutClone@resource://gre/modules/ExtensionCommon.jsm:81:9
+inject/cssPromise<@resource://gre/modules/ExtensionContent.jsm:516:36
+]]
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+1584373936745	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileV6R22i"
+*** You are running in headless mode.
+1584373937888	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584373938074	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584373938185	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584373938219	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584373938219	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584373938219	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584373938219	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584373940505	Marionette	INFO	Listening on port 59853
+1584373940611	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://fb590bbc-262d-411b-ae75-ed1a2e531d10/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584373940868	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584373940881	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:59832","noProxy":[],"sslProxy":"127.0.0.1:59832"}
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript error: https://a.espncdn.com/redesign/0.485.10/js/espn-critical.js, line 9: TypeError: window.moatPrebidApi is undefined
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+1584374365677	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileOdAd0h"
+*** You are running in headless mode.
+1584374366298	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584374366474	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584374366583	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584374366597	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584374366597	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584374366597	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584374366597	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584374368678	Marionette	INFO	Listening on port 60726
+1584374368799	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584374368830	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584374368849	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:60708","noProxy":[],"sslProxy":"127.0.0.1:60708"}
+JavaScript warning: moz-extension://073e081d-3f87-485f-818e-9b7f9cf8b9a4/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+JavaScript error: moz-extension://073e081d-3f87-485f-818e-9b7f9cf8b9a4/lib/adblockplus.js, line 0: Error: frame.state is undefined
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+1584374768860	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileiNDL0p"
+*** You are running in headless mode.
+1584374769563	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584374769743	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584374769862	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584374769877	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584374769878	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584374769878	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584374769878	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584374772132	Marionette	INFO	Listening on port 62114
+1584374772218	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://cdde2f21-7d75-4ae1-83e1-b7f8d9a3a66e/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584374772493	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584374772504	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:62095","noProxy":[],"sslProxy":"127.0.0.1:62095"}
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+1584374838211	Marionette	INFO	Stopped listening on port 62114
+tabs.onRemoved event fired after context unloaded.
+tabs.onUpdated event fired after context unloaded.
+1584381054485	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileoDHgml"
+*** You are running in headless mode.
+1584381055644	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584381055895	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584381056048	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584381056105	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584381056105	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584381056105	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584381056105	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584381059580	Marionette	INFO	Listening on port 58505
+1584381059682	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://97ea1cb1-3987-439d-9150-537b13facfd6/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584381060589	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584381060601	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:58486","noProxy":[],"sslProxy":"127.0.0.1:58486"}
+JavaScript error: moz-extension://97ea1cb1-3987-439d-9150-537b13facfd6/lib/adblockplus.js, line 0: Error: frame.state is undefined
+1584382887980	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile0BFDVM"
+*** You are running in headless mode.
+1584382889896	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584382890173	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584382890375	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584382890399	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584382890399	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584382890400	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584382890400	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584382894552	Marionette	INFO	Listening on port 62316
+1584382894756	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584382895762	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584382895775	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:62243","noProxy":[],"sslProxy":"127.0.0.1:62243"}
+JavaScript warning: moz-extension://5223f19d-948a-43af-a97e-d322a8f8973b/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 3ms)
+JavaScript error: moz-extension://5223f19d-948a-43af-a97e-d322a8f8973b/lib/adblockplus.js, line 0: Error: frame.state is undefined
+out of memory: 0x0000000000001000 bytes requested
+out of memory: 0x0000000000040157 bytes requested
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x37012D,name=PContent::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0xB8000A,name=PWindowGlobal::Msg_RawMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0xB8000A,name=PWindowGlobal::Msg_RawMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x37012D,name=PContent::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x37012D,name=PContent::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x37012D,name=PContent::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x1E0001,name=PBrowser::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x1E0001,name=PBrowser::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x1E0001,name=PBrowser::Msg_AsyncMessage) Channel error: cannot send/recv
+
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x37012D,name=PContent::Msg_AsyncMessage) Channel error: cannot send/recv
+
+A content process crashed and MOZ_CRASHREPORTER_SHUTDOWN is set, shutting down
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+
+###!!! [Parent][RunMessage] Error: Channel error: cannot send/recv
+
+JavaScript error: resource:///modules/sessionstore/SessionStore.jsm, line 1846: TypeError: subject.QueryInterface is not a function
+
+###!!! [Parent][MessageChannel] Error: (msgtype=0x370131,name=PContent::Msg_DetachBrowsingContext) Channel error: cannot send/recv
+
+A content process crashed and MOZ_CRASHREPORTER_SHUTDOWN is set, shutting down
+[Parent 32068, Gecko_IOThread] WARNING: file Z:/task_1584068383/build/src/ipc/chromium/src/base/process_util_win.cc, line 166
+[Parent 32068, Gecko_IOThread] WARNING: file Z:/task_1584068383/build/src/ipc/chromium/src/base/process_util_win.cc, line 166
+1584382919890	Marionette	INFO	Stopped listening on port 62316

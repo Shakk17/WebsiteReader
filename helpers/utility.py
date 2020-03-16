@@ -46,6 +46,7 @@ def add_schema(url):
     :param url: A string containing a URL.
     :return: A string containing a well-formed URL.
     """
+    url = url.replace("www.", "")
     if not re.match('(?:http|ftp|https)://', url):
         return 'http://{}'.format(url)
     return url

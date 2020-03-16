@@ -135,7 +135,7 @@ class RequestHandler:
         else:
             url = self.cursor.url
 
-        self.cursor.url = url
+        self.cursor.url = add_schema(url)
 
         # If the action is History, get the previous action from the database and execute it.
         if action.startswith("History"):
@@ -242,7 +242,7 @@ class RequestHandler:
         crawling_links = Database().get_crawler_links(self.page_visitor.url)
         if len(crawling_links) == 0:
             print("This page has never been visited by a crawling before.")
-            threading.Thread(target=crawl_single_page, args=(self.page_visitor.url,)).start()
+            #threading.Thread(target=crawl_single_page, args=(self.page_visitor.url,)).start()
 
         # Update the url in context and return info about the web page to the user.
         return text_response
