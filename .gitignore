@@ -203,6 +203,5 @@ dmypy.json
 /databases/database.db
 /.google-cookie
 analyze_scraping.py
-/analyze_scraping.py
 /scraping/geckodriver.log
-!/geckodriver.log
+geckodriver.log
