@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
+from databases.pages_handler import db_get_page
 from helpers.utility import strip_html_tags, get_domain, extract_words
 
 
@@ -63,7 +64,7 @@ def get_main_container(url, text):
     """
 
     # First, get the parsed HTML code from the database.
-    page = Database().get_page(url=url)
+    page = db_get_page(url=url)
     rendered_html = page[4]
 
     # Second, get all words composed by 4+ characters from the main text.

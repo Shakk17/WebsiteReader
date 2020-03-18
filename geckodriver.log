@@ -1775,7 +1775,8 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 1584545190641	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
 JavaScript error: moz-extension://cde9ade9-d0e1-40c3-bdc1-e3755355a59e/include.preload.js, line 560: TypeError: response is undefined
 JavaScript warning: moz-extension://cde9ade9-d0e1-40c3-bdc1-e3755355a59e/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
-1584545385633	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile1TePq9"
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile1TePq9"
 *** You are running in headless mode.
 1584545386012	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
 1584545386115	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
@@ -1824,3 +1825,36 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 1584545541718	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:53513","noProxy":[],"sslProxy":"127.0.0.1:53513"}
 1584545541817	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
 JavaScript warning: moz-extension://f43ee95f-f763-4ac7-8d9f-1e54ed14cce9/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+1584546608862	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofilesyacET"
+*** You are running in headless mode.
+1584546609350	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584546609438	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584546609451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584546609451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584546609451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584546609451	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584546611038	Marionette	INFO	Listening on port 54164
+1584546611073	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://a8c9a571-ead9-4228-90d2-04680f74d2ca/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+1584546611492	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584546611502	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:54141","noProxy":[],"sslProxy":"127.0.0.1:54141"}
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+1584548599931	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileJN6STB"
+*** You are running in headless mode.
+1584548600310	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584548600420	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584548600434	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584548600434	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584548600434	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584548600434	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584548602009	Marionette	INFO	Listening on port 54834
+1584548602049	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584548602056	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:54825","noProxy":[],"sslProxy":"127.0.0.1:54825"}
+1584548602123	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://a6888723-c762-4477-ae64-e3a1ef0da07c/include.preload.js, line 560: TypeError: response is undefined
+JavaScript warning: moz-extension://a6888723-c762-4477-ae64-e3a1ef0da07c/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)

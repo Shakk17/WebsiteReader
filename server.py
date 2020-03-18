@@ -1,4 +1,6 @@
 from flask import Flask, request, make_response, jsonify
+
+from databases.database_handler import Database
 from helpers.utility import get_time
 
 from request_handler import RequestHandler
@@ -43,3 +45,4 @@ def webhook():
 # run the app
 if __name__ == '__main__':
     app.run()
+    Database().start()

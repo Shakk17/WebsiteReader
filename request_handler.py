@@ -6,6 +6,8 @@ import requests
 from colorama import Style
 
 from databases.database_handler import Database
+from databases.history_handler import db_insert_action, db_get_previous_action
+from databases.text_links_handler import db_get_text_link
 from helpers.api import get_urls_from_google
 from helpers.helper import update_cursor_index, get_menu, get_menu_link
 from helpers.printer import green, blue, red
@@ -138,7 +140,7 @@ class RequestHandler:
 
         # If the action is History, get the previous action from the database and execute it.
         if action.startswith("History"):
-            action, url = Database().get_previous_action("shakk")
+            action, url = db_get_previous_action("shakk")
 
         text_response = "Action not recognized by the server."
 
@@ -198,7 +200,7 @@ class RequestHandler:
         :return: A text response containing information to show to the user about the web page.
         """
         # Save the action performed by the user into the history table of the database.
-        Database().insert_action("VisitPage", self.cursor.url)
+        db_insert_action("VisitPage", self.cursor.url)
 
         # Get the HTML of the web page.
         self.page_visitor = PageVisitor(url=self.cursor.url)
@@ -331,7 +333,7 @@ class RequestHandler:
         :return: A text response containing info about the new web page.
         """
         # Get URL to visit from the DB.
-        link_url = Database().get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
+        link_url = db_get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
 
         # If the link is valid, update the cursor and visit the page.
         if link_url is not None:
