@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 from databases.database_handler import Database
-from helpers.browser import render_page
 from helpers.utility import strip_html_tags, get_domain, extract_words
 
 
@@ -32,7 +31,7 @@ def get_menu(url):
 
     # Remove elements of the menu that are not frequent.
     highest_freq = menu[0][0]
-    threshold = 0.10
+    threshold = 0.00
     menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
 
     return menu
@@ -63,8 +62,9 @@ def get_main_container(url, text):
     :return: The HTML code of the deepest element containing the main text.
     """
 
-    # First, render the HTML code of the page to get the DOM tree. JavaScript is supported.
-    rendered_html = render_page(url)
+    # First, get the parsed HTML code from the database.
+    page = Database().get_page(url=url)
+    rendered_html = page[4]
 
     # Second, get all words composed by 4+ characters from the main text.
     words = re.findall(r'\w+', text)
@@ -111,7 +111,8 @@ def is_action_recent(timestamp, days=0, minutes=0):
 
     difference = t2 - t1
 
-    return difference < timedelta(days=days, minutes=minutes)
+    recent = difference < timedelta(days=days, minutes=minutes)
+    return recent
 
 
 def get_links_positions(container, text, url):

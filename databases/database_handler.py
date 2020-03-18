@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+from datetime import datetime
 
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                                 id integer PRIMARY KEY AUTOINCREMENT,
@@ -29,6 +30,8 @@ sql_create_pages_table = """CREATE TABLE IF NOT EXISTS pages (
                                     url text PRIMARY KEY,
                                     topic text,
                                     language text,
+                                    simple_html text,
+                                    parsed_html text,
                                     clean_text text,
                                     last_visit text NOT NULL
                                 );"""
@@ -84,9 +87,9 @@ class Database:
         :param url: The url of the web page related to the action performed by the user.
         """
         sql = '''INSERT INTO history (user, action, url, timestamp)
-                    VALUES (?, ?, ?, current_timestamp) '''
+                    VALUES (?, ?, ?, ?) '''
         cur = self.conn.cursor()
-        record = ("shakk", action, url)
+        record = ("shakk", action, url, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         cur.execute(sql, record)
 
     def get_previous_action(self, user):
@@ -115,10 +118,14 @@ class Database:
         This method inserts a website into the websites table of the database.
         :param domain: The domain of the website to insert in the database.
         """
-        sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, current_timestamp)"
+        sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, ?)"
         cur = self.conn.cursor()
-        record = domain
-        cur.execute(sql, (record,))
+        cur.execute(sql, (domain, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
+    def delete_website(self, domain):
+        sql = "DELETE FROM websites WHERE domain LIKE ?;"
+        cur = self.conn.cursor()
+        cur.execute(sql, (f"%{domain}",))
 
     def last_time_crawled(self, domain):
         """
@@ -136,17 +143,19 @@ class Database:
 
     # PAGES TABLE
 
-    def insert_page(self, url, topic, language):
+    def insert_page(self, url, topic, language, simple_html):
         """
         This method inserts a web page in the pages table of the database.
-        :param url: A string representing the URL of the web page.
-        :param topic: A string representing the topic of the web page.
-        :param language: A string representing the language of the web page.
         """
-        sql = """INSERT INTO pages (url, topic, language, last_visit) 
-                    VALUES (?, ?, ?, current_timestamp)"""
+        sql = """INSERT INTO pages (url, topic, language, simple_html, last_visit) 
+                    VALUES (?, ?, ?, ?, ?)"""
         cur = self.conn.cursor()
-        cur.execute(sql, (url, topic, language))
+        cur.execute(sql, (url, topic, language, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
+    def add_parsed_html_to_page(self, url, parsed_html):
+        sql = "UPDATE pages SET parsed_html=? WHERE url LIKE ?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (parsed_html, url))
 
     def update_page(self, url, clean_text):
         """
@@ -168,11 +177,11 @@ class Database:
         cur = self.conn.cursor()
         cur.execute(sql, (url, ))
 
-    def last_time_visited(self, url):
+    def get_page(self, url):
         """
         This method returns a tuple containing info about the last visit of a web page.
         :param url: A string containing the URL of the web page.
-        :return: A tuple (url, topic, summary, language, clear_text, last_visit) or None.
+        :return: A tuple (url, topic, summary, language, simple_html, parsed_html, clear_text, last_visit) or None.
         """
         sql = "SELECT * FROM pages WHERE url LIKE ?"
         cur = self.conn.cursor()
@@ -231,27 +240,27 @@ class Database:
 
     # CRAWLER LINKS TABLE
 
-    def remove_old_website(self, domain):
+    def delete_all_domain_crawler_links(self, domain):
         """
         This method removes the results of a previous crawl of a domain from the database.
         :param domain: A string containing the domain to be un-crawled.
         :return: None
         """
-        # First remove all the tuples in 'links' related to the domain.
         sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"
         cur = self.conn.cursor()
         url = f"%{domain}%"
         cur.execute(sql, (url,))
-        # Then remove the tuple in 'websites' containing the domain.
-        sql = "DELETE FROM websites WHERE domain LIKE ?;"
-        cur = self.conn.cursor()
-        cur.execute(sql, (f"%{domain}",))
 
-    def insert_crawler_link(self, page_url, href, text, x_position, y_position, in_list):
-        sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position, in_list)
-              VALUES (?, ?, ?, ?, ?, ?)"""
+    def delete_all_url_crawler_links(self, url):
+        sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"
         cur = self.conn.cursor()
-        cur.execute(sql, (page_url, href, text, x_position, y_position, in_list))
+        cur.execute(sql, (url,))
+
+    def insert_crawler_link(self, page_url, link_url, link_text, x_position, y_position, in_list):
+        sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position, in_list) 
+                    VALUES (?, ?, ?, ?, ?, ?)"""
+        cur = self.conn.cursor()
+        cur.execute(sql, (page_url, link_url, link_text, x_position, y_position, in_list))
 
     def get_crawler_links(self, url):
         sql = "SELECT link_text, link_url, y_position, in_list FROM crawler_links WHERE page_url LIKE ?"
@@ -268,18 +277,20 @@ class Database:
         """
         cur = self.conn.cursor()
         sql = """
-        SELECT max(times) AS max_times, link_text, link_url, avg_x, avg_y
+        SELECT max(times) AS max_times, crawler_links.page_url, link_text, crawler_links.link_url
         FROM (
-            SELECT COUNT(*) AS times, link_text, link_url, 
-                round(AVG(NULLIF(x_position, 0))) AS avg_x, round(AVG(NULLIF(y_position, 0))) AS avg_y 
+            SELECT COUNT(*) AS times, link_url
             FROM crawler_links
-            WHERE page_url LIKE ? AND y_position < 2000
-            GROUP BY link_text, link_url
+            WHERE page_url LIKE ?
+            GROUP BY link_url
             ORDER BY times DESC
-        )
-        GROUP BY link_url
+        ) counting
+        INNER JOIN crawler_links
+        ON counting.link_url = crawler_links.link_url
+        WHERE crawler_links.page_url LIKE ?
+        GROUP BY crawler_links.link_url
         ORDER BY max_times DESC"""
-        cur.execute(sql, (f"%{domain}%",))
+        cur.execute(sql, (f"%{domain}%", f"%{domain}"))
 
         rows = cur.fetchall()
         return rows

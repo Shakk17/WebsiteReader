@@ -1,18 +1,17 @@
 import queue
 import threading
 import time
+
 import requests
+from colorama import Style
 
 from databases.database_handler import Database
 from helpers.api import get_urls_from_google
-from helpers.helper import update_cursor_index, is_action_recent, get_menu, get_menu_link
+from helpers.helper import update_cursor_index, get_menu, get_menu_link
 from helpers.printer import green, blue, red
-from helpers.browser import crawl_single_page
 from helpers.utility import add_schema, get_domain
-from scraping.crawler_handler import Crawler
-from page_visitor import PageVisitor
 from helpers.utility import get_time
-from colorama import Style
+from page_visitor import PageVisitor
 
 TIMEOUT = 3
 
@@ -204,6 +203,10 @@ class RequestHandler:
         # Get the HTML of the web page.
         self.page_visitor = PageVisitor(url=self.cursor.url)
 
+        self.page_visitor.analyze_page()
+
+        self.page_visitor.analyze_domain()
+
         # Get info about the web page.
         text_response = self.page_visitor.get_info()
 
@@ -212,37 +215,6 @@ class RequestHandler:
         self.cursor.idx_sentence = 0
         self.cursor.idx_menu = 0
         self.cursor.idx_link = 0
-
-        # Checks if domain has been already crawled.
-        domain = get_domain(url=self.page_visitor.url)
-        to_crawl = False
-        last_time_crawled = Database().last_time_crawled(domain=domain)
-
-        # If the domain has never been crawled, crawl it.
-        if last_time_crawled is None:
-            print(f"The domain {domain} has never been crawled before.")
-            to_crawl = True
-
-        # If the domain hasn't been crawled in the last week, cancel the result of the previous crawl. Then crawl again.
-        elif not is_action_recent(timestamp=last_time_crawled, days=7):
-            print(f"The domain {domain} was last crawled too many days ago.")
-            # Remove previous crawling results.
-            Database().remove_old_website(domain)
-            to_crawl = True
-
-        # Crawl in the background.
-        if to_crawl:
-            threading.Thread(target=Crawler(start_url=domain).run, args=()).start()
-            # If the URL contains a subdomain, crawl it too.
-            complete_domain = get_domain(self.page_visitor.url, complete=True)
-            if domain != complete_domain:
-                threading.Thread(target=Crawler(start_url=complete_domain).run, args=()).start()
-
-        # Check if the web page requested has already been visited by a crawling before.
-        crawling_links = Database().get_crawler_links(self.page_visitor.url)
-        if len(crawling_links) == 0:
-            print("This page has never been visited by a crawling before.")
-            #threading.Thread(target=crawl_single_page, args=(self.page_visitor.url,)).start()
 
         # Update the url in context and return info about the web page to the user.
         return text_response

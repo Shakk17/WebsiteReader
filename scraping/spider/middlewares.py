@@ -8,13 +8,11 @@
 from bs4 import BeautifulSoup
 from scrapy import signals
 from scrapy.http import HtmlResponse
-from selenium.webdriver.common.by import By
-from seleniumwire import webdriver
+from urllib.parse import urljoin
 
-from helpers.utility import get_time, get_domain, strip_html_tags
+from helpers.browser import StaleElementReferenceException, get_quick_html
 from helpers.printer import magenta
-from helpers.browser import StaleElementReferenceException, get_firefox_options, get_firefox_profile, \
-    add_headers_to_driver, get_quick_html
+from helpers.utility import get_time, get_domain, strip_html_tags, add_schema
 from scraping.spider.items import UrlItem
 
 
@@ -96,7 +94,7 @@ class SpiderDownloaderMiddleware(object):
 
         for i, link in enumerate(links):
             try:
-                href = link.get("href")
+                href = add_schema(urljoin(request.url, link.get("href")))
                 text = strip_html_tags(link.text)
                 # True if the element is contained in a list container.
                 try:
@@ -105,8 +103,8 @@ class SpiderDownloaderMiddleware(object):
                     in_list = False
 
                 # If the link links to the same page, discard it.
-                hash_position = href.find("#")
-                if href[:hash_position] == request.url:
+                hash_position = href.find("/#")
+                if href[:hash_position] == add_schema(request.url):
                     continue
 
                 # Add the link to the string of bytes to be returned.
