@@ -4,7 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from databases.crawler_links_handler import db_delete_all_domain_crawler_links, db_get_crawler_links
-from databases.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page, db_update_page
+from databases.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page, \
+    db_update_page
 from databases.text_links_handler import db_delete_text_links, db_insert_text_link, db_get_text_links
 from databases.websites_handler import db_delete_website, db_last_time_crawled
 from helpers import helper
@@ -154,105 +155,6 @@ class PageVisitor:
         if page[4] is None:
             # Get all the link
             threading.Thread(target=scrape_page, args=(self.url,)).start()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def get_sentences(self, idx_sentence, n_sentences):
-        """
-        This method returns a number of sentences from the main text of the web page.
-        :param idx_sentence: The index of the first sentence to be retrieved.
-        :param n_sentences: The number of sentences to be retrieved.
-        :return: A string containing some sentences from the main text of the web page.
-        """
-        # Check if the text is actually present in the database.
-        last_time_visited = db_get_page(url=self.url)
-        if last_time_visited is None:
-            raise FileNotFoundError
-
-        # Get the text from the database.
-        text = last_time_visited[3]
-        # Check that the web page has already been analyzed.
-        if text is None:
-            raise FileNotFoundError
-
-        # Add the links indicators to the text to be returned.
-        links_positions = db_get_text_links(page_url=self.url)
-        for i, link in enumerate(links_positions, start=0):
-            # For each link in the main text, get the exact position in the main string.
-            start_link = links_positions[i][0]
-
-            # These offsets are necessary because the indicators [LINK n] need to be considered when calculating
-            # the position of the next indicator in the string.
-            if i < 10:
-                string_offset = i * len(f"[LINK {i}]")
-            elif i < 100:
-                string_offset = 9 * len(f"[LINK 1]") + (i - 9) * len(f"[LINK {i + 1}]")
-            else:
-                string_offset = 9 * len(f"[LINK 1]") + 90 * len(f"[LINK 10]") + (i - 99) * len(f"[LINK {i + 1}]")
-
-            # Add the indicator [LINK n] to the main string.
-            offset = start_link + string_offset
-            text = f"{text[:offset]}[LINK {i + 1}]{text[offset:]}"
-
-        # Split up the main text in sentences.
-        split_text = text.split('.')
-
-        # Once the end of the main text has been reached, raise IndexError.
-        if idx_sentence > len(split_text):
-            raise IndexError
-
-        # Add only the requested sentences to the text to be returned.
-        string = ""
-        for text in split_text[idx_sentence:idx_sentence + n_sentences]:
-            string += f"{text}."
-
-        # Let the user know about how long it will take to finish the reading of the main text.
-        string += f"\n{min(idx_sentence + n_sentences, len(split_text))} out of {len(split_text)} sentence(s) read."
-        return string
-
-    def read_links(self, url):
-        links = db_get_crawler_links(url=url)
-        texts = []
-        new_links = []
-        if len(links) > 0:
-            # Keep only links with 4 words or more in text.
-            links = list(filter(lambda x: len(extract_words(x[0])) > 3, links))
-            # Keep only links not contained in lists.
-            links = list(filter(lambda x: x[3] == 0, links))
-            # Order link depending on their y_position.
-            links.sort(key=lambda x: x[2])
-            # Remove duplicates.
-            new_links = []
-            for link in links:
-                if link[0] not in texts:
-                    new_links.append(link)
-                    texts.append(link[0])
-
-        return new_links
 
     def extract_search_forms(self):
         """

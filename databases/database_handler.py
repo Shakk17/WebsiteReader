@@ -90,7 +90,7 @@ class Database:
         ) counting
         INNER JOIN crawler_links
         ON counting.link_url = crawler_links.link_url
-        WHERE crawler_links.page_url LIKE ?
+        WHERE crawler_links.page_url LIKE ? and y_position < 2000
         GROUP BY crawler_links.link_url
         ORDER BY max_times DESC"""
         cur.execute(sql, (f"%{domain}%", f"%{domain}"))

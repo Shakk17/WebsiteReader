@@ -9,7 +9,7 @@ from databases.database_handler import Database
 from databases.history_handler import db_insert_action, db_get_previous_action
 from databases.text_links_handler import db_get_text_link
 from helpers.api import get_urls_from_google
-from helpers.helper import update_cursor_index, get_menu, get_menu_link
+from helpers.helper import update_cursor_index, get_menu, get_menu_link, get_sentences, read_links
 from helpers.printer import green, blue, red
 from helpers.utility import add_schema, get_domain
 from helpers.utility import get_time
@@ -304,7 +304,7 @@ class RequestHandler:
             # Get actual position of the cursor in the main text.
             idx_sentence = int(self.cursor.idx_sentence)
             # Get sentences from the main text to be shown to the user.
-            text_response = self.page_visitor.get_sentences(idx_sentence=idx_sentence, n_sentences=2)
+            text_response = get_sentences(url=self.cursor.url, idx_sentence=idx_sentence, n_sentences=2)
         except IndexError:
             # There are no more sentences to be read.
             text_response = "You have reached the end of the page."
@@ -317,7 +317,7 @@ class RequestHandler:
 
     def open_page_link(self):
         # Get URL to visit from the DB.
-        links = self.page_visitor.read_links(url=self.cursor.url)
+        links = read_links(url=self.cursor.url)
         link_url = links[self.cursor.idx_link]
 
         # If the link is valid, update the cursor and visit the page.
@@ -343,7 +343,7 @@ class RequestHandler:
             return "Wrong input."
 
     def read_links(self, action):
-        links = self.page_visitor.read_links(url=self.cursor.url)
+        links = read_links(url=self.cursor.url)
         self.cursor.idx_link = update_cursor_index(
             action=action, old_idx=self.cursor.idx_link, step=1, size=len(links))
         if len(links) > 0:
