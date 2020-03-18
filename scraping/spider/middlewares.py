@@ -102,6 +102,10 @@ class SpiderDownloaderMiddleware(object):
                 except IndexError:
                     in_list = False
 
+                # Skip PDF files.
+                if href[-3:] in ["pdf", "jpg", "png"]:
+                    continue
+
                 # If the link links to the same page, discard it.
                 hash_position = href.find("/#")
                 if href[:hash_position] == add_schema(request.url):

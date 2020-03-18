@@ -91,6 +91,10 @@ def scrape_page(url):
                 parents = [parent.name for parent in links_bs4[i].parents]
                 in_list = int("li" in parents)
 
+                # Skip PDF files.
+                if href[-3:] in ["pdf", "jpg", "png"]:
+                    continue
+
                 # If the link links to the same page, discard it.
                 hash_position = href.find("/#")
                 if href[:hash_position] == url or text == "" or int(y_position) == 0:
@@ -104,6 +108,7 @@ def scrape_page(url):
 
     except Exception as e:
         print(f"[SELENIUM] Can't access this website: {url}")
+        print(e)
         raise Exception("Error while visiting the page.")
 
     print(f"{get_time()} [SELENIUM] Page rendering finished.")

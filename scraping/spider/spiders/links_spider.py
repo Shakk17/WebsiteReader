@@ -48,10 +48,6 @@ class LinksSpider(scrapy.Spider):
         for (i, link) in enumerate(links):
             link_url = add_schema(link[0])
 
-            # Skip PDF files.
-            if link_url[-3:] in ["pdf", "jpg", "png"]:
-                continue
-
             # If the link has not been visited yet, visit it.
             if link_url not in self.visited_links and self.allowed_domains[0] in link_url:
                 yield response.follow(link_url, callback=self.parse)
