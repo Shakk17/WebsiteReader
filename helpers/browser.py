@@ -16,8 +16,8 @@ def get_firefox_profile():
     profile.add_extension("firefox_extensions/{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi")
     profile.set_preference("extensions.adblockplus.currentVersion", "3.8")
     # uBlock Origin extension.
-    profile.add_extension("firefox_extensions/uBlock0@raymondhill.net.xpi")
-    profile.set_preference("extensions.ublock0.currentVersion", "1.25.2")
+    # profile.add_extension("firefox_extensions/uBlock0@raymondhill.net.xpi")
+    # profile.set_preference("extensions.ublock0.currentVersion", "1.25.2")
     # I don't care about cookies extension.
     profile.add_extension("firefox_extensions/jid1-KKzOGWgsW3Ao4Q@jetpack.xpi")
     profile.set_preference("extensions.idontcareaboutcookies.currentVersion", "3.1.3")
@@ -69,7 +69,6 @@ def scrape_page(url):
     :param url: A string containing the URL of the web page to analyse.
     :return: None.
     """
-    Database().delete_all_url_crawler_links(url=url)
     try:
         print(f"{get_time()} [SELENIUM] Page rendering started.")
         browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
@@ -80,6 +79,9 @@ def scrape_page(url):
 
         links_bs4 = BeautifulSoup(body, "lxml").find_all("a")
         links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
+
+        # Delete all the old crawler links of the page.
+        Database().delete_all_url_crawler_links(url=url)
 
         for i, link in enumerate(links):
             try:
@@ -97,8 +99,9 @@ def scrape_page(url):
 
                 # If the link links to the same page, discard it.
                 hash_position = href.find("/#")
-                if href[:hash_position] == url or text == "" or int(y_position) == 0:
+                if href[:hash_position] == url or len(text) == 0:
                     continue
+
             except StaleElementReferenceException:
                 continue
             # Update link in database.

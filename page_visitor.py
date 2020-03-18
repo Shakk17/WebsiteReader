@@ -31,17 +31,17 @@ class PageVisitor:
         For speed purposes, Javascript is not supported.
         :return: The HTML code of the web page.
         """
-        print(f"{get_time()} [{self.url}] Simple HTML code get (requests) started.")
+        print(f"{get_time()} [{self.url}] SIMPLE HTML code get started.")
         html = requests.get(self.url).text
-        print(f"{get_time()} [{self.url}] Simple HTML code get (requests) finished.")
+        print(f"{get_time()} [{self.url}] SIMPLE HTML code get finished.")
 
         return html
 
     def save_parsed_html(self):
-        print(f"{get_time()} [{self.url}] Parsed HTML code get (requests) started.")
+        print(f"{get_time()} [{self.url}] PARSED HTML code get started.")
         parsed_html = scrape_page(self.url)
         Database().add_parsed_html_to_page(url=self.url, parsed_html=parsed_html)
-        print(f"{get_time()} [{self.url}] Parsed HTML code get (requests) finished.")
+        print(f"{get_time()} [{self.url}] PARSED HTML code get finished.")
 
     def analyze_page(self):
         print(f"{get_time()} [{self.url}] Analysis started.")

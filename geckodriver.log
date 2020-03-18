@@ -1495,3 +1495,332 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 JavaScript warning: moz-extension://22b4c812-673d-48e2-9d2d-fcfbb5895639/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
 JavaScript error: resource://gre/modules/WebNavigationContent.js, line 271: NS_NOINTERFACE: Component returned failure code: 0x80004002 (NS_NOINTERFACE) [nsIWebProgress.DOMWindow]
 JavaScript error: resource://gre/modules/WebNavigationContent.js, line 271: NS_NOINTERFACE: Component returned failure code: 0x80004002 (NS_NOINTERFACE) [nsIWebProgress.DOMWindow]
+1584534997498	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile1BWQ7J"
+*** You are running in headless mode.
+1584534998082	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584534998206	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584534998295	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584534998307	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584534998307	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584534998307	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584534998308	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584534999976	Marionette	INFO	Listening on port 65425
+1584535000035	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://24e51933-5b29-4d13-abaa-636a8c71299a/include.preload.js, line 560: TypeError: response is undefined
+1584535000120	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584535000131	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:65394","noProxy":[],"sslProxy":"127.0.0.1:65394"}
+JavaScript warning: moz-extension://24e51933-5b29-4d13-abaa-636a8c71299a/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/analytics/at.r3.js, line 13: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: WebGL warning: <Create>: Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript warning: https://a.espncdn.com/prod/scripts/yield_v2.js, line 119: Failed to create WebGL context: WebGL creation failed: 
+* Can't use WebGL in headless mode (https://bugzil.la/1375585).
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+1584544267430	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileRJVeep"
+*** You are running in headless mode.
+1584544267906	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584544268029	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584544268118	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584544268131	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584544268131	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584544268131	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584544268131	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584544269697	Marionette	INFO	Listening on port 50906
+1584544269751	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://72746191-5197-4437-97aa-327c810f2d17/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+1584544270049	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584544270055	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:50879","noProxy":[],"sslProxy":"127.0.0.1:50879"}
+1584544667947	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileG0StjK"
+*** You are running in headless mode.
+1584544668538	addons.xpi-utils	WARN	addMetadata: Add-on uBlockOrigin@1.25.2 is invalid: Error: Invalid addon ID: expected addon ID uBlockOrigin@1.25.2, found uBlock0@raymondhill.net in manifest(resource://gre/modules/addons/XPIDatabase.jsm:2787:15) JS Stack trace: addMetadata@XPIDatabase.jsm:2787:15
+processFileChanges@XPIDatabase.jsm:3218:26
+checkForChanges@XPIProvider.jsm:2941:55
+startup@XPIProvider.jsm:2395:12
+callProvider@AddonManager.jsm:215:31
+_startProvider@AddonManager.jsm:587:17
+startup@AddonManager.jsm:811:14
+startup@AddonManager.jsm:3482:26
+observe@addonManager.js:87:29
+1584544668665	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584544668753	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584544668769	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584544668769	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584544668769	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584544668769	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584544670302	Marionette	INFO	Listening on port 51404
+1584544670379	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://f1b2e067-2fb6-43d6-b622-192121505d1e/include.preload.js, line 560: TypeError: response is undefined
+JavaScript warning: moz-extension://f1b2e067-2fb6-43d6-b622-192121505d1e/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584544670567	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584544670575	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:51394","noProxy":[],"sslProxy":"127.0.0.1:51394"}
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+Marionette threw an error: [Exception... "Failure"  nsresult: "0x80004005 (NS_ERROR_FAILURE)"  location: "JS frame :: chrome://marionette/content/capture.js :: capture.canvas :: line 140"  data: no]
+capture.canvas@chrome://marionette/content/capture.js:140:62
+GeckoDriver.prototype.takeScreenshot@chrome://marionette/content/driver.js:3074:30
+Async*despatch@chrome://marionette/content/server.js:305:40
+execute@chrome://marionette/content/server.js:275:16
+onPacket/<@chrome://marionette/content/server.js:248:20
+onPacket@chrome://marionette/content/server.js:249:9
+_onJSONObjectReady/<@chrome://marionette/content/transport.js:501:20
+
+1584545087522	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile06Zm30"
+*** You are running in headless mode.
+1584545087900	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584545087988	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584545088000	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584545088000	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584545088000	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584545088001	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584545089519	Marionette	INFO	Listening on port 51871
+1584545089550	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584545089557	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:51847","noProxy":[],"sslProxy":"127.0.0.1:51847"}
+1584545089633	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://f8b923e1-f498-4b93-a0aa-5c636f3fe216/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+1584545188559	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileu60EKT"
+*** You are running in headless mode.
+1584545188940	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584545189033	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584545189044	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584545189044	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584545189044	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584545189044	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584545190549	Marionette	INFO	Listening on port 52267
+1584545190574	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584545190579	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:52248","noProxy":[],"sslProxy":"127.0.0.1:52248"}
+1584545190641	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://cde9ade9-d0e1-40c3-bdc1-e3755355a59e/include.preload.js, line 560: TypeError: response is undefined
+JavaScript warning: moz-extension://cde9ade9-d0e1-40c3-bdc1-e3755355a59e/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+1584545385633	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofile1TePq9"
+*** You are running in headless mode.
+1584545386012	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584545386115	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584545386129	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584545386129	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584545386129	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584545386129	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584545387726	Marionette	INFO	Listening on port 52702
+1584545387754	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584545387760	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:52682","noProxy":[],"sslProxy":"127.0.0.1:52682"}
+1584545387806	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://76630861-cd94-46f8-b049-338531e6b48a/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 2ms)
+1584545462266	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofileDE75tl"
+*** You are running in headless mode.
+1584545462764	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584545462860	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584545462874	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584545462874	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584545462874	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584545462874	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584545464438	Marionette	INFO	Listening on port 53098
+1584545464503	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript error: moz-extension://5e029ebd-0369-4408-b368-a2d206a121c7/include.preload.js, line 560: TypeError: response is undefined
+JavaScript warning: moz-extension://5e029ebd-0369-4408-b368-a2d206a121c7/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
+1584545464894	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584545464901	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:53082","noProxy":[],"sslProxy":"127.0.0.1:53082"}
+JavaScript error: https://www.open.online/wp-includes/js/wp-emoji-release.min.js?ver=5.2.5, line 4: NS_ERROR_UNEXPECTED: 
+JavaScript error: https://www.open.online/wp-content/themes/open-wp/assets/js/open.js?ver=1584545350, line 1: NS_ERROR_NOT_INITIALIZED: 
+JavaScript error: https://ajax.cloudflare.com/cdn-cgi/scripts/7089c43e/cloudflare-static/rocket-loader.min.js, line 1: NS_ERROR_NOT_INITIALIZED: 
+1584545539690	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Firefox Developer Edition\\firefox.exe" "-marionette" "--headless" "window-size=500x1024" "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0" "-foreground" "-no-remote" "-profile" "C:\\Users\\shakk17\\AppData\\Local\\Temp\\rust_mozprofilelkolG1"
+*** You are running in headless mode.
+1584545540074	addons.webextension.<unknown>	WARN	Loading extension 'null': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+1584545540167	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
+1584545540178	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
+1584545540178	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: telemetry
+1584545540178	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: resource://pdf.js/
+1584545540178	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
+1584545541696	Marionette	INFO	Listening on port 53534
+1584545541712	Marionette	WARN	TLS certificate errors will be ignored for this session
+1584545541718	Marionette	INFO	Proxy settings initialised: {"proxyType":"manual","httpProxy":"127.0.0.1:53513","noProxy":[],"sslProxy":"127.0.0.1:53513"}
+1584545541817	addons.webextension.{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}	WARN	Loading extension '{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}': Reading manifest: Warning processing storage: An unexpected property was found in the WebExtension manifest.
+JavaScript warning: moz-extension://f43ee95f-f763-4ac7-8d9f-1e54ed14cce9/lib/adblockplus.js, line 0: Successfully compiled asm.js code (total compilation time 1ms)
