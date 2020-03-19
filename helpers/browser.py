@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
 from databases.crawler_links_handler import db_insert_crawler_link, db_delete_all_url_crawler_links
+from helpers.printer import magenta
 from helpers.utility import strip_html_tags, get_time, add_schema
 
 
@@ -57,7 +58,11 @@ def add_headers_to_driver(driver):
 
 
 def get_quick_html(url):
-    html = requests.get(url=url).text
+    try:
+        html = requests.get(url=url).text
+    except Exception:
+        print(magenta("Exception while getting SIMPLE HTML."))
+        html = ""
     return html
 
 

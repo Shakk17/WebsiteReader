@@ -15,7 +15,7 @@ SPIDER_MODULES = ['spider.spiders']
 NEWSPIDER_MODULE = 'spider.spiders'
 
 # Stop after 30 pages crawled.
-CLOSESPIDER_PAGECOUNT = 50
+CLOSESPIDER_PAGECOUNT = 100
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0"
@@ -24,7 +24,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 
 ROBOTSTXT_OBEY = True
 
 # Maximum depth that will be allowed to crawl for any site.
-DEPTH_LIMIT = 1
+DEPTH_LIMIT = 2
 
 LOG_LEVEL = "ERROR"
 
@@ -36,7 +36,7 @@ LOG_LEVEL = "ERROR"
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 5
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 4
+CONCURRENT_REQUESTS_PER_DOMAIN = 8
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)

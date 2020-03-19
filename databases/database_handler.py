@@ -80,7 +80,8 @@ class Database:
         """
         cur = self.conn.cursor()
         sql = """
-        SELECT max(times) AS max_times, crawler_links.page_url, link_text, crawler_links.link_url, x_position, y_position
+        SELECT max(times) AS max_times, crawler_links.page_url, link_text, crawler_links.link_url, 
+                x_position, y_position, in_list
         FROM (
             SELECT COUNT(*) AS times, link_url
             FROM crawler_links

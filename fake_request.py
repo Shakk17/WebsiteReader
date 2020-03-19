@@ -1,6 +1,6 @@
 # importing the requests library
 import time
-
+from helpers.utility import get_time
 import requests
 
 # defining the api-endpoint 
@@ -20,16 +20,7 @@ def get_data(url):
                     "name": "projects/websitereader-srqsqy/agent/sessions/47056a3d-1977-7eb5-f876-fb7f002832bc/contexts/cursor",
                     "lifespanCount": 5,
                     "parameters": {
-                        "string": "open.online",
-                        "string.original": "open.online"
-                    }
-                },
-                {
-                    "name": "projects/websitereader-srqsqy/agent/sessions/47056a3d-1977-7eb5-f876-fb7f002832bc/contexts/searchpage",
-                    "lifespanCount": 2,
-                    "parameters": {
-                        "string": "open.online",
-                        "string.original": "open.online"
+                        "string": url
                     }
                 }
             ]
@@ -37,8 +28,38 @@ def get_data(url):
     }
 
 
-domains = ["open.online"]
+domains = [
+    "reddit.com",
+    "cnn.com",
+    "nytimes.com"
+    "news.google.com",
+    "theguardian.com",
+    "shutterstock.com",
+    "washingtonpost.com",
+    "news.yahoo.com",
+    "forbes.com",
+    "cnbc.com",
+    "foxnews.com",
+    "weather.com",
+    "bloomberg.com"
+    "wsj.com",
+    "reuters.com",
+    "usatoday.com",
+    "nbcnews.com",
+    "nypost.com",
+    "accuweather.com",
+    "chron.com",
+    "dw.com",
+    "drudgereport.com",
+    "usnews.com",
+    "livemint.com",
+    "time.com"
+]
 
 for domain in domains:
-    requests.post(url=API_ENDPOINT, json=get_data(domain))
-    time.sleep(30)
+    try:
+        requests.post(url=API_ENDPOINT, json=get_data(domain))
+        print(f"{get_time()} Requested: {domain}")
+    except ConnectionError:
+        print(f"{get_time()} Connection error: {domain}")
+    time.sleep(100)
