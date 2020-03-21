@@ -1,6 +1,5 @@
 import sqlite3
 from sqlite3 import Error
-from datetime import datetime
 
 sql_create_history_table = """ CREATE TABLE IF NOT EXISTS history (
                                                 id integer PRIMARY KEY AUTOINCREMENT,
@@ -47,6 +46,34 @@ sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS text_links (
                                 );"""
 
 
+def analyze_scraping(domain):
+    """
+    This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
+    :param domain: A string containing the domain to analyse.
+    :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
+    """
+    cur = Database().conn.cursor()
+    sql = """
+    SELECT max(times) AS max_times, link_text, crawler_links.link_url, 
+            x_position, y_position, in_list
+    FROM (
+        SELECT COUNT(*) AS times, link_url
+        FROM crawler_links
+        WHERE page_url LIKE ?
+        GROUP BY link_url
+        ORDER BY times DESC
+    ) counting
+    INNER JOIN crawler_links
+    ON counting.link_url = crawler_links.link_url
+    WHERE crawler_links.page_url LIKE ? and y_position < 2000
+    GROUP BY crawler_links.link_url
+    ORDER BY max_times DESC"""
+    cur.execute(sql, (f"%{domain}%", f"%{domain}"))
+
+    rows = cur.fetchall()
+    return rows
+
+
 class Database:
     """
     This class handles all the operations related to the database.
@@ -71,30 +98,3 @@ class Database:
             self.conn.cursor().execute(sql_create_page_links_table)
         else:
             print("Error! Cannot create the database connection.")
-
-    def analyze_scraping(self, domain):
-        """
-        This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
-        :param domain: A string containing the domain to analyse.
-        :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
-        """
-        cur = self.conn.cursor()
-        sql = """
-        SELECT max(times) AS max_times, crawler_links.page_url, link_text, crawler_links.link_url, 
-                x_position, y_position, in_list
-        FROM (
-            SELECT COUNT(*) AS times, link_url
-            FROM crawler_links
-            WHERE page_url LIKE ?
-            GROUP BY link_url
-            ORDER BY times DESC
-        ) counting
-        INNER JOIN crawler_links
-        ON counting.link_url = crawler_links.link_url
-        WHERE crawler_links.page_url LIKE ? and y_position < 2000
-        GROUP BY crawler_links.link_url
-        ORDER BY max_times DESC"""
-        cur.execute(sql, (f"%{domain}%", f"%{domain}"))
-
-        rows = cur.fetchall()
-        return rows

@@ -2,7 +2,7 @@ import scrapy
 from scrapy import signals
 
 from helpers.helper import get_domain
-from helpers.printer import magenta
+from helpers.printer import magenta, green
 from helpers.utility import add_schema
 
 import random
@@ -53,5 +53,5 @@ class LinksSpider(scrapy.Spider):
                 yield response.follow(link_url, callback=self.parse)
 
     def spider_closed(self, spider):
-        print(magenta(f"[CRAWLER] Crawling of {self.start_urls[0]} finished."))
+        print(green(f"[CRAWLER] Crawling of {self.start_urls[0]} finished."))
         spider.logger.info('Spider closed: %s', spider.name)

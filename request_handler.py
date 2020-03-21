@@ -5,15 +5,15 @@ import time
 import requests
 from colorama import Style
 
-from databases.database_handler import Database
 from databases.history_handler import db_insert_action, db_get_previous_action
 from databases.text_links_handler import db_get_text_link
+from functionality.menu import get_menu, get_menu_text_response
 from helpers.api import get_urls_from_google
-from helpers.helper import update_cursor_index, get_menu, get_menu_link, get_sentences, read_links
-from helpers.printer import green, blue, red
+from helpers.helper import update_cursor_index, get_menu_link, get_sentences, read_links
+from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_schema, get_domain
 from helpers.utility import get_time
-from page_visitor import PageVisitor
+from functionality.analysis import analyze_page, analyze_domain, get_info
 
 TIMEOUT = 3
 
@@ -202,18 +202,18 @@ class RequestHandler:
         # Save the action performed by the user into the history table of the database.
         db_insert_action("VisitPage", self.cursor.url)
 
-        # Get the HTML of the web page.
-        self.page_visitor = PageVisitor(url=self.cursor.url)
+        try:
+            analyze_page(url=self.cursor.url)
 
-        self.page_visitor.analyze_page()
+            analyze_domain(url=self.cursor.url)
 
-        self.page_visitor.analyze_domain()
-
-        # Get info about the web page.
-        text_response = self.page_visitor.get_info()
+            # Get info about the web page.
+            text_response = get_info(url=self.cursor.url)
+        except Exception:
+            print(magenta("Error encountered."))
+            return "Error encountered. Try again!"
 
         # Update the cursor.
-        self.cursor.url = self.page_visitor.url
         self.cursor.idx_sentence = 0
         self.cursor.idx_menu = 0
         self.cursor.idx_link = 0
@@ -226,7 +226,7 @@ class RequestHandler:
         This method visits the homepage of the current website.
         :return:
         """
-        self.cursor.url = add_schema(get_domain(self.cursor.url))
+        self.cursor.url = add_schema(get_domain(self.cursor.url, complete=True))
         text_response = self.visit_page()
         return text_response
 
@@ -235,9 +235,8 @@ class RequestHandler:
         This method returns info about the web page currently visited to the user.
         :return: A text response containing info about the web page currently visited.
         """
-        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
         # Get info about the web page.
-        text_response = self.page_visitor.get_info()
+        text_response = get_info(url=self.cursor.url)
         return text_response
 
     def get_menu(self, action):
@@ -249,31 +248,12 @@ class RequestHandler:
         """
         # Extract the menu from the crawl results.
         menu = get_menu(self.cursor.url)
-
         # Update cursor.
-        self.cursor.idx_menu = update_cursor_index(
-            action=action, old_idx=self.cursor.idx_menu, step=10, size=len(menu))
-
+        self.cursor.idx_menu = update_cursor_index(action=action, old_idx=self.cursor.idx_menu, step=10, size=len(menu))
         # Number of choices that will get displayed to the user at once.
         num_choices = 10
-
-        # Get how many elements of the menu have already been shown.
-        idx_start = int(self.cursor.idx_menu)
-
-        # Get the indexes of the options to be shown to the user
-        if idx_start >= len(menu):
-            idx_start = 0
-        idx_end = idx_start + 10
-
-        # Get the options that will be shown to the user in the text response.
-        strings = [tup[1] for tup in menu[idx_start:idx_end]]
-
-        # Format of display -> option n: text
-        #                      option n+1: text
-        text_response = "You can choose between: \n"
-        for i, string in enumerate(strings, start=1):
-            text_response += f"{idx_start + i}: {string}. \n"
-        text_response += f"\n{min(idx_start + num_choices, len(menu))} out of {len(menu)} option(s) read."
+        # Get text response containing voices to show.
+        text_response = get_menu_text_response(menu=menu, idx_start=self.cursor.idx_menu, num_choices=num_choices)
 
         return text_response
 
@@ -282,14 +262,17 @@ class RequestHandler:
         This method visits the link chosen from the menu by the user.
         :return: A text response containing info about the new web page.
         """
+        menu = get_menu(url=self.cursor.url)
+        # Get all the URLs of the menu links.
+        menu_anchors = [tup[2] for tup in menu]
         try:
-            # Get URL to visit from the DB.
-            new_url = get_menu_link(url=self.cursor.url, number=self.cursor.number)
-            # Update cursor and visit the page.
-            self.cursor.url = new_url
-            return self.visit_page()
+            # Get URL to visit.
+            new_url = menu_anchors[self.cursor.number - 1]
         except ValueError:
             return "Wrong input."
+        # Update cursor and visit the page.
+        self.cursor.url = new_url
+        return self.visit_page()
 
     def read_page(self, action):
         """
@@ -297,17 +280,13 @@ class RequestHandler:
         It also updates the cursor.
         :return: A text response containing a part of the main text of the web page.
         """
-        self.cursor.idx_sentence = update_cursor_index(
-            action=action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
-        self.page_visitor = PageVisitor(url=self.cursor.url, quick_download=False)
+        # Update cursor.
+        self.cursor.idx_sentence = update_cursor_index(action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
         try:
-            # Get actual position of the cursor in the main text.
-            idx_sentence = int(self.cursor.idx_sentence)
             # Get sentences from the main text to be shown to the user.
-            text_response = get_sentences(url=self.cursor.url, idx_sentence=idx_sentence, n_sentences=2)
+            text_response = get_sentences(url=self.cursor.url, idx_sentence=self.cursor.idx_sentence, n_sentences=2)
         except IndexError:
-            # There are no more sentences to be read.
-            text_response = "You have reached the end of the page."
+            text_response = "No more sentences to read, you have reached the end of the page."
             # Reset cursor position.
             self.cursor.idx_sentence = 0
         except FileNotFoundError:

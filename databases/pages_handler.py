@@ -3,14 +3,14 @@ from datetime import datetime
 from databases.database_handler import Database
 
 
-def db_insert_page(url, topic, language, simple_html):
+def db_insert_page(url, simple_html):
     """
     This method inserts a web page in the pages table of the database.
     """
-    sql = """INSERT INTO pages (url, topic, language, simple_html, last_visit) 
-                VALUES (?, ?, ?, ?, ?)"""
+    sql = """INSERT INTO pages (url, simple_html, last_visit) 
+                VALUES (?, ?, ?)"""
     Database().conn.cursor().execute(
-        sql, (url, topic, language, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        sql, (url, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
 
 def db_add_parsed_html_to_page(url, parsed_html):

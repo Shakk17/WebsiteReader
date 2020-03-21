@@ -71,7 +71,8 @@ def get_text_from_aylien_api(url):
     print(yellow(f"{get_time()} [AYLIEN API] Main text extraction started."))
     try:
         text = aylien_client.Extract({'url': url})
-    except TimeoutError:
+        print(yellow(f"{get_time()} [AYLIEN API] Main text extraction finished."))
+        text = text.get("article")
+    except Exception:
         text = "Error during API call."
-    print(yellow(f"{get_time()} [AYLIEN API] Main text extraction finished."))
-    return text.get("article")
+    return text

@@ -72,9 +72,9 @@ def scrape_page(url):
     :param url: A string containing the URL of the web page to analyse.
     :return: None.
     """
+    print(f"{get_time()} [SELENIUM] Page rendering started.")
+    browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
     try:
-        print(f"{get_time()} [SELENIUM] Page rendering started.")
-        browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
         browser.get(url)
         body = browser.page_source
 
@@ -113,9 +113,8 @@ def scrape_page(url):
                 x_position=x_position, y_position=y_position, in_list=in_list)
 
     except Exception as e:
-        print(f"[SELENIUM] Can't access this website: {url}")
-        print(e)
-        raise Exception("Error while visiting the page.")
+        print(magenta(f"[SELENIUM] Can't access this website: {url}"))
+        body = ""
 
     print(f"{get_time()} [SELENIUM] Page rendering finished.")
     browser.close()
