@@ -5,13 +5,15 @@ import time
 import requests
 from colorama import Style
 
-from databases.history_handler import db_insert_action, db_get_previous_action
-from databases.text_links_handler import db_get_text_link
+from databases.handlers.history_handler import db_insert_action, db_get_previous_action
+from databases.handlers.text_links_handler import db_get_text_link
+from functionality.links import read_links, get_links_text_response, read_links_article
+from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu, get_menu_text_response
 from helpers.api import get_urls_from_google
-from helpers.helper import update_cursor_index, get_menu_link, get_sentences, read_links
+from helpers.helper import update_cursor_index
 from helpers.printer import green, blue, red, magenta
-from helpers.utility import add_schema, get_domain
+from helpers.utility import add_scheme, get_domain
 from helpers.utility import get_time
 from functionality.analysis import analyze_page, analyze_domain, get_info
 
@@ -34,6 +36,8 @@ class Cursor:
         self.idx_search_result = 0
         # Index of next link to read in the page.
         self.idx_link = 0
+        # Index of next link (article mode) to read in the page.
+        self.idx_link_article = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
@@ -52,6 +56,7 @@ class Cursor:
             f"\tIdx menu: {self.idx_menu}\n"
             f"\tIdx search result: {self.idx_search_result}\n"
             f"\tIdx link: {self.idx_link}\n"
+            f"\tIdx link article: {self.idx_link_article}\n"
         ))
 
 
@@ -59,7 +64,6 @@ class RequestHandler:
     """
     This class handles the requests received by the server from the agent.
     """
-    page_visitor = None
     cursor = None
 
     def __init__(self):
@@ -109,6 +113,7 @@ class RequestHandler:
 
         # Get action from request.
         action = request.get('queryResult').get('action')
+        print(green(f"[SERVER] Action: {action}"))
 
         # Get main context from request, if available.
         contexts = request.get("queryResult").get("outputContexts")
@@ -127,7 +132,7 @@ class RequestHandler:
             # Try both http and https schemas.
             try:
                 url = string.replace("www.", "")
-                url = add_schema(url=url)
+                url = add_scheme(url=url)
                 # Try to visit the URL.
                 requests.get(url=url)
             except requests.exceptions.RequestException:
@@ -136,7 +141,7 @@ class RequestHandler:
         else:
             url = self.cursor.url
 
-        self.cursor.url = add_schema(url)
+        self.cursor.url = add_scheme(url)
 
         # If the action is History, get the previous action from the database and execute it.
         if action.startswith("History"):
@@ -158,12 +163,12 @@ class RequestHandler:
             text_response = self.open_menu_link()
         elif action.startswith("ReadPage"):
             text_response = self.read_page(action=action.split("_")[-1])
-        elif action.startswith("OpenPageLink"):
-            text_response = self.open_page_link()
-        elif action.startswith("ReadLinks"):
-            text_response = self.read_links(action=action.split("_")[-1])
         elif action.startswith("OpenTextLink"):
             text_response = self.open_text_link()
+        elif action.startswith("ReadLinks"):
+            text_response = self.read_links(links_type=action.split("_")[-2], action=action.split("_")[-1])
+        elif action.startswith("OpenLink"):
+            text_response = self.open_link(links_type=action.split("_")[-1])
 
         return self.build_response(text_response=text_response)
 
@@ -204,19 +209,21 @@ class RequestHandler:
 
         try:
             analyze_page(url=self.cursor.url)
+        except ConnectionError:
+            error_message = "Error while requesting the HTML code of the page."
+            print(magenta(error_message))
+            return error_message
 
-            analyze_domain(url=self.cursor.url)
+        analyze_domain(url=self.cursor.url)
 
-            # Get info about the web page.
-            text_response = get_info(url=self.cursor.url)
-        except Exception:
-            print(magenta("Error encountered."))
-            return "Error encountered. Try again!"
+        # Get info about the web page.
+        text_response = get_info(url=self.cursor.url)
 
         # Update the cursor.
         self.cursor.idx_sentence = 0
         self.cursor.idx_menu = 0
         self.cursor.idx_link = 0
+        self.cursor.idx_link_article = 0
 
         # Update the url in context and return info about the web page to the user.
         return text_response
@@ -226,7 +233,7 @@ class RequestHandler:
         This method visits the homepage of the current website.
         :return:
         """
-        self.cursor.url = add_schema(get_domain(self.cursor.url, complete=True))
+        self.cursor.url = add_scheme(get_domain(self.cursor.url, complete=True))
         text_response = self.visit_page()
         return text_response
 
@@ -258,10 +265,6 @@ class RequestHandler:
         return text_response
 
     def open_menu_link(self):
-        """
-        This method visits the link chosen from the menu by the user.
-        :return: A text response containing info about the new web page.
-        """
         menu = get_menu(url=self.cursor.url)
         # Get all the URLs of the menu links.
         menu_anchors = [tup[2] for tup in menu]
@@ -275,16 +278,12 @@ class RequestHandler:
         return self.visit_page()
 
     def read_page(self, action):
-        """
-        This method gets the main text of the web page and returns a part of it to be shown to the user.
-        It also updates the cursor.
-        :return: A text response containing a part of the main text of the web page.
-        """
         # Update cursor.
         self.cursor.idx_sentence = update_cursor_index(action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
         try:
             # Get sentences from the main text to be shown to the user.
-            text_response = get_sentences(url=self.cursor.url, idx_sentence=self.cursor.idx_sentence, n_sentences=2)
+            text_response = get_main_text_sentences(
+                url=self.cursor.url, idx_sentence=self.cursor.idx_sentence, n_sentences=2)
         except IndexError:
             text_response = "No more sentences to read, you have reached the end of the page."
             # Reset cursor position.
@@ -294,23 +293,7 @@ class RequestHandler:
 
         return text_response
 
-    def open_page_link(self):
-        # Get URL to visit from the DB.
-        links = read_links(url=self.cursor.url)
-        link_url = links[self.cursor.idx_link]
-
-        # If the link is valid, update the cursor and visit the page.
-        if link_url is not None:
-            self.cursor.url = link_url[1]
-            return self.visit_page()
-        else:
-            return "Wrong input."
-
     def open_text_link(self):
-        """
-        This method visits the link chosen from the page by the user.
-        :return: A text response containing info about the new web page.
-        """
         # Get URL to visit from the DB.
         link_url = db_get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
 
@@ -321,19 +304,43 @@ class RequestHandler:
         else:
             return "Wrong input."
 
-    def read_links(self, action):
-        links = read_links(url=self.cursor.url)
-        self.cursor.idx_link = update_cursor_index(
-            action=action, old_idx=self.cursor.idx_link, step=1, size=len(links))
-        if len(links) > 0:
-            try:
-                text_response = f"Do you want to visit:\n '{links[self.cursor.idx_link][0]}'?"
-            except IndexError:
-                text_response = "No more links in the page."
-                self.cursor.idx_link = 0
-        else:
-            text_response = "Wait for the page to be analyzed."
+    def read_links(self, links_type, action):
+        links = []
+        if links_type == "all":
+            links = read_links(url=self.cursor.url)
+            # Update cursor.
+            self.cursor.idx_link = update_cursor_index(action, old_idx=self.cursor.idx_link, step=5, size=len(links))
+        elif links_type == "article":
+            links = read_links_article(url=self.cursor.url)
+            # Update cursor.
+            self.cursor.idx_link_article = update_cursor_index(
+                action, old_idx=self.cursor.idx_link_article, step=1, size=len(links))
+
+        try:
+            text_response = get_links_text_response(links=links, idx_start=self.cursor.idx_link, num_choices=5)
+        except IndexError:
+            text_response = "No more links to read, you have reached the end of the page."
+            # Reset cursor position.
+            self.cursor.idx_sentence = 0
+
         return text_response
+
+    def open_link(self, links_type):
+        # Select the right type of links.
+        link_url = None
+        if links_type == "all":
+            links = read_links(url=self.cursor.url)
+            link_url = links[self.cursor.number - 1]
+        elif links_type == "article":
+            links = read_links_article(url=self.cursor.url)
+            link_url = links[self.cursor.number - 1]
+
+        # If the link is valid, update the cursor and visit the page.
+        if link_url is not None:
+            self.cursor.url = link_url[1]
+            return self.visit_page()
+        else:
+            return "Wrong input."
 
     def build_response(self, text_response):
         """

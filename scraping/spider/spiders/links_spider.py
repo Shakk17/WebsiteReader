@@ -1,11 +1,10 @@
+import random
+
 import scrapy
 from scrapy import signals
 
-from helpers.helper import get_domain
-from helpers.printer import magenta, green
-from helpers.utility import add_schema
-
-import random
+from helpers.printer import green
+from helpers.utility import add_scheme, get_domain
 
 
 class LinksSpider(scrapy.Spider):
@@ -46,7 +45,7 @@ class LinksSpider(scrapy.Spider):
 
         # Analyze each link found in the page.
         for (i, link) in enumerate(links):
-            link_url = add_schema(link[0])
+            link_url = add_scheme(link[0])
 
             # If the link has not been visited yet, visit it.
             if link_url not in self.visited_links and self.allowed_domains[0] in link_url:

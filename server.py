@@ -44,5 +44,6 @@ def webhook():
 
 # run the app
 if __name__ == '__main__':
-    app.run()
     Database().start()
+    app.run()
+

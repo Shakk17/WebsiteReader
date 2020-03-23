@@ -3,15 +3,16 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 
-from databases.crawler_links_handler import db_delete_all_domain_crawler_links
-from databases.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page
-from databases.text_links_handler import db_delete_text_links
-from databases.websites_handler import db_delete_website, db_last_time_crawled
+from databases.handlers.crawler_links_handler import db_delete_all_domain_crawler_links
+from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page
+from databases.handlers.text_links_handler import db_delete_text_links
+from databases.handlers.websites_handler import db_delete_website, db_last_time_crawled
+from functionality.main_text import extract_main_text
 from functionality.search_forms import extract_search_forms
 from helpers import helper
 from helpers.browser import scrape_page
 from helpers.helper import is_action_recent
-from helpers.utility import get_time, get_domain, add_schema
+from helpers.utility import get_time, get_domain, add_scheme
 from scraping.crawler_handler import Crawler
 
 
@@ -30,18 +31,18 @@ def save_parsed_html(url):
     print(f"{get_time()} [{url}] PARSED HTML code started.")
     parsed_html = scrape_page(url)
     db_add_parsed_html_to_page(url=url, parsed_html=parsed_html)
+    # Extract clean main text.
+    extract_main_text(url)
     print(f"{get_time()} [{url}] PARSED HTML code finished.")
 
 
 def analyze_page(url):
-    print(f"{get_time()} [{url}] Analysis started.")
-
     # Check in the database if the web page has already been visited.
     get_new_page = False
     result = db_get_page(url=url)
 
     # Delete, if present, an obsolete version of the page.
-    if result is not None and not helper.is_action_recent(timestamp=result[6], days=0, minutes=1):
+    if result is not None and not helper.is_action_recent(timestamp=result[6], days=0, minutes=40):
         print("Page present, but obsolete.")
         db_delete_page(url=url)
         db_delete_text_links(url=url)
@@ -63,8 +64,6 @@ def analyze_page(url):
         db_add_parsed_html_to_page(url=url, parsed_html="In progress.")
         threading.Thread(target=save_parsed_html, args=(url, )).start()
 
-    print(f"{get_time()} [{url}] Analysis finished.")
-
 
 def get_info(url):
     """
@@ -74,8 +73,12 @@ def get_info(url):
     :return: A text response to be shown to the user containing info about the page.
     """
     page = db_get_page(url)
+    try:
+        title = BeautifulSoup(page[3], 'lxml').title.string
+    except AttributeError:
+        title = "unknown"
     text_response = (
-        f"The title of this page is {BeautifulSoup(page[4], 'lxml').title.string}.\n"
+        f"The title of this page is {title}.\n"
         f"The topic of this web page is {page[1]}. \n"
         f"The language of this web page is {page[2]}. \n"
     )
@@ -95,7 +98,7 @@ def analyze_domain(url):
     last_crawling = db_last_time_crawled(domain)
 
     # Delete, if present, an obsolete crawling.
-    if last_crawling is not None and not is_action_recent(timestamp=last_crawling, days=0, minutes=1):
+    if last_crawling is not None and not is_action_recent(timestamp=last_crawling, days=0, minutes=40):
         db_delete_all_domain_crawler_links(domain)
         db_delete_website(domain)
         to_crawl = True
@@ -113,7 +116,7 @@ def analyze_domain(url):
             threading.Thread(target=Crawler(start_url=complete_domain).run, args=()).start()
 
     # Check if the homepage of the domain has already been visited.
-    page = db_get_page(add_schema(complete_domain))
+    page = db_get_page(add_scheme(complete_domain))
     if page[4] is None:
         # Get all the link
         threading.Thread(target=scrape_page, args=(url,)).start()

@@ -2,8 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 
-from databases.websites_handler import db_insert_website
-from helpers.utility import add_schema
+from databases.handlers.websites_handler import db_insert_website
+from helpers.utility import add_scheme
 
 
 class Crawler:
@@ -17,7 +17,7 @@ class Crawler:
         # Open a shell in the scrapy directory and start crawling in a new subprocess.
         path = str(Path(os.getcwd()))
         shell_path = path + "/scraping/"
-        homepage_url = add_schema(f"{self.start_url}")
+        homepage_url = add_scheme(f"{self.start_url}")
         command = f"scrapy crawl links -s url={homepage_url}"
         subprocess.call(command, cwd=shell_path, shell=True)
 

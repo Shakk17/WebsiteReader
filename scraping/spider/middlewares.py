@@ -12,7 +12,7 @@ from urllib.parse import urljoin
 
 from helpers.browser import StaleElementReferenceException, get_quick_html
 from helpers.printer import magenta
-from helpers.utility import get_time, get_domain, strip_html_tags, add_schema
+from helpers.utility import get_time, get_domain, strip_html_tags, add_scheme
 from scraping.spider.items import UrlItem
 
 
@@ -94,7 +94,7 @@ class SpiderDownloaderMiddleware(object):
 
         for i, link in enumerate(links):
             try:
-                href = add_schema(urljoin(request.url, link.get("href")))
+                href = add_scheme(urljoin(request.url, link.get("href")))
                 text = strip_html_tags(link.text)
                 # True if the element is contained in a list container.
                 try:
@@ -108,7 +108,7 @@ class SpiderDownloaderMiddleware(object):
 
                 # If the link links to the same page, discard it.
                 hash_position = href.find("/#")
-                if href[:hash_position] == add_schema(request.url):
+                if href[:hash_position] == add_scheme(request.url):
                     continue
 
                 # Add the link to the string of bytes to be returned.

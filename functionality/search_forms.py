@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from databases.pages_handler import db_get_page
+from databases.handlers.pages_handler import db_get_page
 
 
 def extract_search_forms(url):

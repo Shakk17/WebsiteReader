@@ -1,4 +1,5 @@
 from databases.database_handler import Database
+from helpers.utility import remove_scheme
 
 
 def db_delete_all_domain_crawler_links(domain):
@@ -14,11 +15,16 @@ def db_delete_all_domain_crawler_links(domain):
 
 
 def db_delete_all_url_crawler_links(url):
+    url = remove_scheme(url)
+
     sql = "DELETE FROM crawler_links WHERE page_url LIKE ?;"
     Database().conn.cursor().execute(sql, (url,))
 
 
 def db_insert_crawler_link(page_url, link_url, link_text, x_position, y_position, in_list):
+    page_url = remove_scheme(page_url)
+    link_url = remove_scheme(link_url)
+
     sql = """INSERT INTO crawler_links (page_url, link_url, link_text, x_position, y_position, in_list) 
                 VALUES (?, ?, ?, ?, ?, ?)"""
     Database().conn.cursor().execute(sql, (page_url, link_url, link_text, x_position, y_position, in_list))

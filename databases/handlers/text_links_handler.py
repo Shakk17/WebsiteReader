@@ -1,4 +1,5 @@
 from databases.database_handler import Database
+from helpers.utility import remove_scheme
 
 
 def db_insert_text_link(page_url, link_num, link):
@@ -9,6 +10,7 @@ def db_insert_text_link(page_url, link_num, link):
     :param link: A tuple (position, link_text, link_url) containing info about the link.
     :return: None.
     """
+    page_url = remove_scheme(page_url)
     sql = "INSERT INTO text_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
     Database().conn.cursor().execute(sql, (page_url, link_num, link[0], link[1], link[2]))
 
@@ -20,6 +22,7 @@ def db_get_text_link(page_url, link_num):
     :param link_num: A number representing the index of the link to get between all the other links of the text.
     :return: A tuple (link_url) containing the URL of the link requested or None.
     """
+    page_url = remove_scheme(page_url)
     sql = "SELECT link_url FROM text_links WHERE page_url LIKE ? AND link_num = ?"
     cur = Database().conn.cursor()
     cur.execute(sql, (page_url, link_num))
@@ -33,6 +36,7 @@ def db_get_text_links(page_url):
     :param page_url: A string containing the URL of the web page.
     :return: An array containing tuples (position, link_text) with all the info about the links of the web page.
     """
+    page_url = remove_scheme(page_url)
     sql = "SELECT position, link_text FROM text_links WHERE page_url LIKE ?"
     cur = Database().conn.cursor()
     cur.execute(sql, (page_url,))
@@ -46,5 +50,6 @@ def db_delete_text_links(url):
     :param url: A string containing the URl of the web page to delete.
     :return: None
     """
+    url = remove_scheme(url)
     sql = "DELETE FROM text_links WHERE page_url LIKE ?"
     Database().conn.cursor().execute(sql, (url,))

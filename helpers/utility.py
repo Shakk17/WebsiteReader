@@ -40,7 +40,7 @@ def get_domain(url, complete=False):
     return domain
 
 
-def add_schema(url):
+def add_scheme(url):
     """
     This method takes a URL and returns a well-formed URL. If the schema is missing, it will get added.
     :param url: A string containing a URL.
@@ -49,6 +49,16 @@ def add_schema(url):
     url = url.replace("www.", "")
     if not re.match('(?:http|ftp|https)://', url):
         return 'http://{}'.format(url)
+    return url
+
+
+def remove_scheme(url):
+    url = url.replace("www.", "")
+    try:
+        idx = url.index("://")
+        url = url[idx + 3:]
+    except ValueError:
+        pass
     return url
 
 

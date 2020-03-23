@@ -1,10 +1,5 @@
 from datetime import datetime, timedelta
 
-from databases.crawler_links_handler import db_get_crawler_links
-from databases.pages_handler import db_get_page
-from databases.text_links_handler import db_get_text_links
-from helpers.utility import extract_words
-
 
 def is_action_recent(timestamp, days=0, minutes=0):
     """

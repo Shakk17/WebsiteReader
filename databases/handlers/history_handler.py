@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from databases.database_handler import Database
+from helpers.utility import remove_scheme
 
 
 def db_insert_action(action, url):
@@ -9,6 +10,7 @@ def db_insert_action(action, url):
     :param action: A string indicating the action performed by the user.
     :param url: The url of the web page related to the action performed by the user.
     """
+    url = remove_scheme(url)
     sql = '''INSERT INTO history (user, action, url, timestamp)
                 VALUES (?, ?, ?, ?) '''
     cur = Database().conn.cursor()

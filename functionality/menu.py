@@ -35,7 +35,7 @@ def get_menu_text_response(menu, idx_start, num_choices):
     # Get the indexes of the options to be shown to the user
     if idx_start >= len(menu):
         idx_start = 0
-    idx_end = idx_start + 10
+    idx_end = idx_start + num_choices
 
     # Get the options that will be shown to the user in the text response.
     strings = [tup[1] for tup in menu[idx_start:idx_end]]

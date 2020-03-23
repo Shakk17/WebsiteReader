@@ -3,8 +3,8 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from databases.pages_handler import db_update_page, db_get_page
-from databases.text_links_handler import db_insert_text_link, db_get_text_links
+from databases.handlers.pages_handler import db_update_page, db_get_page
+from databases.handlers.text_links_handler import db_insert_text_link, db_get_text_links
 from helpers.api import get_text_from_aylien_api
 
 
@@ -147,7 +147,7 @@ def get_main_text_sentences(url, idx_sentence, n_sentences):
         raise FileNotFoundError
 
     # Get the text from the database.
-    text = page[3]
+    text = page[5]
     # Check that the web page has already been analyzed.
     if text is None:
         raise FileNotFoundError
