@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from databases.handlers.pages_handler import db_update_page, db_get_page
+from databases.handlers.pages_handler import db_add_clean_text_to_page, db_get_page
 from databases.handlers.text_links_handler import db_insert_text_link, db_get_text_links
 from helpers.api import get_text_from_aylien_api
 
@@ -24,7 +24,7 @@ def extract_main_text(url):
     links = get_links_positions_in_main_text(container=container, text=text, url=url)
 
     # Save the main text in the DB.
-    db_update_page(url=url, clean_text=text)
+    db_add_clean_text_to_page(url=url, clean_text=text)
 
     # Save the links in the DB.
     for i, link in enumerate(links, start=1):

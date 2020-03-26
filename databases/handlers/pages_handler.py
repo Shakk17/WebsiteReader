@@ -21,7 +21,13 @@ def db_add_parsed_html_to_page(url, parsed_html):
     Database().conn.cursor().execute(sql, (parsed_html, url))
 
 
-def db_update_page(url, clean_text):
+def db_add_topic_to_page(url, topic):
+    url = remove_scheme(url)
+    sql = "UPDATE pages SET topic=? WHERE url LIKE ?"
+    Database().conn.cursor().execute(sql, (topic, url))
+
+
+def db_add_clean_text_to_page(url, clean_text):
     """
     This method updates a page in the pages table of the database.
     :param url: A string representing the URL of the web page to update.

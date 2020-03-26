@@ -1,10 +1,12 @@
-from time import time
-
 from aylienapiclient import textapi
+from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 
+from helpers.browser import get_quick_html
 from helpers.printer import yellow
-from helpers.utility import get_time
+from helpers.utility import get_time, add_scheme
+
+from urllib.parse import quote
 
 aylien_client = textapi.Client("b50e3216", "0ca0c7ad3a293fc011883422f24b8e73")
 
@@ -76,3 +78,12 @@ def get_text_from_aylien_api(url):
     except Exception:
         text = "Error during API call."
     return text
+
+
+def get_topic(url):
+    new_url = quote(url)
+    fortiguard_url = f"https://fortiguard.com/webfilter?q={new_url}"
+    html = get_quick_html(url=fortiguard_url)
+    string = BeautifulSoup(html, "lxml").findAll("h4", {"class": "info_title"})[0].text
+    topic = string.split(": ")[1]
+    return topic

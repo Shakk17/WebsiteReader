@@ -4,12 +4,14 @@ import requests
 from bs4 import BeautifulSoup
 
 from databases.handlers.crawler_links_handler import db_delete_all_domain_crawler_links
-from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page
+from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page, \
+    db_add_topic_to_page
 from databases.handlers.text_links_handler import db_delete_text_links
 from databases.handlers.websites_handler import db_delete_website, db_last_time_crawled
 from functionality.main_text import extract_main_text
 from functionality.search_forms import extract_search_forms
 from helpers import helper
+from helpers.api import get_topic
 from helpers.browser import scrape_page
 from helpers.helper import is_action_recent
 from helpers.utility import get_time, get_domain, add_scheme
@@ -55,7 +57,8 @@ def analyze_page(url):
 
     if get_new_page:
         # Get info from the Aylien API.
-        topic = "unknown"
+        topic = get_topic(url)
+        db_add_topic_to_page(url, topic)
         language = "unknown"
         # Save the info in the DB.
         save_simple_html(url=url)

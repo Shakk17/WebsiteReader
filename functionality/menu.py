@@ -24,9 +24,10 @@ def get_menu(url):
     menu = list(filter(lambda x: len(extract_words(x[1])) < 4, menu))
 
     # Remove elements of the menu that are not frequent.
-    highest_freq = menu[0][0]
-    threshold = 0.00
-    menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
+    if len(menu) > 0:
+        highest_freq = menu[0][0]
+        threshold = 0.00
+        menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
 
     return menu
 
