@@ -1,8 +1,9 @@
 from databases.handlers.crawler_links_handler import db_get_crawler_links
-from helpers.utility import extract_words
+from helpers.utility import extract_words, remove_scheme
 
 
 def read_links(url):
+    url = remove_scheme(url)
     links = db_get_crawler_links(url=url)
     texts = []
     new_links = []
@@ -18,6 +19,7 @@ def read_links(url):
 
 
 def read_links_article(url):
+    url = remove_scheme(url)
     links = db_get_crawler_links(url=url)
     texts = []
     new_links = []

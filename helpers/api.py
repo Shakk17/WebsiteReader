@@ -2,6 +2,7 @@ from aylienapiclient import textapi
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 
+from datumbox_wrapper import get_language_string
 from helpers.browser import get_quick_html
 from helpers.printer import yellow
 from helpers.utility import get_time, add_scheme
@@ -32,36 +33,25 @@ def get_urls_from_google(query):
     return results
 
 
-def get_info_from_aylien_api(url):
+def get_language(url):
     """
     This method returns info regarding a certain web page by using Aylien APIs.
     :param url: A string containing the URL of the web page.
     :return: A tuple (topic, language) containing info about the web page.
     """
-    print(yellow(f"{get_time()} [AYLIEN API] Info extraction started."))
+    print(yellow(f"{get_time()} [AYLIEN API] Language extraction started."))
 
     try:
         # This is a combined call to the Aylien APIs.
-        combined = aylien_client.Combined({
-            'url': url,
-            'endpoint': ["classify", "language"]
-        })
+        language = aylien_client.Language({'url': url})
     except TimeoutError:
-        return "unknown", "unknown"
+        return "unknown"
 
-    language = combined.get("results")[0].get("result").get("lang")
+    language_code = language.get("lang")
+    language = get_language_string(language_code)
 
-    # The topic is returned only if it the level of confidence is over a certain threshold.
-    try:
-        topic_confidence = combined.get("results")[1].get("result").get("categories")[0].get("confidence")
-        if topic_confidence > 0.3:
-            topic = combined.get("results")[1].get("result").get("categories")[0].get("label")
-        else:
-            topic = "unknown"
-    except IndexError:
-        topic = "unknown"
-    print(yellow(f"{get_time()} [AYLIEN API] Info extraction finished."))
-    return topic, language
+    print(yellow(f"{get_time()} [AYLIEN API] Language extraction finished."))
+    return language
 
 
 def get_text_from_aylien_api(url):

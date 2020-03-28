@@ -27,6 +27,12 @@ def db_add_topic_to_page(url, topic):
     Database().conn.cursor().execute(sql, (topic, url))
 
 
+def db_add_language_to_page(url, language):
+    url = remove_scheme(url)
+    sql = "UPDATE pages SET language=? WHERE url LIKE ?"
+    Database().conn.cursor().execute(sql, (language, url))
+
+
 def db_add_clean_text_to_page(url, clean_text):
     """
     This method updates a page in the pages table of the database.
