@@ -3,7 +3,7 @@ import threading
 import requests
 from bs4 import BeautifulSoup
 
-from databases.handlers.crawler_links_handler import db_delete_all_domain_crawler_links
+from databases.handlers.page_links_handler import db_delete_all_domain_links
 from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page, \
     db_add_topic_to_page, db_add_language_to_page
 from databases.handlers.text_links_handler import db_delete_text_links
@@ -103,7 +103,7 @@ def analyze_domain(url):
 
     # Delete, if present, an obsolete crawling.
     if last_crawling is not None and not is_action_recent(timestamp=last_crawling, days=0, minutes=40):
-        db_delete_all_domain_crawler_links(domain)
+        db_delete_all_domain_links(domain)
         db_delete_website(domain)
         to_crawl = True
 

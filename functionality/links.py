@@ -1,10 +1,10 @@
-from databases.handlers.crawler_links_handler import db_get_crawler_links
-from helpers.utility import extract_words, remove_scheme
+from databases.handlers.page_links_handler import db_get_page_links, db_get_domain_links
+from helpers.utility import extract_words, remove_scheme, get_domain
 
 
 def read_links(url):
     url = remove_scheme(url)
-    links = db_get_crawler_links(url=url)
+    links = db_get_page_links(url=url)
     texts = []
     new_links = []
     if len(links) > 0:
@@ -20,7 +20,7 @@ def read_links(url):
 
 def read_links_article(url):
     url = remove_scheme(url)
-    links = db_get_crawler_links(url=url)
+    links = db_get_page_links(url=url)
     texts = []
     new_links = []
     if len(links) > 0:
@@ -36,6 +36,28 @@ def read_links_article(url):
                 texts.append(link[0])
 
     return new_links
+
+
+def read_links_best(url):
+    url = remove_scheme(url)
+    links = db_get_domain_links(domain=get_domain(url))
+    texts = []
+    new_links = []
+    if len(links) > 0:
+        # Remove duplicates.
+        new_links = []
+        for link in links:
+            if link[0] not in texts:
+                new_links.append(link)
+                texts.append(link[0])
+
+    return new_links
+
+
+def assign_score(links):
+    links_score = []
+    #
+    return links_score
 
 
 def get_links_text_response(links, idx_start, num_choices):

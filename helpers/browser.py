@@ -4,7 +4,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
-from databases.handlers.crawler_links_handler import db_insert_crawler_link, db_delete_all_url_crawler_links
+from databases.handlers.page_links_handler import db_insert_page_link, db_delete_all_page_links
 from helpers.printer import magenta, red
 from helpers.utility import strip_html_tags, get_time, add_scheme
 
@@ -84,7 +84,7 @@ def scrape_page(url):
         links_bs4 = list(filter(lambda x: x.get("href") is not None, links_bs4))
 
         # Delete all the old crawler links of the page.
-        db_delete_all_url_crawler_links(url=url)
+        db_delete_all_page_links(url=url)
 
         for i, link in enumerate(links):
             try:
@@ -108,7 +108,7 @@ def scrape_page(url):
             except StaleElementReferenceException:
                 continue
             # Update link in database.
-            db_insert_crawler_link(
+            db_insert_page_link(
                 page_url=url, link_url=href, link_text=text,
                 x_position=x_position, y_position=y_position, in_list=in_list)
 

@@ -137,7 +137,10 @@ class RequestHandler:
                 requests.get(url=url)
             except requests.exceptions.RequestException:
                 # The string passed is actually a query, get the first 5 results from Google Search.
-                query_results = get_urls_from_google(string)
+                try:
+                    query_results = get_urls_from_google(string)
+                except Exception:
+                    return self.build_response(text_response="Error while searching on Google. Try again.")
         else:
             url = self.cursor.url
 
@@ -209,8 +212,8 @@ class RequestHandler:
 
         try:
             analyze_page(url=self.cursor.url)
-        except ConnectionError:
-            error_message = "Error while requesting the HTML code of the page."
+        except Exception:
+            error_message = "Error while visiting the website."
             print(magenta(error_message))
             return error_message
 
@@ -317,7 +320,7 @@ class RequestHandler:
                 action, old_idx=self.cursor.idx_link_article, step=1, size=len(links))
 
         try:
-            text_response = get_links_text_response(links=links, idx_start=self.cursor.idx_link, num_choices=5)
+            text_response = get_links_text_response(links=links, idx_start=self.cursor.idx_link, num_choices=10)
         except IndexError:
             text_response = "No more links to read, you have reached the end of the page."
             # Reset cursor position.
