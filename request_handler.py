@@ -7,7 +7,7 @@ from colorama import Style
 
 from databases.handlers.history_handler import db_insert_action, db_get_previous_action
 from databases.handlers.text_links_handler import db_get_text_link
-from functionality.links import read_links, get_links_text_response, read_links_article
+from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu, get_menu_text_response
 from helpers.api import get_urls_from_google
@@ -38,6 +38,8 @@ class Cursor:
         self.idx_link = 0
         # Index of next link (article mode) to read in the page.
         self.idx_link_article = 0
+        # Index of next link (best mode) to read in the page.
+        self.idx_link_best = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
@@ -57,6 +59,7 @@ class Cursor:
             f"\tIdx search result: {self.idx_search_result}\n"
             f"\tIdx link: {self.idx_link}\n"
             f"\tIdx link article: {self.idx_link_article}\n"
+            f"\tIdx link best: {self.idx_link_best}\n"
         ))
 
 
@@ -129,13 +132,11 @@ class RequestHandler:
         query_results = None
         if action.startswith("SearchPage"):
             string = self.cursor.string
-            # Try both http and https schemas.
             try:
-                url = string.replace("www.", "")
-                url = add_scheme(url=url)
+                url = add_scheme(url=string)
                 # Try to visit the URL.
-                requests.get(url=url)
-            except requests.exceptions.RequestException:
+                requests.head(url=url)
+            except Exception:
                 # The string passed is actually a query, get the first 5 results from Google Search.
                 try:
                     query_results = get_urls_from_google(string)
@@ -227,6 +228,7 @@ class RequestHandler:
         self.cursor.idx_menu = 0
         self.cursor.idx_link = 0
         self.cursor.idx_link_article = 0
+        self.cursor.idx_link_best = 0
 
         # Update the url in context and return info about the web page to the user.
         return text_response
@@ -309,22 +311,35 @@ class RequestHandler:
 
     def read_links(self, links_type, action):
         links = []
+        idx_start = 0
         if links_type == "all":
             links = read_links(url=self.cursor.url)
+            idx_start = self.cursor.idx_link
             # Update cursor.
-            self.cursor.idx_link = update_cursor_index(action, old_idx=self.cursor.idx_link, step=5, size=len(links))
+            self.cursor.idx_link = update_cursor_index(action, old_idx=self.cursor.idx_link, step=10, size=len(links))
         elif links_type == "article":
             links = read_links_article(url=self.cursor.url)
+            idx_start = self.cursor.idx_link_article
             # Update cursor.
             self.cursor.idx_link_article = update_cursor_index(
-                action, old_idx=self.cursor.idx_link_article, step=1, size=len(links))
+                action, old_idx=self.cursor.idx_link_article, step=10, size=len(links))
+        elif links_type == "best":
+            links = read_links_best(url=self.cursor.url)
+            idx_start = self.cursor.idx_link_best
+            # Update cursor.
+            self.cursor.idx_link_best = update_cursor_index(
+                action, old_idx=self.cursor.idx_link_best, step=10, size=len(links))
 
         try:
-            text_response = get_links_text_response(links=links, idx_start=self.cursor.idx_link, num_choices=10)
+            text_response = get_links_text_response(links=links, idx_start=idx_start, num_choices=10)
         except IndexError:
             text_response = "No more links to read, you have reached the end of the page."
-            # Reset cursor position.
-            self.cursor.idx_sentence = 0
+            if links_type == "all":
+                self.cursor.idx_link = 0
+            elif links_type == "article":
+                self.cursor.idx_link_article = 0
+            elif links_type == "best":
+                self.cursor.idx_link_best = 0
 
         return text_response
 
