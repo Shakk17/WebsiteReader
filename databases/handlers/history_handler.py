@@ -18,7 +18,12 @@ def db_insert_action(action, url):
     cur.execute(sql, record)
 
 
-def db_get_previous_action(user):
+def db_delete_last_action(user):
+    sql = "DELETE FROM history WHERE id = (SELECT MAX(id) FROM history) and user LIKE ?"
+    Database().conn.cursor().execute(sql, (user, ))
+
+
+def db_get_last_action(user):
     """
     This method retrieves the second to last action performed by the user.
     Then it deletes the last two actions performed by the user.
@@ -26,13 +31,7 @@ def db_get_previous_action(user):
     :return: A tuple (action, url) containing the second to last action performed by the user.
     """
     # First, get the second to last action performed.
-    cur = Database().conn.cursor()
-    cur.execute("SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC ", (f"{user}",))
-    result = cur.fetchall()[1]
-
-    # Then, delete the last two actions performed.
-    cur.execute("DELETE from history "
-                "WHERE id IN (SELECT id FROM history WHERE user LIKE ? ORDER BY id DESC LIMIT 2)",
-                (f"{user}",)
-                )
+    sql = "SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC"
+    cur = Database().conn.cursor().execute(sql, (user, ))
+    result = cur.fetchone()
     return result

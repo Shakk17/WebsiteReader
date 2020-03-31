@@ -5,7 +5,7 @@ import time
 import requests
 from colorama import Style
 
-from databases.handlers.history_handler import db_insert_action, db_get_previous_action
+from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
 from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
 from functionality.main_text import get_main_text_sentences
@@ -147,11 +147,17 @@ class RequestHandler:
 
         self.cursor.url = add_scheme(url)
 
+        text_response = "Action not recognized by the server."
+
         # If the action is History, get the previous action from the database and execute it.
         if action.startswith("History"):
-            action, url = db_get_previous_action("shakk")
-
-        text_response = "Action not recognized by the server."
+            a = action
+            try:
+                action, url = db_get_last_action("shakk")
+                if a.endswith("previous"):
+                    db_delete_last_action("shakk")
+            except TypeError:
+                text_response = "History is empty."
 
         if action.startswith("SearchPage"):
             text_response = self.search_page(query_results=query_results, action=action.split("_")[-1])
@@ -208,8 +214,13 @@ class RequestHandler:
         - checks if the domain has been already crawled. If not, it starts a new crawl.
         :return: A text response containing information to show to the user about the web page.
         """
-        # Save the action performed by the user into the history table of the database.
-        db_insert_action("VisitPage", self.cursor.url)
+        # Save, if new, the action performed by the user into the history table of the database.
+        try:
+            old_action, old_url = db_get_last_action("shakk")
+        except TypeError:
+            old_url = ""
+        if old_url != self.cursor.string:
+            db_insert_action("VisitPage", self.cursor.url)
 
         try:
             analyze_page(url=self.cursor.url)
