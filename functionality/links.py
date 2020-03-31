@@ -44,12 +44,11 @@ def assign_score(links, url):
     for link in links:
         score = 1
         # TODO: assign score to each link.
-        # Assign 1 point if the link is in the homepage, 2 points if on top.
+        # Assign 1 point if the link is in the homepage, 2 points if positioned on top.
         homepage_links_urls = [link[1] for link in homepage_links]
         try:
             idx = homepage_links_urls.index(link[1])
             score += 1
-            # Check position of URL in the homepage.
             if int(homepage_links_urls[idx][2]) < 2000:
                 score += 5
         except ValueError:
@@ -59,8 +58,9 @@ def assign_score(links, url):
             score += 1
             if link[0][0].isupper():
                 score += 1
-
-        # TODO:
+        # Assign 50 points if the text contains log or sign.
+        if "log" in link[0].lower() or "sign" in link[0].lower():
+            score += 50
 
         links_score.append([link[0], link[1], score])
     # Order links according to score.
@@ -69,7 +69,7 @@ def assign_score(links, url):
     new_links = []
     for link in links_score:
         # Check if the new URL is between the URLs already analyzed.
-        urls = [l[1] for l in new_links]
+        urls = [new_link[1] for new_link in new_links]
         try:
             idx = urls.index(link[1])
             new_links[idx][2] += link[2]
