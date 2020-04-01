@@ -21,15 +21,16 @@ def is_action_recent(timestamp, days=0, minutes=0):
 def update_cursor_index(action, old_idx, step, size):
     """
     This method takes an index as an input, and returns an updated index which value depends on the other parameters.
-    :param action: "next" or "previous".
+    :param action: "none", "next" or "previous".
     :param old_idx: An integer representing the old index to modify.
     :param step: An integer representing the variation of the index.
     :param size: An integer representing the size of the element related to the index.
     :return: An integer representing the new index.
     """
-    new_idx = old_idx
     if action == "next":
-        new_idx = new_idx + step if (old_idx + step) < size else 0
+        new_idx = old_idx + step if (old_idx + step) < size else 0
     elif action == "previous":
-        new_idx = new_idx - step if (old_idx - step) > 0 else 0
+        new_idx = old_idx - step if (old_idx - step) > 0 else 0
+    else:
+        new_idx = old_idx
     return new_idx

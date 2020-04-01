@@ -325,21 +325,18 @@ class RequestHandler:
         idx_start = 0
         if links_type == "all":
             links = read_links(url=self.cursor.url)
-            idx_start = self.cursor.idx_link
-            # Update cursor.
             self.cursor.idx_link = update_cursor_index(action, old_idx=self.cursor.idx_link, step=10, size=len(links))
+            idx_start = self.cursor.idx_link
         elif links_type == "article":
             links = read_links_article(url=self.cursor.url)
-            idx_start = self.cursor.idx_link_article
-            # Update cursor.
             self.cursor.idx_link_article = update_cursor_index(
                 action, old_idx=self.cursor.idx_link_article, step=10, size=len(links))
+            idx_start = self.cursor.idx_link_article
         elif links_type == "best":
             links = read_links_best(url=self.cursor.url)
-            idx_start = self.cursor.idx_link_best
-            # Update cursor.
             self.cursor.idx_link_best = update_cursor_index(
                 action, old_idx=self.cursor.idx_link_best, step=10, size=len(links))
+            idx_start = self.cursor.idx_link_best
 
         try:
             text_response = get_links_text_response(links=links, idx_start=idx_start, num_choices=10)
