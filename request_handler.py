@@ -16,6 +16,7 @@ from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
 from helpers.utility import get_time
 from functionality.analysis import analyze_page, analyze_domain, get_info
+from functionality import search_forms
 
 TIMEOUT = 3
 
@@ -179,6 +180,8 @@ class RequestHandler:
             text_response = self.read_links(links_type=action.split("_")[-2], action=action.split("_")[-1])
         elif action.startswith("OpenLink"):
             text_response = self.open_link(links_type=action.split("_")[-1])
+        elif action.startswith("FillSearchForm"):
+            text_response = self.fill_search_form()
 
         return self.build_response(text_response=text_response)
 
@@ -367,6 +370,14 @@ class RequestHandler:
             return self.visit_page()
         else:
             return "Wrong input."
+
+    def fill_search_form(self):
+        url = self.cursor.url
+        query = self.cursor.query
+        number = self.cursor.number - 1
+        new_url = search_forms.fill_search_form(url=url, number=number, query=query)
+        self.cursor.url = new_url
+        return self.visit_page()
 
     def build_response(self, text_response):
         """

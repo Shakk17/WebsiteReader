@@ -102,11 +102,13 @@ def get_links_text_response(links, idx_start, num_choices):
     # Get the options that will be shown to the user in the text response.
     strings = [tup[0] for tup in links[idx_start:idx_end]]
 
-    # Format of display -> option n: text
-    #                      option n+1: text
-    text_response = "You can choose between: \n"
-    for i, string in enumerate(strings, start=1):
-        text_response += f"{idx_start + i}: {string}. \n"
-    text_response += f"\n{min(idx_start + num_choices, len(links))} out of {len(links)} option(s) read."
-
+    if len(links) > 0:
+        # Format of display -> option n: text
+        #                      option n+1: text
+        text_response = "You can choose between: \n"
+        for i, string in enumerate(strings, start=1):
+            text_response += f"{idx_start + i}: {string}. \n"
+        text_response += f"\n{min(idx_start + num_choices, len(links))} out of {len(links)} option(s) read."
+    else:
+        text_response = "No links available at the moment."
     return text_response

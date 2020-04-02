@@ -45,6 +45,18 @@ sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS text_links (
                                     FOREIGN KEY (page_url) REFERENCES pages (url)
                                 );"""
 
+sql_create_search_forms_table = """CREATE TABLE IF NOT EXISTS search_forms (
+                                    page_url text NOT NULL,
+                                    form_num integer NOT NULL,
+                                    method text NOT NULL,
+                                    action text NOT NULL,
+                                    input_num integer NOT NULL,
+                                    input_name text NOT NULL,
+                                    input_text text NOT NULL,
+                                    PRIMARY KEY (page_url, form_num),
+                                    FOREIGN KEY (page_url) REFERENCES pages (url)
+                                );"""
+
 
 def analyze_scraping(domain):
     """
@@ -96,5 +108,6 @@ class Database:
             self.conn.cursor().execute(sql_create_crawler_links_table)
             self.conn.cursor().execute(sql_create_pages_table)
             self.conn.cursor().execute(sql_create_page_links_table)
+            self.conn.cursor().execute(sql_create_search_forms_table)
         else:
             print("Error! Cannot create the database connection.")
