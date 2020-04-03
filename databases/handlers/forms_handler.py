@@ -2,7 +2,7 @@ from databases.database_handler import Database
 from helpers.utility import remove_scheme
 
 
-def db_insert_search_form(page_url, form_num, method, action, input_num, input_name, input_text):
+def db_insert_form(page_url, form_num, method, action, input_num, input_name, input_text):
     page_url = remove_scheme(page_url)
     sql = """INSERT INTO search_forms (page_url, form_num, method, action, input_num, input_name, input_text) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)"""
@@ -13,7 +13,7 @@ def db_insert_search_form(page_url, form_num, method, action, input_num, input_n
         pass
 
 
-def db_get_search_forms(page_url):
+def db_get_forms(page_url):
     page_url = remove_scheme(page_url)
     sql = """SELECT page_url, form_num, method, action, input_num, input_name, input_text
                 FROM search_forms WHERE page_url LIKE ?"""

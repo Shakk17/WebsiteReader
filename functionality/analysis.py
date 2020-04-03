@@ -6,11 +6,11 @@ from bs4 import BeautifulSoup
 from databases.handlers.page_links_handler import db_delete_all_domain_links
 from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_page, db_delete_page, db_insert_page, \
     db_add_topic_to_page, db_add_language_to_page
-from databases.handlers.search_forms_handler import db_get_search_forms
+from databases.handlers.forms_handler import db_get_forms
 from databases.handlers.text_links_handler import db_delete_text_links
 from databases.handlers.websites_handler import db_delete_website, db_last_time_crawled
 from functionality.main_text import extract_main_text
-from functionality.search_forms import extract_search_forms
+from functionality.forms import extract_forms
 from helpers import helper
 from helpers.api import get_topic, get_language
 from helpers.browser import scrape_page
@@ -89,8 +89,8 @@ def get_info(url):
     )
 
     # Extract all the search forms present in the page.
-    extract_search_forms(url=url)
-    search_forms = db_get_search_forms(page_url=url)
+    extract_forms(url=url)
+    search_forms = db_get_forms(page_url=url)
     search_forms_text = [x[6] for x in search_forms]
     if len(search_forms_text) > 0:
         text_response += f"There are search forms in this page called: "

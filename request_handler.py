@@ -7,6 +7,8 @@ from colorama import Style
 
 from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
+from functionality.analysis import analyze_page, analyze_domain, get_info
+from functionality.forms import get_text_field_form, submit_form
 from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu, get_menu_text_response
@@ -15,8 +17,6 @@ from helpers.helper import update_cursor_index
 from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
 from helpers.utility import get_time
-from functionality.analysis import analyze_page, analyze_domain, get_info
-from functionality import search_forms
 
 TIMEOUT = 3
 
@@ -41,13 +41,16 @@ class Cursor:
         self.idx_link_article = 0
         # Index of next link (best mode) to read in the page.
         self.idx_link_best = 0
+        # Index of the form to write into.
+        self.idx_form = 0
+        self.idx_field = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
             if not key.endswith("original"):
                 try:
                     value = int(value)
-                except ValueError:
+                except Exception:
                     pass
                 setattr(self, key, value)
 
@@ -61,6 +64,8 @@ class Cursor:
             f"\tIdx link: {self.idx_link}\n"
             f"\tIdx link article: {self.idx_link_article}\n"
             f"\tIdx link best: {self.idx_link_best}\n"
+            f"\tIdx form: {self.idx_form}\n"
+            f"\tIdx field: {self.idx_field}\n"
         ))
 
 
@@ -180,8 +185,8 @@ class RequestHandler:
             text_response = self.read_links(links_type=action.split("_")[-2], action=action.split("_")[-1])
         elif action.startswith("OpenLink"):
             text_response = self.open_link(links_type=action.split("_")[-1])
-        elif action.startswith("FillSearchForm"):
-            text_response = self.fill_search_form()
+        elif action.startswith("FillForm"):
+            text_response = self.fill_form(action=action.split("_")[-1])
 
         return self.build_response(text_response=text_response)
 
@@ -243,6 +248,8 @@ class RequestHandler:
         self.cursor.idx_link = 0
         self.cursor.idx_link_article = 0
         self.cursor.idx_link_best = 0
+        self.cursor.idx_form = 0
+        self.cursor.idx_field = 0
 
         # Update the url in context and return info about the web page to the user.
         return text_response
@@ -371,13 +378,29 @@ class RequestHandler:
         else:
             return "Wrong input."
 
-    def fill_search_form(self):
+    def fill_form(self, action):
         url = self.cursor.url
-        query = self.cursor.query
-        number = self.cursor.number - 1
-        new_url = search_forms.fill_search_form(url=url, number=number, query=query)
-        self.cursor.url = new_url
-        return self.visit_page()
+        if action == "start":
+            # Initialize form parameters.
+            self.cursor.idx_form = self.cursor.number - 1
+            self.cursor.form_parameters = {}
+        elif action == "write":
+            user_input = self.cursor.user_input
+            self.cursor.form_parameters[self.cursor.idx_field] = user_input
+            self.cursor.idx_field += 1
+        elif action == "submit":
+            fields_values = list(self.cursor.form_parameters.values())
+            self.cursor.url = submit_form(url=url, form_number=self.cursor.idx_form, fields_values=fields_values)
+            return self.visit_page()
+        try:
+            field_text = get_text_field_form(url=url,
+                                             form_number=self.cursor.idx_form, field_number=self.cursor.idx_field)
+            text_response = f"What do you want to write in the field: {field_text}? Start your answer with 'write'!"
+        except Exception:
+            text_response = f"You successfully filled all the fields."
+            # TODO: recap fields for user.
+
+        return text_response
 
     def build_response(self, text_response):
         """
