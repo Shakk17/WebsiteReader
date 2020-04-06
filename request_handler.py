@@ -13,6 +13,7 @@ from functionality.links import read_links, get_links_text_response, read_links_
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu, get_menu_text_response
 from helpers.api import get_urls_from_google
+from helpers.exceptions import NoSuchFormError
 from helpers.helper import update_cursor_index
 from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
@@ -333,23 +334,26 @@ class RequestHandler:
     def read_links(self, links_type, action):
         links = []
         idx_start = 0
+        num_choices = 5
         if links_type == "all":
             links = read_links(url=self.cursor.url)
-            self.cursor.idx_link = update_cursor_index(action, old_idx=self.cursor.idx_link, step=10, size=len(links))
+            self.cursor.idx_link = update_cursor_index(
+                action, old_idx=self.cursor.idx_link, step=num_choices, size=len(links))
             idx_start = self.cursor.idx_link
         elif links_type == "article":
             links = read_links_article(url=self.cursor.url)
+            num_choices = 3
             self.cursor.idx_link_article = update_cursor_index(
-                action, old_idx=self.cursor.idx_link_article, step=10, size=len(links))
+                action, old_idx=self.cursor.idx_link_article, step=num_choices, size=len(links))
             idx_start = self.cursor.idx_link_article
         elif links_type == "best":
             links = read_links_best(url=self.cursor.url)
             self.cursor.idx_link_best = update_cursor_index(
-                action, old_idx=self.cursor.idx_link_best, step=10, size=len(links))
+                action, old_idx=self.cursor.idx_link_best, step=num_choices, size=len(links))
             idx_start = self.cursor.idx_link_best
 
         try:
-            text_response = get_links_text_response(links=links, idx_start=idx_start, num_choices=10)
+            text_response = get_links_text_response(links=links, idx_start=idx_start, num_choices=num_choices)
         except IndexError:
             text_response = "No more links to read, you have reached the end of the page."
             if links_type == "all":
@@ -396,8 +400,10 @@ class RequestHandler:
             field_text = get_text_field_form(url=url,
                                              form_number=self.cursor.idx_form, field_number=self.cursor.idx_field)
             text_response = f"What do you want to write in the field: {field_text}? Start your answer with 'write'!"
+        except NoSuchFormError:
+            text_response = "Form not found."
         except Exception:
-            text_response = f"You successfully filled all the fields."
+            text_response = f"You successfully filled all the fields. Write 'submit' to submit the form."
             # TODO: recap fields for user.
 
         return text_response

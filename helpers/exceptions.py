@@ -1,0 +1,2 @@
+class NoSuchFormError(Exception):
+    pass

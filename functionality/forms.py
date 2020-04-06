@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 from databases.handlers.pages_handler import db_get_page
 from databases.handlers.forms_handler import db_insert_form, db_get_forms
+from helpers.exceptions import NoSuchFormError
 from helpers.utility import remove_scheme
 
 from urllib.parse import quote
@@ -32,7 +33,10 @@ def extract_forms(url):
 def get_text_field_form(url, form_number, field_number):
     fields_forms = db_get_forms(page_url=url)
     fields_form = list(filter(lambda x: x[1] == form_number, fields_forms))
-    text = fields_form[field_number][6]
+    if len(fields_form) > 0:
+        text = fields_form[field_number][6]
+    else:
+        raise NoSuchFormError
     return text
 
 
