@@ -5,15 +5,17 @@ import time
 import requests
 from colorama import Style
 
+from databases.handlers.bookmarks_handler import db_get_bookmarks, db_insert_bookmark
 from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
 from functionality.analysis import analyze_page, analyze_domain, get_info
+from functionality.bookmarks import insert_bookmark
 from functionality.forms import get_text_field_form, submit_form
 from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu, get_menu_text_response
 from helpers.api import get_urls_from_google
-from helpers.exceptions import NoSuchFormError
+from helpers.exceptions import NoSuchFormError, BookmarkUrlTaken, BookmarkNameTaken
 from helpers.helper import update_cursor_index
 from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
@@ -45,6 +47,8 @@ class Cursor:
         # Index of the form to write into.
         self.idx_form = 0
         self.idx_field = 0
+        # Bookmarks.
+        self.idx_bookmarks = 0
 
         # Updates cursor with values received from the context.
         for key, value in cursor_context.get("parameters").items():
@@ -67,6 +71,7 @@ class Cursor:
             f"\tIdx link best: {self.idx_link_best}\n"
             f"\tIdx form: {self.idx_form}\n"
             f"\tIdx field: {self.idx_field}\n"
+            f"\tIdx bookmarks: {self.idx_bookmarks}\n"
         ))
 
 
@@ -132,28 +137,6 @@ class RequestHandler:
         # Create a Cursor object containing details about the web page.
         self.cursor = Cursor(cursor_context)
 
-        # Understand if the string passed is a URL or a query.
-
-        # URL is either in the parameters (VisitPage) or in the context.
-        url = ""
-        query_results = None
-        if action.startswith("SearchPage"):
-            string = self.cursor.string
-            try:
-                url = add_scheme(url=string)
-                # Try to visit the URL.
-                requests.head(url=url)
-            except Exception:
-                # The string passed is actually a query, get the first 5 results from Google Search.
-                try:
-                    query_results = get_urls_from_google(string)
-                except Exception:
-                    return self.build_response(text_response="Error while searching on Google. Try again.")
-        else:
-            url = self.cursor.url
-
-        self.cursor.url = add_scheme(url)
-
         text_response = "Action not recognized by the server."
 
         # If the action is History, get the previous action from the database and execute it.
@@ -166,8 +149,10 @@ class RequestHandler:
             except TypeError:
                 text_response = "History is empty."
 
-        if action.startswith("SearchPage"):
-            text_response = self.search_page(query_results=query_results, action=action.split("_")[-1])
+        if action.startswith("GoogleSearch"):
+            text_response = self.google_search(action=action.split("_")[-1])
+        elif action.startswith("Bookmarks"):
+            text_response = self.bookmarks(action=action.split("_")[-1])
         elif action.startswith("VisitPage"):
             text_response = self.visit_page()
         elif action.startswith("GoToHomepage"):
@@ -191,7 +176,7 @@ class RequestHandler:
 
         return self.build_response(text_response=text_response)
 
-    def search_page(self, query_results, action):
+    def google_search(self, action):
         """
         This method:
             - if the user has performed a search, it returns one of the results of the Google search;
@@ -200,19 +185,35 @@ class RequestHandler:
         :param action: a string containing "previous", "next" or "reset".
         :return: A string containing info about one result of the Google search or info about a web page.
         """
-        # Reset the counter if a new search is performed.
+        try:
+            query_results = get_urls_from_google(query=self.cursor.query)
+        except Exception:
+            return "Error while searching on Google."
+
+        # Update cursor.
         self.cursor.idx_search_result = update_cursor_index(
             action=action, old_idx=self.cursor.idx_search_result, step=1, size=5)
 
-        # If the parameter given by the user was a valid URL, visit the page.
-        if query_results is None:
-            text_response = self.visit_page()
-        # Otherwise, return one of the Google Search results.
-        else:
-            result = query_results[self.cursor.idx_search_result]
-            text_response = f"""Result number {self.cursor.idx_search_result + 1}.
-                                    Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
-            self.cursor.url = result[1]
+        result = query_results[self.cursor.idx_search_result]
+        text_response = f"""Result number {self.cursor.idx_search_result + 1}.
+                                Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
+        self.cursor.url = result[1]
+
+        return text_response
+
+    def bookmarks(self, action):
+        text_response = ""
+
+        if action == "show":
+            bookmarks = db_get_bookmarks(user="shakk")
+
+            return
+        elif action == "add":
+            text_response = insert_bookmark(url=self.cursor.url, name=self.cursor.name)
+        elif action == "delete":
+            text_response = "Bookmark deleted!"
+        elif action == "open":
+            pass
         return text_response
 
     def visit_page(self):
@@ -228,7 +229,7 @@ class RequestHandler:
             old_action, old_url = db_get_last_action("shakk")
         except TypeError:
             old_url = ""
-        if old_url != self.cursor.string:
+        if old_url != self.cursor.url:
             db_insert_action("VisitPage", self.cursor.url)
 
         try:
@@ -251,6 +252,7 @@ class RequestHandler:
         self.cursor.idx_link_best = 0
         self.cursor.idx_form = 0
         self.cursor.idx_field = 0
+        self.cursor.idx_bookmarks = 0
 
         # Update the url in context and return info about the web page to the user.
         return text_response

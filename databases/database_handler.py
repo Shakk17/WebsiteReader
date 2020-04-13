@@ -57,6 +57,14 @@ sql_create_forms_table = """CREATE TABLE IF NOT EXISTS forms (
                                     FOREIGN KEY (page_url) REFERENCES pages (url)
                                 );"""
 
+sql_create_bookmarks_table = """CREATE TABLE IF NOT EXISTS bookmarks (
+                                    url text NOT NULL,
+                                    name text NOT NULL,
+                                    user text NOT NULL,
+                                    PRIMARY KEY (url, user),
+                                    CONSTRAINT name_user UNIQUE(name, user)
+                                );"""
+
 
 def analyze_scraping(domain):
     """
@@ -109,5 +117,6 @@ class Database:
             self.conn.cursor().execute(sql_create_pages_table)
             self.conn.cursor().execute(sql_create_page_links_table)
             self.conn.cursor().execute(sql_create_forms_table)
+            self.conn.cursor().execute(sql_create_bookmarks_table)
         else:
             print("Error! Cannot create the database connection.")
