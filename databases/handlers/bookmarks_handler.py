@@ -18,6 +18,12 @@ def db_insert_bookmark(url, name, user):
             raise BookmarkNameTaken
 
 
+def db_delete_bookmark(url, user):
+    url = remove_scheme(url)
+    sql = "DELETE FROM bookmarks WHERE url LIKE ? AND user LIKE ?;"
+    Database().conn.cursor().execute(sql, (url, user))
+
+
 def db_get_bookmarks(user):
     sql = """SELECT url, name, user 
                 FROM bookmarks WHERE user LIKE ?"""

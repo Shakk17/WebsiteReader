@@ -30,22 +30,3 @@ def get_menu(url):
         menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
 
     return menu
-
-
-def get_menu_text_response(menu, idx_start, num_choices):
-    # Get the indexes of the options to be shown to the user
-    if idx_start >= len(menu):
-        idx_start = 0
-    idx_end = idx_start + num_choices
-
-    # Get the options that will be shown to the user in the text response.
-    strings = [tup[1] for tup in menu[idx_start:idx_end]]
-
-    # Format of display -> option n: text
-    #                      option n+1: text
-    text_response = "You can choose between: \n"
-    for i, string in enumerate(strings, start=1):
-        text_response += f"{idx_start + i}: {string}. \n"
-    text_response += f"\n{min(idx_start + num_choices, len(menu))} out of {len(menu)} option(s) read."
-
-    return text_response

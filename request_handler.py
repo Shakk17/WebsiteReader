@@ -2,21 +2,19 @@ import queue
 import threading
 import time
 
-import requests
 from colorama import Style
 
-from databases.handlers.bookmarks_handler import db_get_bookmarks, db_insert_bookmark
 from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
 from functionality.analysis import analyze_page, analyze_domain, get_info
-from functionality.bookmarks import insert_bookmark
+from functionality.bookmarks import insert_bookmark, delete_bookmark, get_bookmarks
 from functionality.forms import get_text_field_form, submit_form
 from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
 from functionality.main_text import get_main_text_sentences
-from functionality.menu import get_menu, get_menu_text_response
+from functionality.menu import get_menu
 from helpers.api import get_urls_from_google
-from helpers.exceptions import NoSuchFormError, BookmarkUrlTaken, BookmarkNameTaken
-from helpers.helper import update_cursor_index
+from helpers.exceptions import NoSuchFormError
+from helpers.helper import update_cursor_index, show_element
 from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
 from helpers.utility import get_time
@@ -51,13 +49,15 @@ class Cursor:
         self.idx_bookmarks = 0
 
         # Updates cursor with values received from the context.
-        for key, value in cursor_context.get("parameters").items():
-            if not key.endswith("original"):
-                try:
-                    value = int(value)
-                except Exception:
-                    pass
-                setattr(self, key, value)
+        if cursor_context is not None:
+            if cursor_context.get("parameters") is not None:
+                for key, value in cursor_context.get("parameters").items():
+                    if not key.endswith("original"):
+                        try:
+                            value = int(value)
+                        except Exception:
+                            pass
+                        setattr(self, key, value)
 
     def __repr__(self):
         return (green(
@@ -152,7 +152,7 @@ class RequestHandler:
         if action.startswith("GoogleSearch"):
             text_response = self.google_search(action=action.split("_")[-1])
         elif action.startswith("Bookmarks"):
-            text_response = self.bookmarks(action=action.split("_")[-1])
+            text_response = self.bookmarks(command=action.split("_")[-2], action=action.split("_")[-1])
         elif action.startswith("VisitPage"):
             text_response = self.visit_page()
         elif action.startswith("GoToHomepage"):
@@ -201,19 +201,33 @@ class RequestHandler:
 
         return text_response
 
-    def bookmarks(self, action):
-        text_response = ""
+    def bookmarks(self, command, action):
+        text_response = "Command not recognized."
 
-        if action == "show":
-            bookmarks = db_get_bookmarks(user="shakk")
-
-            return
-        elif action == "add":
+        if command == "show":
+            bookmarks = get_bookmarks(user="shakk")
+            # Number of choices that will get displayed to the user at once.
+            num_choices = 5
+            # Update cursor.
+            self.cursor.idx_bookmarks = update_cursor_index(action=action, old_idx=self.cursor.idx_bookmarks,
+                                                            step=num_choices, size=len(bookmarks))
+            # Get text response containing voices to show.
+            text_response = show_element(element=bookmarks, idx_start=self.cursor.idx_bookmarks,
+                                         num_choices=num_choices)
+        elif command == "add":
             text_response = insert_bookmark(url=self.cursor.url, name=self.cursor.name)
-        elif action == "delete":
-            text_response = "Bookmark deleted!"
-        elif action == "open":
-            pass
+        elif command == "delete":
+            bookmarks = get_bookmarks(user="shakk")
+            url = bookmarks[self.cursor.idx_bookmarks]
+            text_response = delete_bookmark(url=url, user="shakk")
+        elif command == "open":
+            bookmarks = get_bookmarks(user="shakk")
+            try:
+                index = self.cursor.number - 1
+                self.cursor.url = bookmarks[index][0]
+                text_response = self.visit_page()
+            except IndexError:
+                text_response = "Wrong input."
         return text_response
 
     def visit_page(self):
@@ -289,7 +303,7 @@ class RequestHandler:
         # Number of choices that will get displayed to the user at once.
         num_choices = 10
         # Get text response containing voices to show.
-        text_response = get_menu_text_response(menu=menu, idx_start=self.cursor.idx_menu, num_choices=num_choices)
+        text_response = show_element(element=menu, idx_start=self.cursor.idx_menu, num_choices=num_choices)
 
         return text_response
 
