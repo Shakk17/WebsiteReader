@@ -23,7 +23,7 @@ def create_table(engine):
 
 
 class Link(Base):
-    __tablename__ = "crawler_links"
+    __tablename__ = "page_links"
 
     id = Column(Integer, primary_key=True)
     page_url = Column('page_url', String(200))
