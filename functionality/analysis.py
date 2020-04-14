@@ -9,6 +9,7 @@ from databases.handlers.pages_handler import db_add_parsed_html_to_page, db_get_
 from databases.handlers.forms_handler import db_get_forms
 from databases.handlers.text_links_handler import db_delete_text_links
 from databases.handlers.websites_handler import db_delete_website, db_last_time_crawled
+from functionality.functionality import extract_functionality
 from functionality.main_text import extract_main_text
 from functionality.forms import extract_forms
 from helpers import helper
@@ -119,8 +120,15 @@ def analyze_domain(url):
 
     # Crawl in the background.
     if to_crawl:
-        threading.Thread(target=Crawler(start_url=domain).run, args=()).start()
+        # threading.Thread(target=Crawler(start_url=domain).run, args=()).start()
+        threading.Thread(target=start_crawling, args=(domain,)).start()
 
     # Analyze the homepage of the website.
     domain = domain + '/'
     analyze_page(domain)
+
+
+def start_crawling(domain):
+    Crawler(start_url=domain).run()
+    # Extract functionality from the website.
+    extract_functionality(domain)

@@ -8,7 +8,8 @@ from databases.handlers.text_links_handler import db_get_text_link
 from functionality.analysis import analyze_page, analyze_domain, get_info
 from functionality.bookmarks import insert_bookmark, delete_bookmark, get_bookmarks
 from functionality.forms import get_text_field_form, submit_form
-from functionality.links import read_links, get_links_text_response, read_links_article, read_links_best
+from functionality.functionality import get_functionality
+from functionality.links import read_links, get_links_text_response, read_links_article
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu
 from helpers.api import get_urls_from_google
@@ -298,7 +299,7 @@ class RequestHandler:
                 action, old_idx=self.cursor.idx_link_article, step=num_choices, size=len(links))
             idx_start = self.cursor.idx_link_article
         elif links_type == "best":
-            links = read_links_best(url=self.cursor.url)
+            links = get_functionality(url=self.cursor.url)
             self.cursor.idx_link_best = update_cursor_index(
                 action, old_idx=self.cursor.idx_link_best, step=num_choices, size=len(links))
             idx_start = self.cursor.idx_link_best

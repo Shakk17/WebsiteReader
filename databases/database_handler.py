@@ -65,6 +65,15 @@ sql_create_bookmarks_table = """CREATE TABLE IF NOT EXISTS bookmarks (
                                     CONSTRAINT name_user UNIQUE(name, user)
                                 );"""
 
+sql_create_functionality_table = """CREATE TABLE IF NOT EXISTS functionality (
+                                    page_url text NOT NULL,
+                                    type text NOT NULL,
+                                    name text NOT NULL,
+                                    link_url text,
+                                    score integer NOT NULL,
+                                    PRIMARY KEY (page_url, type, name)
+                                );"""
+
 
 def analyze_scraping(domain):
     """
@@ -118,5 +127,6 @@ class Database:
             self.conn.cursor().execute(sql_create_text_links_table)
             self.conn.cursor().execute(sql_create_forms_table)
             self.conn.cursor().execute(sql_create_bookmarks_table)
+            self.conn.cursor().execute(sql_create_functionality_table)
         else:
             print("Error! Cannot create the database connection.")
