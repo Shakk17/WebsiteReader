@@ -9,10 +9,10 @@ def db_insert_page(url, simple_html):
     This method inserts a web page in the pages table of the database.
     """
     url = remove_scheme(url)
-    sql = """INSERT INTO pages (url, simple_html, last_visit) 
-                VALUES (?, ?, ?)"""
+    sql = """INSERT INTO pages (url, simple_html, last_visit, parsed_html) 
+                VALUES (?, ?, ?, ?)"""
     Database().conn.cursor().execute(
-        sql, (url, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        sql, (url, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "In progress."))
 
 
 def db_add_parsed_html_to_page(url, parsed_html):

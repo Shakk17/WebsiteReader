@@ -2,7 +2,6 @@ import queue
 import threading
 import time
 
-from colorama import Style
 
 from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
@@ -13,66 +12,14 @@ from functionality.links import read_links, get_links_text_response, read_links_
 from functionality.main_text import get_main_text_sentences
 from functionality.menu import get_menu
 from helpers.api import get_urls_from_google
-from helpers.exceptions import NoSuchFormError
+from helpers.cursor import Cursor
+from helpers.exceptions import NoSuchFormError, PageRequestError
 from helpers.helper import update_cursor_index, show_element
 from helpers.printer import green, blue, red, magenta
 from helpers.utility import add_scheme, get_domain
 from helpers.utility import get_time
 
 TIMEOUT = 3
-
-
-class Cursor:
-    """
-    An object that keeps track of the current state of the user.
-    It is sent and received by the server (as a JSON) in requests and responses to the agent.
-    """
-
-    def __init__(self, cursor_context):
-        self.url = "https://www.google.com"
-        # Number that indicates the paragraph to read in the current article.
-        self.idx_sentence = 0
-        # Number that indicates the article to read in the current section.
-        self.idx_menu = 0
-        # Number of GoogleSearch result to show.
-        self.idx_search_result = 0
-        # Index of next link to read in the page.
-        self.idx_link = 0
-        # Index of next link (article mode) to read in the page.
-        self.idx_link_article = 0
-        # Index of next link (best mode) to read in the page.
-        self.idx_link_best = 0
-        # Index of the form to write into.
-        self.idx_form = 0
-        self.idx_field = 0
-        # Bookmarks.
-        self.idx_bookmarks = 0
-
-        # Updates cursor with values received from the context.
-        if cursor_context is not None:
-            if cursor_context.get("parameters") is not None:
-                for key, value in cursor_context.get("parameters").items():
-                    if not key.endswith("original"):
-                        try:
-                            value = int(value)
-                        except Exception:
-                            pass
-                        setattr(self, key, value)
-
-    def __repr__(self):
-        return (green(
-            f"{Style.BRIGHT}+++ CURSOR +++{Style.NORMAL}\n"
-            f"\tURL: {self.url}\n"
-            f"\tIdx sentence: {self.idx_sentence}\n"
-            f"\tIdx menu: {self.idx_menu}\n"
-            f"\tIdx search result: {self.idx_search_result}\n"
-            f"\tIdx link: {self.idx_link}\n"
-            f"\tIdx link article: {self.idx_link_article}\n"
-            f"\tIdx link best: {self.idx_link_best}\n"
-            f"\tIdx form: {self.idx_form}\n"
-            f"\tIdx field: {self.idx_field}\n"
-            f"\tIdx bookmarks: {self.idx_bookmarks}\n"
-        ))
 
 
 class RequestHandler:
@@ -248,27 +195,15 @@ class RequestHandler:
 
         try:
             analyze_page(url=self.cursor.url)
-        except Exception:
-            error_message = "Error while visiting the website."
-            print(magenta(error_message))
-            return error_message
+            # Get info about the web page.
+            text_response = get_info(url=self.cursor.url)
+            self.cursor.reset_indexes()
+            # Start analyzing the domain in the background.
+            threading.Thread(target=analyze_domain, args=(self.cursor.url,)).start()
+        except PageRequestError:
+            text_response = "Error while visiting the website. Say 'reload' to try again."
+            print(magenta(text_response))
 
-        analyze_domain(url=self.cursor.url)
-
-        # Get info about the web page.
-        text_response = get_info(url=self.cursor.url)
-
-        # Update the cursor.
-        self.cursor.idx_sentence = 0
-        self.cursor.idx_menu = 0
-        self.cursor.idx_link = 0
-        self.cursor.idx_link_article = 0
-        self.cursor.idx_link_best = 0
-        self.cursor.idx_form = 0
-        self.cursor.idx_field = 0
-        self.cursor.idx_bookmarks = 0
-
-        # Update the url in context and return info about the web page to the user.
         return text_response
 
     def go_to_homepage(self):

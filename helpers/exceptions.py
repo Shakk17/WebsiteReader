@@ -8,3 +8,7 @@ class BookmarkUrlTaken(Exception):
 
 class BookmarkNameTaken(Exception):
     pass
+
+
+class PageRequestError(Exception):
+    pass

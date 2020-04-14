@@ -14,24 +14,28 @@ from functionality.forms import extract_forms
 from helpers import helper
 from helpers.api import get_topic, get_language
 from helpers.browser import scrape_page
+from helpers.exceptions import PageRequestError
 from helpers.helper import is_action_recent
 from helpers.utility import get_time, get_domain, add_scheme
 from scraping.crawler_handler import Crawler
 
 
-def save_simple_html(url):
+def get_simple_html(url):
     """
-    This method requests the HTML code of the web page and saves it in the db.
+    This method requests the HTML code of the web page.
     For speed purposes, Javascript is not supported.
     """
     url = add_scheme(url)
     print(f"{get_time()} [{url}] SIMPLE HTML code started.")
-    html = requests.get(url).text
+    try:
+        html = requests.get(url).text
+    except Exception:
+        raise PageRequestError
     print(f"{get_time()} [{url}] SIMPLE HTML code finished.")
-    db_insert_page(url, html)
+    return html
 
 
-def save_parsed_html(url):
+def finish_page_analysis(url):
     url = add_scheme(url)
     print(f"{get_time()} [{url}] PARSED HTML code started.")
     parsed_html = scrape_page(url)
@@ -61,13 +65,12 @@ def analyze_page(url):
     if get_new_page:
         # Save the info in the DB.
         url = add_scheme(url)
-        save_simple_html(url=url)
-        db_add_topic_to_page(url, get_topic(url))
-        db_add_language_to_page(url, get_language(url))
-
-        # Put a placeholder, and parse the page in the background.
-        db_add_parsed_html_to_page(url=url, parsed_html="In progress.")
-        threading.Thread(target=save_parsed_html, args=(url, )).start()
+        simple_html = get_simple_html(url=url)
+        db_insert_page(url=url, simple_html=simple_html)
+        db_add_topic_to_page(url=url, topic=get_topic(url))
+        db_add_language_to_page(url=url, language=get_language(url))
+        # Finish analyse (with rendering) the web page in the background.
+        threading.Thread(target=finish_page_analysis, args=(url,)).start()
 
 
 def get_info(url):
@@ -83,7 +86,7 @@ def get_info(url):
     except AttributeError:
         title = "unknown"
     text_response = (
-        f"The title of this page is {title}.\n"
+        f"The title of this web page is {title}.\n"
         f"The topic of this web page is {page[1]}. \n"
         f"The language of this web page is {page[2]}. \n"
     )
@@ -128,4 +131,4 @@ def analyze_domain(url):
     page = db_get_page(add_scheme(complete_domain))
     if page[4] is None:
         # Get all the link
-        threading.Thread(target=scrape_page, args=(url,)).start()
+        scrape_page(url)
