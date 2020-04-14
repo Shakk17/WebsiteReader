@@ -24,20 +24,16 @@ def strip_html_tags(text):
     return text
 
 
-def get_domain(url, complete=False):
+def get_domain(url):
     """
     This method extracts the domain from the URL of a website.
     :param complete: True is the subdomain is also needed, False otherwise.
     :param url: A string containing the URL.
     :return: A string containing the domain extracted from the URL.
     """
+    url = remove_scheme(url)
     extracted_domain = tldextract.extract(url)
-    subdomain = extracted_domain.subdomain.replace("www.", "")
-    if complete and len(subdomain) > 0:
-        domain = f"{subdomain}.{extracted_domain.domain}.{extracted_domain.suffix}"
-    else:
-        domain = f"{extracted_domain.domain}.{extracted_domain.suffix}"
-    return domain
+    return extracted_domain.fqdn
 
 
 def add_scheme(url):

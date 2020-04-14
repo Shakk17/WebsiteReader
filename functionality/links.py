@@ -38,7 +38,7 @@ def read_links_best(url):
 
 def assign_score(links, url):
     links_score = []
-    homepage_url = get_domain(url, complete=True)
+    homepage_url = get_domain(url)
     homepage_links = db_get_page_links(homepage_url)
     # link = (link_text, link_url, y_position, in_list)
     for link in links:

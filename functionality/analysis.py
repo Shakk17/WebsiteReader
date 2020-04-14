@@ -52,14 +52,12 @@ def analyze_page(url):
 
     # Delete, if present, an obsolete version of the page.
     if result is not None and not helper.is_action_recent(timestamp=result[6], days=0, minutes=40):
-        print("Page present, but obsolete.")
         db_delete_page(url=url)
         db_delete_text_links(url=url)
         get_new_page = True
 
     # If the page is not present in memory.
     if result is None:
-        print("Page not present.")
         get_new_page = True
 
     if get_new_page:
@@ -119,16 +117,10 @@ def analyze_domain(url):
     if last_crawling is None:
         to_crawl = True
 
-    complete_domain = get_domain(url, complete=True)
     # Crawl in the background.
     if to_crawl:
         threading.Thread(target=Crawler(start_url=domain).run, args=()).start()
-        # If the URL contains a subdomain, crawl it too.
-        if domain != complete_domain:
-            threading.Thread(target=Crawler(start_url=complete_domain).run, args=()).start()
 
-    # Check if the homepage of the domain has already been visited.
-    page = db_get_page(add_scheme(complete_domain))
-    if page[4] is None:
-        # Get all the link
-        scrape_page(url)
+    # Analyze the homepage of the website.
+    domain = domain + '/'
+    analyze_page(domain)

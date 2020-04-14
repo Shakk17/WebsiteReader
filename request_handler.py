@@ -211,7 +211,7 @@ class RequestHandler:
         This method visits the homepage of the current website.
         :return:
         """
-        self.cursor.url = add_scheme(get_domain(self.cursor.url, complete=True))
+        self.cursor.url = add_scheme(get_domain(self.cursor.url))
         text_response = self.visit_page()
         return text_response
 
