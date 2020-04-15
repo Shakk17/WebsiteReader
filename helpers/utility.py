@@ -49,12 +49,18 @@ def add_scheme(url):
 
 
 def remove_scheme(url):
+    # Remove www.
     url = url.replace("www.", "")
+    # Remove scheme.
     try:
         idx = url.index("://")
         url = url[idx + 3:]
     except ValueError:
         pass
+    # Remove trailing / at the end of homepages.
+    if url.endswith('/') and '.' in url[-5:]:
+        url = url[:-1]
+
     return url
 
 

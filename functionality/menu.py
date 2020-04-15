@@ -21,7 +21,7 @@ def get_menu(url):
     menu = list(filter(lambda x: len(x[1]) > 0, menu))
 
     # Remove elements with more than 3 words.
-    menu = list(filter(lambda x: len(extract_words(x[1])) < 4, menu))
+    # menu = list(filter(lambda x: len(extract_words(x[1])) < 4, menu))
 
     # Remove elements of the menu that are not frequent.
     if len(menu) > 0:
