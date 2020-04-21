@@ -20,8 +20,8 @@ class Cursor:
         self.idx_link = 0
         # Index of next link (article mode) to read in the page.
         self.idx_link_article = 0
-        # Index of next link (best mode) to read in the page.
-        self.idx_link_best = 0
+        # Index of next functionality to read in the page.
+        self.idx_functionality = 0
         # Index of the form to write into.
         self.idx_form = 0
         self.idx_field = 0
@@ -48,7 +48,7 @@ class Cursor:
             f"\tIdx search result: {self.idx_search_result}\n"
             f"\tIdx link: {self.idx_link}\n"
             f"\tIdx link article: {self.idx_link_article}\n"
-            f"\tIdx link best: {self.idx_link_best}\n"
+            f"\tIdx functionality: {self.idx_functionality}\n"
             f"\tIdx form: {self.idx_form}\n"
             f"\tIdx field: {self.idx_field}\n"
             f"\tIdx bookmarks: {self.idx_bookmarks}\n"
@@ -60,7 +60,7 @@ class Cursor:
         self.idx_menu = 0
         self.idx_link = 0
         self.idx_link_article = 0
-        self.idx_link_best = 0
+        self.idx_functionality = 0
         self.idx_form = 0
         self.idx_field = 0
         self.idx_bookmarks = 0

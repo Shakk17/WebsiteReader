@@ -1,4 +1,5 @@
 from databases.handlers.page_links_handler import db_get_page_links, db_get_domain_links
+from helpers.helper import update_cursor_index
 from helpers.utility import extract_words, remove_scheme, get_domain
 
 
@@ -36,7 +37,15 @@ def remove_duplicate_links(links):
     return new_links
 
 
-def get_links_text_response(links, idx_start, num_choices):
+def get_links_text_response(url, links_type, action, idx_start, num_choices):
+    links = []
+    if links_type == "all":
+        links = read_links(url=url)
+    elif links_type == "article":
+        links = read_links_article(url=url)
+
+    idx_start = update_cursor_index(action, old_idx=idx_start, step=num_choices, size=len(links))
+
     # Get the indexes of the options to be shown to the user
     if idx_start >= len(links):
         idx_start = 0
@@ -54,4 +63,5 @@ def get_links_text_response(links, idx_start, num_choices):
         text_response += f"\n{min(idx_start + num_choices, len(links))} out of {len(links)} option(s) read."
     else:
         text_response = "No links available at the moment."
-    return text_response
+
+    return text_response, idx_start

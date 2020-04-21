@@ -2,7 +2,6 @@ import queue
 import threading
 import time
 
-
 from databases.handlers.history_handler import db_insert_action, db_get_last_action, db_delete_last_action
 from databases.handlers.text_links_handler import db_get_text_link
 from functionality.analysis import analyze_page, analyze_domain, get_info
@@ -89,11 +88,10 @@ class RequestHandler:
 
         # If the action is History, get the previous action from the database and execute it.
         if action.startswith("History"):
-            a = action
             try:
-                action, url = db_get_last_action("shakk")
-                if a.endswith("previous"):
+                if action.endswith("previous"):
                     db_delete_last_action("shakk")
+                action, self.cursor.url = db_get_last_action("shakk")
             except TypeError:
                 text_response = "History is empty."
 
@@ -103,24 +101,22 @@ class RequestHandler:
             text_response = self.bookmarks(command=action.split("_")[-2], action=action.split("_")[-1])
         elif action.startswith("VisitPage"):
             text_response = self.visit_page()
-        elif action.startswith("GoToHomepage"):
-            text_response = self.go_to_homepage()
-        elif action.startswith("GetInfo"):
+        elif action.startswith("Homepage"):
+            text_response = self.homepage()
+        elif action.startswith("BasicInformation"):
             text_response = self.get_info()
-        elif action.startswith("GetMenu"):
-            text_response = self.get_menu(action=action.split("_")[-1])
-        elif action.startswith("OpenMenuLink"):
-            text_response = self.open_menu_link()
-        elif action.startswith("ReadPage"):
-            text_response = self.read_page(action=action.split("_")[-1])
-        elif action.startswith("OpenTextLink"):
-            text_response = self.open_text_link()
-        elif action.startswith("ReadLinks"):
-            text_response = self.read_links(links_type=action.split("_")[-2], action=action.split("_")[-1])
-        elif action.startswith("OpenLink"):
-            text_response = self.open_link(links_type=action.split("_")[-1])
-        elif action.startswith("FillForm"):
-            text_response = self.fill_form(action=action.split("_")[-1])
+        elif action.startswith("Menu"):
+            text_response = self.menu(command=action.split("_")[-2], action=action.split("_")[-1])
+        elif action.startswith("MainText"):
+            text_response = self.main_text(action=action.split("_")[-1])
+        elif action.startswith("Links_all"):
+            text_response = self.links_all(command=action.split("_")[-2], action=action.split("_")[-1])
+        elif action.startswith("Links_article"):
+            text_response = self.links_article(command=action.split("_")[-2], action=action.split("_")[-1])
+        elif action.startswith("Form"):
+            text_response = self.form(action=action.split("_")[-1])
+        elif action.startswith("Functionality"):
+            text_response = self.functionality(command=action.split("_")[-2], action=action.split("_")[-1])
 
         return self.build_response(text_response=text_response)
 
@@ -207,7 +203,7 @@ class RequestHandler:
 
         return text_response
 
-    def go_to_homepage(self):
+    def homepage(self):
         """
         This method visits the homepage of the current website.
         :return:
@@ -225,116 +221,104 @@ class RequestHandler:
         text_response = get_info(url=self.cursor.url)
         return text_response
 
-    def get_menu(self, action):
-        """
-        This method:
-        - analyzes the result of the crawl of a domain and extracts its menu;
-        - selects which options are to be shown to the user.
-        :return: A text response containing the options to be shown to the user.
-        """
+    def menu(self, command, action):
         # Extract the menu from the crawl results.
         menu = get_menu(self.cursor.url)
-        # Update cursor.
-        self.cursor.idx_menu = update_cursor_index(action=action, old_idx=self.cursor.idx_menu, step=10, size=len(menu))
-        # Number of choices that will get displayed to the user at once.
-        num_choices = 10
-        # Get text response containing voices to show.
-        text_response = show_element(element=menu, idx_start=self.cursor.idx_menu, num_choices=num_choices)
+        text_response = "Wrong input."
+        if command == "show":
+            # Update cursor.
+            self.cursor.idx_menu = update_cursor_index(action=action, old_idx=self.cursor.idx_menu, step=10,
+                                                       size=len(menu))
+            # Number of choices that will get displayed to the user at once.
+            num_choices = 10
+            # Get text response containing voices to show.
+            text_response = show_element(element=menu, idx_start=self.cursor.idx_menu, num_choices=num_choices)
+        elif command == "open":
+            # Get all the URLs of the menu links.
+            menu_anchors = [tup[2] for tup in menu]
+            try:
+                # Get URL to visit.
+                new_url = menu_anchors[self.cursor.number - 1]
+                # Update cursor and visit the page.
+                self.cursor.url = new_url
+                text_response = self.visit_page()
+            except ValueError:
+                pass
 
         return text_response
 
-    def open_menu_link(self):
-        menu = get_menu(url=self.cursor.url)
-        # Get all the URLs of the menu links.
-        menu_anchors = [tup[2] for tup in menu]
-        try:
-            # Get URL to visit.
-            new_url = menu_anchors[self.cursor.number - 1]
-        except ValueError:
-            return "Wrong input."
-        # Update cursor and visit the page.
-        self.cursor.url = new_url
-        return self.visit_page()
+    def main_text(self, action):
+        if action == "openLink":
+            # Get URL to visit from the DB.
+            link_url = db_get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
 
-    def read_page(self, action):
-        # Update cursor.
-        self.cursor.idx_sentence = update_cursor_index(action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
-        try:
-            # Get sentences from the main text to be shown to the user.
-            text_response = get_main_text_sentences(
-                url=self.cursor.url, idx_sentence=self.cursor.idx_sentence, n_sentences=2)
-        except IndexError:
-            text_response = "No more sentences to read, you have reached the end of the page."
-            # Reset cursor position.
-            self.cursor.idx_sentence = 0
-        except FileNotFoundError:
-            text_response = "Sorry, this page is still in the process of being analysed. Try again later!"
-
-        return text_response
-
-    def open_text_link(self):
-        # Get URL to visit from the DB.
-        link_url = db_get_text_link(page_url=self.cursor.url, link_num=self.cursor.number)
-
-        # If the link is valid, update the cursor and visit the page.
-        if link_url is not None:
-            self.cursor.url = link_url[0]
-            return self.visit_page()
+            # If the link is valid, update the cursor and visit the page.
+            if link_url is not None:
+                self.cursor.url = link_url[0]
+                return self.visit_page()
+            else:
+                return "Wrong input."
         else:
-            return "Wrong input."
+            # Update cursor.
+            self.cursor.idx_sentence = update_cursor_index(action, old_idx=self.cursor.idx_sentence, step=2, size=10000)
+            try:
+                # Get sentences from the main text to be shown to the user.
+                text_response = get_main_text_sentences(
+                    url=self.cursor.url, idx_sentence=self.cursor.idx_sentence, n_sentences=2)
+            except IndexError:
+                text_response = "No more sentences to read, you have reached the end of the page."
+                # Reset cursor position.
+                self.cursor.idx_sentence = 0
+            except FileNotFoundError:
+                text_response = "Sorry, this page is still in the process of being analysed. Try again later!"
 
-    def read_links(self, links_type, action):
-        links = []
-        idx_start = 0
-        num_choices = 5
-        if links_type == "all":
-            links = read_links(url=self.cursor.url)
-            self.cursor.idx_link = update_cursor_index(
-                action, old_idx=self.cursor.idx_link, step=num_choices, size=len(links))
-            idx_start = self.cursor.idx_link
-        elif links_type == "article":
-            links = read_links_article(url=self.cursor.url)
-            num_choices = 3
-            self.cursor.idx_link_article = update_cursor_index(
-                action, old_idx=self.cursor.idx_link_article, step=num_choices, size=len(links))
-            idx_start = self.cursor.idx_link_article
-        elif links_type == "best":
-            links = get_functionality(url=self.cursor.url)
-            self.cursor.idx_link_best = update_cursor_index(
-                action, old_idx=self.cursor.idx_link_best, step=num_choices, size=len(links))
-            idx_start = self.cursor.idx_link_best
+        return text_response
 
-        try:
-            text_response = get_links_text_response(links=links, idx_start=idx_start, num_choices=num_choices)
-        except IndexError:
-            text_response = "No more links to read, you have reached the end of the page."
-            if links_type == "all":
+    def links_all(self, command, action):
+        text_response = "Wrong input."
+
+        if command == "show":
+            num_choices = 5
+            try:
+                text_response, self.cursor.idx_link = get_links_text_response(
+                    url=self.cursor.url, links_type="all", action=action,
+                    idx_start=self.cursor.idx_link, num_choices=num_choices)
+            except IndexError:
+                text_response = "No more links to read, you have reached the end of the page."
                 self.cursor.idx_link = 0
-            elif links_type == "article":
-                self.cursor.idx_link_article = 0
-            elif links_type == "best":
-                self.cursor.idx_link_best = 0
+        elif command == "open":
+            links = read_links(url=self.cursor.url)
+            link_url = links[self.cursor.number - 1]
+            # If the link is valid, update the cursor and visit the page.
+            if link_url is not None:
+                self.cursor.url = link_url[1]
+                text_response = self.visit_page()
 
         return text_response
 
-    def open_link(self, links_type):
-        # Select the right type of links.
-        link_url = None
-        if links_type == "all":
-            links = read_links(url=self.cursor.url)
-            link_url = links[self.cursor.number - 1]
-        elif links_type == "article":
+    def links_article(self, command, action):
+        text_response = "Wrong input."
+
+        if command == "show":
+            num_choices = 5
+            try:
+                text_response, self.cursor.idx_link_article = get_links_text_response(
+                    url=self.cursor.url, links_type="article", action=action,
+                    idx_start=self.cursor.idx_link_article, num_choices=num_choices)
+            except IndexError:
+                text_response = "No more links to read, you have reached the end of the page."
+                self.cursor.idx_link_article = 0
+        elif command == "open":
             links = read_links_article(url=self.cursor.url)
             link_url = links[self.cursor.number - 1]
+            # If the link is valid, update the cursor and visit the page.
+            if link_url is not None:
+                self.cursor.url = link_url[1]
+                text_response = self.visit_page()
 
-        # If the link is valid, update the cursor and visit the page.
-        if link_url is not None:
-            self.cursor.url = link_url[1]
-            return self.visit_page()
-        else:
-            return "Wrong input."
+        return text_response
 
-    def fill_form(self, action):
+    def form(self, action):
         url = self.cursor.url
         if action == "start":
             # Initialize form parameters.
@@ -357,6 +341,25 @@ class RequestHandler:
         except Exception:
             text_response = f"You successfully filled all the fields. Write 'submit' to submit the form."
             # TODO: recap fields for user.
+
+        return text_response
+
+    def functionality(self, command, action):
+        functionality = get_functionality(url=self.cursor.url)
+        num_choices = 5
+        text_response = "Wrong input."
+
+        if command == "show":
+            self.cursor.idx_link_best = update_cursor_index(
+                action, old_idx=self.cursor.idx_link_best, step=num_choices, size=len(functionality))
+            idx_start = self.cursor.idx_link_best
+            text_response = get_links_text_response(links=functionality, idx_start=idx_start, num_choices=num_choices)
+        elif command == "open":
+            link_url = functionality[self.cursor.number - 1]
+            # If the link is valid, update the cursor and visit the page.
+            if link_url is not None:
+                self.cursor.url = link_url[1]
+                text_response = self.visit_page()
 
         return text_response
 
