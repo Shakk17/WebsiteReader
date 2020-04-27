@@ -81,11 +81,11 @@ class RequestHandler:
         # Get all active contexts.
         contexts = request.get("queryResult").get("outputContexts")
         # Get Navigation context. If not present, create it.
-        navigation_context = next((x for x in contexts if "Navigation" in x.get("name")), None)
+        navigation_context = next((x for x in contexts if "navigation" in x.get("name")), None)
         self.navigation = NavigationContext(navigation_context)
         # Get the other contexts, if present.
         for context in contexts:
-            name = context.get("name")
+            name = context.get("name").split('/')[-1]
             self.dict_contexts[name] = assign_context(name, context)
 
         text_response = "Action not recognized by the server."
@@ -134,16 +134,16 @@ class RequestHandler:
         :return: A string containing info about one result of the Google search or info about a web page.
         """
         try:
-            query_results = get_urls_from_google(query=self.dict_contexts["GoogleSearch"].query)
+            query_results = get_urls_from_google(query=self.dict_contexts["googleSearch"].query)
         except Exception:
             return "Error while searching on Google."
 
         # Update cursor.
-        self.dict_contexts["GoogleSearch"].index = update_cursor_index(
-            action=action, old_idx=self.dict_contexts["GoogleSearch"].index, step=1, size=5)
+        self.dict_contexts["googleSearch"].index = update_cursor_index(
+            action=action, old_idx=self.dict_contexts["googleSearch"].index, step=1, size=5)
 
-        result = query_results[self.dict_contexts["GoogleSearch"].index]
-        text_response = f"""Result number {self.dict_contexts["GoogleSearch"].index + 1}.
+        result = query_results[self.dict_contexts["googleSearch"].index]
+        text_response = f"""Result number {self.dict_contexts["googleSearch"].index + 1}.
                                 Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
         self.navigation.url = result[1]
 
@@ -156,25 +156,25 @@ class RequestHandler:
         if command == "show":
             if action == "open":
                 try:
-                    index = self.dict_contexts["Bookmarks"].number - 1
+                    index = self.dict_contexts["bookmarks"].number - 1
                     self.navigation.url = bookmarks[index][0]
                     text_response = self.visit_page()
                 except IndexError:
                     text_response = "Wrong input."
             elif action == "delete":
-                url = bookmarks[self.dict_contexts["Bookmarks"].index]
+                url = bookmarks[self.dict_contexts["bookmarks"].index]
                 text_response = delete_bookmark(url=url, user="shakk")
             else:
                 # Number of choices that will get displayed to the user at once.
                 num_choices = 5
                 # Update cursor.
-                self.dict_contexts["Bookmarks"].index = update_cursor_index(action=action, old_idx=self.dict_contexts["Bookmarks"].index,
+                self.dict_contexts["bookmarks"].index = update_cursor_index(action=action, old_idx=self.dict_contexts["bookmarks"].index,
                                                                     step=num_choices, size=len(bookmarks))
                 # Get text response containing voices to show.
-                text_response = show_element(element=bookmarks, idx_start=self.dict_contexts["Bookmarks"].index,
+                text_response = show_element(element=bookmarks, idx_start=self.dict_contexts["bookmarks"].index,
                                              num_choices=num_choices)
         elif command == "add":
-            text_response = insert_bookmark(url=self.navigation.url, name=self.dict_contexts["Bookmarks"].name)
+            text_response = insert_bookmark(url=self.navigation.url, name=self.dict_contexts["bookmarks"].name)
         
         return text_response
 
@@ -231,18 +231,18 @@ class RequestHandler:
         text_response = "Wrong input."
         if command == "show":
             # Update cursor.
-            self.dict_contexts["Menu"].index = update_cursor_index(action=action, old_idx=self.dict_contexts["Menu"].index, step=10,
+            self.dict_contexts["menu"].index = update_cursor_index(action=action, old_idx=self.dict_contexts["menu"].index, step=10,
                                                            size=len(menu))
             # Number of choices that will get displayed to the user at once.
             num_choices = 10
             # Get text response containing voices to show.
-            text_response = show_element(element=menu, idx_start=self.dict_contexts["Menu"].index, num_choices=num_choices)
+            text_response = show_element(element=menu, idx_start=self.dict_contexts["menu"].index, num_choices=num_choices)
         elif command == "open":
             # Get all the URLs of the menu links.
             menu_anchors = [tup[2] for tup in menu]
             try:
                 # Get URL to visit.
-                new_url = menu_anchors[self.dict_contexts["Menu"].number - 1]
+                new_url = menu_anchors[self.dict_contexts["menu"].number - 1]
                 # Update cursor and visit the page.
                 self.navigation.url = new_url
                 text_response = self.visit_page()
@@ -254,7 +254,7 @@ class RequestHandler:
     def main_text(self, action):
         if action == "openLink":
             # Get URL to visit from the DB.
-            link_url = db_get_text_link(page_url=self.navigation.url, link_num=self.dict_contexts["MainText"].number)
+            link_url = db_get_text_link(page_url=self.navigation.url, link_num=self.dict_contexts["mainText"].number)
 
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
@@ -264,15 +264,15 @@ class RequestHandler:
                 return "Wrong input."
         else:
             # Update cursor.
-            self.dict_contexts["MainText"].index = update_cursor_index(action, old_idx=self.dict_contexts["MainText"].index, step=2, size=10000)
+            self.dict_contexts["mainText"].index = update_cursor_index(action, old_idx=self.dict_contexts["mainText"].index, step=2, size=10000)
             try:
                 # Get sentences from the main text to be shown to the user.
                 text_response = get_main_text_sentences(
-                    url=self.navigation.url, idx_sentence=self.dict_contexts["MainText"].index, n_sentences=2)
+                    url=self.navigation.url, idx_sentence=self.dict_contexts["mainText"].index, n_sentences=2)
             except IndexError:
                 text_response = "No more sentences to read, you have reached the end of the page."
                 # Reset cursor position.
-                self.dict_contexts["MainText"].index = 0
+                self.dict_contexts["mainText"].index = 0
             except FileNotFoundError:
                 text_response = "Sorry, this page is still in the process of being analysed. Try again later!"
 
@@ -284,15 +284,15 @@ class RequestHandler:
         if command == "show":
             num_choices = 5
             try:
-                text_response, self.dict_contexts["LinksAll"].index = get_links_text_response(
+                text_response, self.dict_contexts["linksAll"].index = get_links_text_response(
                     url=self.navigation.url, links_type="all", action=action,
-                    idx_start=self.self.dict_contexts["LinksAll"].index, num_choices=num_choices)
+                    idx_start=self.dict_contexts["linksAll"].index, num_choices=num_choices)
             except IndexError:
                 text_response = "No more links to read, you have reached the end of the page."
-                self.dict_contexts["LinksAll"].index = 0
+                self.dict_contexts["linksAll"].index = 0
         elif command == "open":
             links = read_links(url=self.navigation.url)
-            link_url = links[self.dict_contexts["LinksAll"].number - 1]
+            link_url = links[self.dict_contexts["linksAll"].number - 1]
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
                 self.navigation.url = link_url[1]
@@ -306,15 +306,15 @@ class RequestHandler:
         if command == "show":
             num_choices = 5
             try:
-                text_response, self.dict_contexts["LinksArticle"].index = get_links_text_response(
+                text_response, self.dict_contexts["linksArticle"].index = get_links_text_response(
                     url=self.navigation.url, links_type="article", action=action,
-                    idx_start=self.dict_contexts["LinksArticle"].index, num_choices=num_choices)
+                    idx_start=self.dict_contexts["linksArticle"].index, num_choices=num_choices)
             except IndexError:
                 text_response = "No more links to read, you have reached the end of the page."
-                self.dict_contexts["LinksArticle"].index = 0
+                self.dict_contexts["linksArticle"].index = 0
         elif command == "open":
             links = read_links_article(url=self.navigation.url)
-            link_url = links[self.dict_contexts["LinksArticle"].number - 1]
+            link_url = links[self.dict_contexts["linksArticle"].number - 1]
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
                 self.navigation.url = link_url[1]
@@ -326,22 +326,22 @@ class RequestHandler:
         url = self.navigation.url
         if action == "start":
             # Initialize form parameters.
-            self.dict_contexts["Form"].idx_form = self.dict_contexts["Form"].number - 1
-            self.dict_contexts["Form"].form_parameters = {}
+            self.dict_contexts["form"].idx_form = self.dict_contexts["form"].number - 1
+            self.dict_contexts["form"].form_parameters = {}
         elif action == "write":
-            user_input = self.dict_contexts["Form"].user_input
-            self.dict_contexts["Form"].form_parameters[self.dict_contexts["Form"].idx_field] = user_input
-            self.dict_contexts["Form"].index += 1
+            user_input = self.dict_contexts["form"].user_input
+            self.dict_contexts["form"].form_parameters[self.dict_contexts["form"].idx_field] = user_input
+            self.dict_contexts["form"].index += 1
         elif action == "submit":
-            fields_values = list(self.dict_contexts["Form"].form_parameters.values())
+            fields_values = list(self.dict_contexts["form"].form_parameters.values())
             self.navigation.url = submit_form(url=url,
-                                              form_number=self.dict_contexts["Form"].idx_form,
+                                              form_number=self.dict_contexts["form"].idx_form,
                                               fields_values=fields_values)
             return self.visit_page()
         try:
             field_text = get_text_field_form(url=url,
-                                             form_number=self.dict_contexts["Form"].idx_form,
-                                             field_number=self.dict_contexts["Form"].idx_field)
+                                             form_number=self.dict_contexts["form"].idx_form,
+                                             field_number=self.dict_contexts["form"].idx_field)
             text_response = f"What do you want to write in the field: {field_text}? Start your answer with 'write'!"
         except NoSuchFormError:
             text_response = "Form not found."
@@ -357,13 +357,13 @@ class RequestHandler:
         text_response = "Wrong input."
 
         if command == "show":
-            self.dict_contexts["Functionality"].index = update_cursor_index(
-                action, old_idx=self.dict_contexts["Functionality"].index, step=num_choices, size=len(functionality))
-            idx_start = self.dict_contexts["Functionality"].index
+            self.dict_contexts["functionality"].index = update_cursor_index(
+                action, old_idx=self.dict_contexts["functionality"].index, step=num_choices, size=len(functionality))
+            idx_start = self.dict_contexts["functionality"].index
             # TODO
             text_response = get_links_text_response(links=functionality, idx_start=idx_start, num_choices=num_choices)
         elif command == "open":
-            link_url = functionality[self.dict_contexts["Functionality"].number - 1]
+            link_url = functionality[self.dict_contexts["functionality"].number - 1]
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
                 self.navigation.url = link_url[1]
@@ -377,14 +377,15 @@ class RequestHandler:
         :param text_response: A text message containing the message to be shown to the user.
         :return: A well-formed response message to be sent to the agent.
         """
-        self.dict_contexts["Navigation"] = self.navigation
+        self.dict_contexts["navigation"] = self.navigation
         output_contexts = list()
         for name, context in self.dict_contexts.items():
-            output_context = dict()
-            output_context["name"] = f"projects/<Project ID>/agent/sessions/<Session ID>/contexts/{name}"
-            output_context["lifespanCount"] = 1
-            output_context["parameters"] = vars(context)
-            output_contexts.append(output_context)
+            if context is not None:
+                output_context = dict()
+                output_context["name"] = f"projects/<Project ID>/agent/sessions/<Session ID>/contexts/{name}"
+                output_context["lifespanCount"] = 1
+                output_context["parameters"] = context.get_dict()
+                output_contexts.append(output_context)
 
         self.q.put(
             {
