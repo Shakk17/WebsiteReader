@@ -7,7 +7,7 @@ def db_insert_functionality_link(page_url, name, link_url, score):
     sql = """INSERT INTO functionality (page_url, type, name, link_url, score) 
                 VALUES (?, ?, ?, ?, ?)"""
     try:
-        Database().conn.cursor().execute(sql, (page_url, "link", name, link_url, score))
+        Database().conn.navigation().execute(sql, (page_url, "link", name, link_url, score))
     except Exception:
         pass
 
@@ -15,6 +15,6 @@ def db_insert_functionality_link(page_url, name, link_url, score):
 def db_get_functionality(page_url):
     sql = """SELECT page_url, type, name, link_url, score
                 FROM functionality WHERE page_url LIKE ?"""
-    cur = Database().conn.cursor().execute(sql, (page_url,))
+    cur = Database().conn.navigation().execute(sql, (page_url,))
     rows = cur.fetchall()
     return rows

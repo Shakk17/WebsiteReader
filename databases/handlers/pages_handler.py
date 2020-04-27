@@ -11,26 +11,26 @@ def db_insert_page(url, simple_html):
     url = remove_scheme(url)
     sql = """INSERT INTO pages (url, simple_html, last_visit, parsed_html) 
                 VALUES (?, ?, ?, ?)"""
-    Database().conn.cursor().execute(
+    Database().conn.navigation().execute(
         sql, (url, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "In progress."))
 
 
 def db_add_parsed_html_to_page(url, parsed_html):
     url = remove_scheme(url)
     sql = "UPDATE pages SET parsed_html=? WHERE url LIKE ?"
-    Database().conn.cursor().execute(sql, (parsed_html, url))
+    Database().conn.navigation().execute(sql, (parsed_html, url))
 
 
 def db_add_topic_to_page(url, topic):
     url = remove_scheme(url)
     sql = "UPDATE pages SET topic=? WHERE url LIKE ?"
-    Database().conn.cursor().execute(sql, (topic, url))
+    Database().conn.navigation().execute(sql, (topic, url))
 
 
 def db_add_language_to_page(url, language):
     url = remove_scheme(url)
     sql = "UPDATE pages SET language=? WHERE url LIKE ?"
-    Database().conn.cursor().execute(sql, (language, url))
+    Database().conn.navigation().execute(sql, (language, url))
 
 
 def db_add_clean_text_to_page(url, clean_text):
@@ -41,7 +41,7 @@ def db_add_clean_text_to_page(url, clean_text):
     """
     url = remove_scheme(url)
     sql = "UPDATE pages SET clean_text=? WHERE url LIKE ?"
-    Database().conn.cursor().execute(sql, (clean_text, url))
+    Database().conn.navigation().execute(sql, (clean_text, url))
 
 
 def db_delete_page(url):
@@ -52,7 +52,7 @@ def db_delete_page(url):
     """
     url = remove_scheme(url)
     sql = "DELETE FROM pages WHERE url LIKE ?"
-    Database().conn.cursor().execute(sql, (url,))
+    Database().conn.navigation().execute(sql, (url,))
 
 
 def db_get_page(url):
@@ -63,6 +63,6 @@ def db_get_page(url):
     """
     url = remove_scheme(url)
     sql = "SELECT * FROM pages WHERE url LIKE ?"
-    cur = Database().conn.cursor().execute(sql, (url,))
+    cur = Database().conn.navigation().execute(sql, (url,))
     result = cur.fetchone()
     return result

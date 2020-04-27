@@ -10,7 +10,7 @@ def db_insert_bookmark(url, name, user):
     sql = """INSERT INTO bookmarks (url, name, user) 
                 VALUES (?, ?, ?)"""
     try:
-        Database().conn.cursor().execute(sql, (url, name, user))
+        Database().conn.navigation().execute(sql, (url, name, user))
     except IntegrityError as e:
         if "url" in e.args[0]:
             raise BookmarkUrlTaken
@@ -21,12 +21,12 @@ def db_insert_bookmark(url, name, user):
 def db_delete_bookmark(url, user):
     url = remove_scheme(url)
     sql = "DELETE FROM bookmarks WHERE url LIKE ? AND user LIKE ?;"
-    Database().conn.cursor().execute(sql, (url, user))
+    Database().conn.navigation().execute(sql, (url, user))
 
 
 def db_get_bookmarks(user):
     sql = """SELECT url, name, user 
                 FROM bookmarks WHERE user LIKE ?"""
-    cur = Database().conn.cursor().execute(sql, (user,))
+    cur = Database().conn.navigation().execute(sql, (user,))
     rows = cur.fetchall()
     return rows
