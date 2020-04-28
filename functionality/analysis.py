@@ -85,9 +85,8 @@ def get_info(url):
     except AttributeError:
         title = "unknown"
     text_response = (
-        f"The title of this web page is {title}.\n"
-        f"The topic of this web page is {page[1]}. \n"
-        f"The language of this web page is {page[2]}. \n"
+        f"You are now visiting the web page called {title}.\n"
+        f"Its topic is {page[1]} and the language is {page[2]}. \n"
     )
 
     # Extract all the search forms present in the page.

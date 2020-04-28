@@ -26,7 +26,7 @@ class RequestHandler:
     """
     This class handles the requests received by the server from the agent.
     """
-    navigation = None
+    cursor = None
     dict_contexts = dict()
 
     def __init__(self):
@@ -134,16 +134,18 @@ class RequestHandler:
         :return: A string containing info about one result of the Google search or info about a web page.
         """
         try:
-            query_results = get_urls_from_google(query=self.dict_contexts["googleSearch"].query)
+            query_results = get_urls_from_google(query=self.dict_contexts["googlesearch"].query)
         except Exception:
-            return "Error while searching on Google."
+            error_message = "Error while searching on Google."
+            print(red(error_message))
+            return error_message
 
         # Update cursor.
-        self.dict_contexts["googleSearch"].index = update_cursor_index(
-            action=action, old_idx=self.dict_contexts["googleSearch"].index, step=1, size=5)
+        self.dict_contexts["googlesearch"].index = update_cursor_index(
+            action=action, old_idx=self.dict_contexts["googlesearch"].index, step=1, size=5)
 
-        result = query_results[self.dict_contexts["googleSearch"].index]
-        text_response = f"""Result number {self.dict_contexts["googleSearch"].index + 1}.
+        result = query_results[self.dict_contexts["googlesearch"].index]
+        text_response = f"""Result number {self.dict_contexts["googlesearch"].index + 1}.
                                 Do you want to visit the page: {result[0]} at {get_domain(result[1])}?"""
         self.navigation.url = result[1]
 
@@ -254,7 +256,7 @@ class RequestHandler:
     def main_text(self, action):
         if action == "openLink":
             # Get URL to visit from the DB.
-            link_url = db_get_text_link(page_url=self.navigation.url, link_num=self.dict_contexts["mainText"].number)
+            link_url = db_get_text_link(page_url=self.navigation.url, link_num=self.dict_contexts["maintext"].number)
 
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
@@ -264,15 +266,15 @@ class RequestHandler:
                 return "Wrong input."
         else:
             # Update cursor.
-            self.dict_contexts["mainText"].index = update_cursor_index(action, old_idx=self.dict_contexts["mainText"].index, step=2, size=10000)
+            self.dict_contexts["maintext"].index = update_cursor_index(action, old_idx=self.dict_contexts["maintext"].index, step=2, size=10000)
             try:
                 # Get sentences from the main text to be shown to the user.
                 text_response = get_main_text_sentences(
-                    url=self.navigation.url, idx_sentence=self.dict_contexts["mainText"].index, n_sentences=2)
+                    url=self.navigation.url, idx_sentence=self.dict_contexts["maintext"].index, n_sentences=2)
             except IndexError:
                 text_response = "No more sentences to read, you have reached the end of the page."
                 # Reset cursor position.
-                self.dict_contexts["mainText"].index = 0
+                self.dict_contexts["maintext"].index = 0
             except FileNotFoundError:
                 text_response = "Sorry, this page is still in the process of being analysed. Try again later!"
 
@@ -284,15 +286,15 @@ class RequestHandler:
         if command == "show":
             num_choices = 5
             try:
-                text_response, self.dict_contexts["linksAll"].index = get_links_text_response(
+                text_response, self.dict_contexts["links_all"].index = get_links_text_response(
                     url=self.navigation.url, links_type="all", action=action,
-                    idx_start=self.dict_contexts["linksAll"].index, num_choices=num_choices)
+                    idx_start=self.dict_contexts["links_all"].index, num_choices=num_choices)
             except IndexError:
                 text_response = "No more links to read, you have reached the end of the page."
-                self.dict_contexts["linksAll"].index = 0
+                self.dict_contexts["links_all"].index = 0
         elif command == "open":
             links = read_links(url=self.navigation.url)
-            link_url = links[self.dict_contexts["linksAll"].number - 1]
+            link_url = links[self.dict_contexts["links_all"].number - 1]
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
                 self.navigation.url = link_url[1]
@@ -306,15 +308,15 @@ class RequestHandler:
         if command == "show":
             num_choices = 5
             try:
-                text_response, self.dict_contexts["linksArticle"].index = get_links_text_response(
+                text_response, self.dict_contexts["links_article"].index = get_links_text_response(
                     url=self.navigation.url, links_type="article", action=action,
-                    idx_start=self.dict_contexts["linksArticle"].index, num_choices=num_choices)
+                    idx_start=self.dict_contexts["links_article"].index, num_choices=num_choices)
             except IndexError:
                 text_response = "No more links to read, you have reached the end of the page."
-                self.dict_contexts["linksArticle"].index = 0
+                self.dict_contexts["links_article"].index = 0
         elif command == "open":
             links = read_links_article(url=self.navigation.url)
-            link_url = links[self.dict_contexts["linksArticle"].number - 1]
+            link_url = links[self.dict_contexts["links_article"].number - 1]
             # If the link is valid, update the cursor and visit the page.
             if link_url is not None:
                 self.navigation.url = link_url[1]

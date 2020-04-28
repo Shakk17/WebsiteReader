@@ -1,17 +1,17 @@
 def assign_context(name, context):
     if name == "bookmarks":
         return BookmarksContext(context)
-    elif name == "googleSearch":
+    elif name == "googlesearch":
         return GoogleSearchContext(context)
     elif name == "form":
         return FormContext(context)
     elif name == "functionality":
         return FunctionalityContext(context)
-    elif name == "linksAll":
+    elif name == "links_all":
         return LinksAllContext(context)
-    elif name == "linksArticle":
+    elif name == "links_article":
         return LinksArticleContext(context)
-    elif name == "mainText":
+    elif name == "maintext":
         return MainTextContext(context)
     elif name == "menu":
         return MenuContext(context)
@@ -34,7 +34,7 @@ class NavigationContext(Context):
         if context is not None:
             try:
                 self.url = context.get("parameters").get("url")
-            except AttributeError:
+            except Exception:
                 self.url = "https://www.google.com"
 
 
@@ -44,17 +44,17 @@ class BookmarksContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
 
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
             try:
                 self.name = context.get("parameters").get("name")
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -64,11 +64,11 @@ class GoogleSearchContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
             try:
                 self.query = context.get("parameters").get("query")
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -78,26 +78,26 @@ class FormContext(Context):
         if context is not None:
             try:
                 self.idx_form = int(context.get("parameters").get("idx_form"))
-            except AttributeError:
+            except Exception:
                 self.idx_form = 0
             try:
                 self.idx_field = int(context.get("parameters").get("idx_field"))
-            except AttributeError:
+            except Exception:
                 self.idx_field = 0
 
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
             try:
                 self.user_input = context.get("parameters").get("user_input")
-            except AttributeError:
+            except Exception:
                 pass
 
             try:
                 self.form_parameters = context.get("parameters").get("form_parameters")
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -107,12 +107,12 @@ class FunctionalityContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
 
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -122,11 +122,11 @@ class LinksAllContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -136,11 +136,11 @@ class LinksArticleContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -150,11 +150,11 @@ class MainTextContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
 
 
@@ -164,9 +164,9 @@ class MenuContext(Context):
         if context is not None:
             try:
                 self.index = int(context.get("parameters").get("index"))
-            except AttributeError:
+            except Exception:
                 self.index = 0
             try:
                 self.number = int(context.get("parameters").get("number"))
-            except AttributeError:
+            except Exception:
                 pass
