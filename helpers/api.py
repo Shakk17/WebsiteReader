@@ -74,6 +74,9 @@ def get_topic(url):
     new_url = quote(url)
     fortiguard_url = f"https://fortiguard.com/webfilter?q={new_url}"
     html = get_quick_html(url=fortiguard_url)
-    string = BeautifulSoup(html, "lxml").findAll("h4", {"class": "info_title"})[0].text
-    topic = string.split(": ")[1]
+    try:
+        string = BeautifulSoup(html, "lxml").findAll("h4", {"class": "info_title"})[0].text
+        topic = string.split(": ")[1]
+    except IndexError:
+        topic = "unknown"
     return topic

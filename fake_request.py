@@ -4,23 +4,23 @@ from helpers.utility import get_time
 import requests
 
 # defining the api-endpoint 
-API_ENDPOINT = "https://b5e7b107.ngrok.io/webhook"
+API_ENDPOINT = "https://71b47c8c.ngrok.io/webhook"
 
 
 def get_data(url):
     return {
         "queryResult": {
             "queryText": "visit open.online",
-            "action": "SearchPage_reset",
+            "action": "VisitPage",
             "parameters": {
                 "string": url
             },
             "outputContexts": [
                 {
-                    "name": "projects/websitereader-srqsqy/agent/sessions/47056a3d-1977-7eb5-f876-fb7f002832bc/contexts/cursor",
+                    "name": "projects/websitereader-srqsqy/agent/sessions/47056a3d-1977-7eb5-f876-fb7f002832bc/contexts/navigation",
                     "lifespanCount": 5,
                     "parameters": {
-                        "string": url
+                        "url": url
                     }
                 }
             ]
@@ -29,9 +29,8 @@ def get_data(url):
 
 
 domains = [
-    "reddit.com",
     "cnn.com",
-    "nytimes.com"
+    "nytimes.com",
     "news.google.com",
     "theguardian.com",
     "shutterstock.com",

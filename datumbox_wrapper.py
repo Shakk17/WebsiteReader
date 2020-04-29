@@ -204,7 +204,8 @@ languages = dict([
     ('yo', 'Yoruba'),
     ('za', 'Zhuang; Chuang'),
     ('zh', 'Chinese'),
-    ('zu', 'Zulu')
+    ('zu', 'Zulu'),
+    ('unknown', 'unknown')
 ])
 
 

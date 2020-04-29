@@ -114,7 +114,7 @@ def scrape_page(url):
 
     except Exception as e:
         print(magenta(f"[SELENIUM] Can't access this website: {url}"))
-        body = ""
+        body = "<html></html>"
 
     print(f"{get_time()} [SELENIUM] Page rendering finished.")
     browser.close()

@@ -15,7 +15,7 @@ def db_connect():
     Returns sqlalchemy engine instance
     """
     path = Path(os.getcwd())
-    return create_engine(f"sqlite:///{path.parent}/databases/database.db")
+    return create_engine(f"sqlite:///{path.parent}/databases/database.db", connect_args={'timeout': 15})
 
 
 def create_table(engine):

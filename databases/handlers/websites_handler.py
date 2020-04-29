@@ -9,12 +9,16 @@ def db_insert_website(domain):
     :param domain: The domain of the website to insert in the database.
     """
     sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, ?)"
-    Database().conn.cursor().execute(sql, (domain, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (domain, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+    cur.close()
 
 
 def db_delete_website(domain):
     sql = "DELETE FROM websites WHERE domain LIKE ?;"
-    Database().conn.cursor().execute(sql, (f"%{domain}",))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (f"%{domain}",))
+    cur.close()
 
 
 def db_last_time_crawled(domain):
@@ -24,8 +28,10 @@ def db_last_time_crawled(domain):
     :return: The timestamp of the last crawl (if it has been crawled), None otherwise.
     """
     sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
-    cur = Database().conn.cursor().execute(sql, (domain,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (domain,))
     rows = cur.fetchone()
+    cur.close()
     # Returns True is it has been crawled, False otherwise.
     if rows is not None:
         return rows[1]

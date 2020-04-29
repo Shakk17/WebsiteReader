@@ -16,11 +16,14 @@ def db_insert_action(action, url):
     cur = Database().conn.cursor()
     record = ("shakk", action, url, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     cur.execute(sql, record)
+    cur.close()
 
 
 def db_delete_last_action(user):
     sql = "DELETE FROM history WHERE id = (SELECT MAX(id) FROM history) and user LIKE ?"
-    Database().conn.cursor().execute(sql, (user,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (user,))
+    cur.close()
 
 
 def db_get_last_action(user):
@@ -32,6 +35,8 @@ def db_get_last_action(user):
     """
     # First, get the second to last action performed.
     sql = "SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC"
-    cur = Database().conn.cursor().execute(sql, (user,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (user,))
     result = cur.fetchone()
+    cur.close()
     return result

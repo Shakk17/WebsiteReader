@@ -12,7 +12,9 @@ def db_insert_text_link(page_url, link_num, link):
     """
     page_url = remove_scheme(page_url)
     sql = "INSERT INTO text_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
-    Database().conn.cursor().execute(sql, (page_url, link_num, link[0], link[1], link[2]))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
+    cur.close()
 
 
 def db_get_text_link(page_url, link_num):
@@ -27,6 +29,7 @@ def db_get_text_link(page_url, link_num):
     cur = Database().conn.cursor()
     cur.execute(sql, (page_url, link_num))
     result = cur.fetchone()
+    cur.close()
     return result
 
 
@@ -41,6 +44,7 @@ def db_get_text_links(page_url):
     cur = Database().conn.cursor()
     cur.execute(sql, (page_url,))
     result = cur.fetchall()
+    cur.close()
     return result
 
 
@@ -52,4 +56,6 @@ def db_delete_text_links(url):
     """
     url = remove_scheme(url)
     sql = "DELETE FROM text_links WHERE page_url LIKE ?"
-    Database().conn.cursor().execute(sql, (url,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (url,))
+    cur.close()

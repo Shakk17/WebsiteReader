@@ -12,13 +12,15 @@ def db_delete_all_domain_links(domain):
     cur = Database().conn.cursor()
     url = f"%{domain}%"
     cur.execute(sql, (url,))
+    cur.close()
 
 
 def db_delete_all_page_links(url):
     url = remove_scheme(url)
-
     sql = "DELETE FROM page_links WHERE page_url LIKE ?;"
-    Database().conn.cursor().execute(sql, (url,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (url,))
+    cur.close()
 
 
 def db_insert_page_link(page_url, link_url, link_text, x_position, y_position, in_list):
@@ -27,20 +29,26 @@ def db_insert_page_link(page_url, link_url, link_text, x_position, y_position, i
 
     sql = """INSERT INTO page_links (page_url, link_url, link_text, x_position, y_position, in_list) 
                 VALUES (?, ?, ?, ?, ?, ?)"""
-    Database().conn.cursor().execute(sql, (page_url, link_url, link_text, x_position, y_position, in_list))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (page_url, link_url, link_text, x_position, y_position, in_list))
+    cur.close()
 
 
 def db_get_page_links(url):
     url = remove_scheme(url)
     sql = "SELECT link_text, link_url, y_position, in_list FROM page_links WHERE page_url LIKE ?"
-    cur = Database().conn.cursor().execute(sql, (url,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (url,))
     rows = cur.fetchall()
+    cur.close()
     return rows
 
 
 def db_get_domain_links(domain):
     url = f"%{domain}%"
     sql = "SELECT link_text, link_url, y_position, in_list FROM page_links WHERE page_url LIKE ?"
-    cur = Database().conn.cursor().execute(sql, (url,))
+    cur = Database().conn.cursor()
+    cur.execute(sql, (url,))
     rows = cur.fetchall()
+    cur.close()
     return rows

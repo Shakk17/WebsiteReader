@@ -170,10 +170,14 @@ class RequestHandler:
                 # Number of choices that will get displayed to the user at once.
                 num_choices = 5
                 # Update cursor.
-                self.dict_contexts["bookmarks"].index = update_cursor_index(action=action, old_idx=self.dict_contexts["bookmarks"].index,
-                                                                    step=num_choices, size=len(bookmarks))
+                self.dict_contexts["bookmarks"].index = update_cursor_index(
+                    action=action,
+                    old_idx=self.dict_contexts["bookmarks"].index,
+                    step=num_choices,
+                    size=len(bookmarks))
                 # Get text response containing voices to show.
-                text_response = show_element(element=bookmarks, idx_start=self.dict_contexts["bookmarks"].index,
+                text_response = show_element(element=bookmarks,
+                                             idx_start=self.dict_contexts["bookmarks"].index,
                                              num_choices=num_choices)
         elif command == "add":
             text_response = insert_bookmark(url=self.navigation.url, name=self.dict_contexts["bookmarks"].name)

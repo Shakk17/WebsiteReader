@@ -18,7 +18,6 @@ def read_links_best(domain):
         # Sort links depending on score.
         links.sort(key=lambda x: x[2], reverse=True)
         links = remove_duplicate_links(links)
-        print()
 
     return links
 

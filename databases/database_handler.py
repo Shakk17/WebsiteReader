@@ -94,12 +94,13 @@ def analyze_scraping(domain):
     ) counting
     INNER JOIN page_links
     ON counting.link_url = page_links.link_url
-    WHERE page_links.page_url LIKE ? and y_position < 2000
+    WHERE page_links.page_url LIKE ? and page_links.in_list = 1
     GROUP BY page_links.link_url
     ORDER BY max_times DESC"""
     cur.execute(sql, (f"%{domain}%", f"%{domain}"))
 
     rows = cur.fetchall()
+    cur.close()
     return rows
 
 
@@ -113,7 +114,7 @@ class Database:
     def __init__(self):
         # Create a database connection.
         try:
-            self.conn = sqlite3.connect(self.name, isolation_level=None)
+            self.conn = sqlite3.connect(self.name, timeout=15, isolation_level=None)
         except Error as e:
             print(e)
 
