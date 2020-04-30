@@ -119,5 +119,5 @@ def scrape_page(url):
         body = "<html></html>"
 
     print(f"{get_time()} [SELENIUM] Page rendering finished.")
-    browser.close()
+    browser.quit()
     return body

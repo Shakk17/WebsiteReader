@@ -35,8 +35,9 @@ def assign_score(links, url):
         try:
             idx = homepage_links_urls.index(link[1])
             score += 1
-            if int(homepage_links_urls[idx][2]) < 2000:
-                score += 5
+            # TODO: index error: string index out of range:
+            '''# if int(homepage_links_urls[idx][2]) < 2000:
+               # score += 5'''
         except ValueError:
             pass
         # Assign 1 point if link has text, 2 points if it starts with a capital letter.

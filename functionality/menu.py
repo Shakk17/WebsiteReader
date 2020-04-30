@@ -1,4 +1,5 @@
-from databases.database_handler import analyze_scraping_nav, analyze_scraping_li
+from databases.database_handler import get_links_in_list
+from databases.handlers.page_links_handler import db_get_page_links
 from helpers.utility import get_domain, strip_html_tags
 
 
@@ -10,22 +11,35 @@ def get_menu(url):
     """
     # Get menu of the domain that contains the web page.
     domain = get_domain(url)
-    # Try getting menu with nav element first.
-    menu = analyze_scraping_nav(domain)
-    # If fail, use li method.
-    if len(menu) == 0:
-        menu = analyze_scraping_li(domain)
-    menu = [list(element) for element in menu]
+    # Get all domain links contained in lists.
+    # link = (times, link_text, link_url, page_url, in_nav)
+    domain_links = get_links_in_list(domain)
+    domain_links = [list(link) for link in domain_links]
+    # homepage_link = (link_text, link_url)
+    homepage_links = db_get_page_links(domain)
+    homepage_links_urls = [link[1] for link in homepage_links]
 
     # Remove all the tags from the text fields of the links.
-    for i, element in enumerate(menu):
-        menu[i][1] = strip_html_tags(element[1])
+    for i, link in enumerate(domain_links):
+        domain_links[i][1] = strip_html_tags(link[1])
 
     # Remove elements of the menu with empty texts.
-    menu = list(filter(lambda x: len(x[1]) > 0, menu))
+    domain_links = list(filter(lambda link: len(link[1]) > 0, domain_links))
 
-    # Remove elements with more than 3 words.
-    # menu = list(filter(lambda x: len(extract_words(x[1])) < 4, menu))
+    menu = []
+    # Apply bonus and malus to each link score.
+    for link in domain_links:
+        # If text is too long, penalize.
+        if len(link[1]) > 20:
+            link[0] /= 10
+        # If link is also present in homepage, bonus.
+        if link[2] in homepage_links_urls:
+            link[0] *= 100
+        # If link is contained in <nav> element, bonus.
+        if link[4] == 1:
+            link[0] *= 5
+
+    menu = sorted(domain_links, key=lambda link: link[0], reverse=True)
 
     # Remove elements of the menu that are not frequent.
     if len(menu) > 0:

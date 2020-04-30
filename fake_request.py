@@ -4,14 +4,16 @@ from helpers.utility import get_time
 import requests
 
 # defining the api-endpoint 
-API_ENDPOINT = "https://eb03521d.ngrok.io/webhook"
+API_ENDPOINT = "https://829ed32e.ngrok.io/webhook"
+
+action = "VisitPage"
 
 
 def get_data(url):
     return {
         "queryResult": {
             "queryText": "visit open.online",
-            "action": "VisitPage",
+            "action": action,
             "parameters": {
                 "string": url
             },
@@ -29,7 +31,10 @@ def get_data(url):
 
 
 domains = [
+    "nytimes.com",
+    "washingtonpost.com",
     "usatoday.com",
+    "nypost.com"
 ]
 
 for domain in domains:
