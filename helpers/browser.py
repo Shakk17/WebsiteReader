@@ -95,6 +95,7 @@ def scrape_page(url):
                 # True if the element is contained in a list container.
                 parents = [parent.name for parent in links_bs4[i].parents]
                 in_list = int("li" in parents)
+                in_nav = int("nav" in parents)
 
                 # Skip PDF files.
                 if href[-3:] in ["pdf", "jpg", "png"]:
@@ -110,10 +111,11 @@ def scrape_page(url):
             # Update link in database.
             db_insert_page_link(
                 page_url=url, link_url=href, link_text=text,
-                x_position=x_position, y_position=y_position, in_list=in_list)
+                x_position=x_position, y_position=y_position, in_list=in_list, in_nav=in_nav)
 
     except Exception as e:
-        print(magenta(f"[SELENIUM] Can't access this website: {url}"))
+        print(red(f"[SELENIUM] Can't access this website: {url}"))
+        print(e)
         body = "<html></html>"
 
     print(f"{get_time()} [SELENIUM] Page rendering finished.")

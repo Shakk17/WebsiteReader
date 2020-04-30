@@ -1,5 +1,5 @@
-from databases.database_handler import analyze_scraping
-from helpers.utility import get_domain, strip_html_tags, extract_words
+from databases.database_handler import analyze_scraping_nav, analyze_scraping_li
+from helpers.utility import get_domain, strip_html_tags
 
 
 def get_menu(url):
@@ -10,7 +10,11 @@ def get_menu(url):
     """
     # Get menu of the domain that contains the web page.
     domain = get_domain(url)
-    menu = analyze_scraping(domain)
+    # Try getting menu with nav element first.
+    menu = analyze_scraping_nav(domain)
+    # If fail, use li method.
+    if len(menu) == 0:
+        menu = analyze_scraping_li(domain)
     menu = [list(element) for element in menu]
 
     # Remove all the tags from the text fields of the links.

@@ -44,7 +44,7 @@ def get_language(url):
     try:
         # This is a combined call to the Aylien APIs.
         language = aylien_client.Language({'url': url})
-    except TimeoutError:
+    except Exception:
         return "unknown"
 
     language_code = language.get("lang")

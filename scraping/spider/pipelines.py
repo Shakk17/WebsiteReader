@@ -31,12 +31,13 @@ class SpiderPipeline(object):
         session = self.Session()
 
         try:
-            if len(item) == 4:
+            if len(item) == 5:
                 link = Link()
                 link.page_url = remove_scheme(item["page_url"])
                 link.link_url = remove_scheme(item["link_url"])
                 link.link_text = item["link_text"]
                 link.in_list = item["in_list"]
+                link.in_nav = item["in_nav"]
                 self.links.append(link)
             else:
                 session.bulk_save_objects(self.links)

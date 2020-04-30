@@ -8,3 +8,4 @@ class UrlItem(Item):
     x_position = Field()
     y_position = Field()
     in_list = Field()
+    in_nav = Field()

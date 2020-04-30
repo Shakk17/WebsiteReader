@@ -22,6 +22,7 @@ sql_create_page_links_table = """CREATE TABLE IF NOT EXISTS page_links (
                                     x_position integer,
                                     y_position integer,
                                     in_list integer NOT NULL,
+                                    in_nav integer NOT NULL,
                                     FOREIGN KEY (page_url) REFERENCES websites (domain)
                                 );"""
 
@@ -75,7 +76,36 @@ sql_create_functionality_table = """CREATE TABLE IF NOT EXISTS functionality (
                                 );"""
 
 
-def analyze_scraping(domain):
+def analyze_scraping_nav(domain):
+    """
+    This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
+    :param domain: A string containing the domain to analyse.
+    :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
+    """
+    cur = Database().conn.cursor()
+    sql = """
+    SELECT max(times) AS max_times, link_text, page_links.link_url, 
+            x_position, y_position, in_list
+    FROM (
+        SELECT COUNT(*) AS times, link_url
+        FROM page_links
+        WHERE page_url LIKE ?
+        GROUP BY link_url
+        ORDER BY times DESC
+    ) counting
+    INNER JOIN page_links
+    ON counting.link_url = page_links.link_url
+    WHERE page_links.page_url LIKE ? and page_links.in_nav = 1
+    GROUP BY page_links.link_url
+    ORDER BY max_times DESC"""
+    cur.execute(sql, (f"%{domain}%", f"%{domain}"))
+
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+
+
+def analyze_scraping_li(domain):
     """
     This method analyses the crawl of a domain and returns its menu links, ordered by number DESC.
     :param domain: A string containing the domain to analyse.

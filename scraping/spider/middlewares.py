@@ -102,6 +102,12 @@ class SpiderDownloaderMiddleware(object):
                 except IndexError:
                     in_list = False
 
+                # True if the element is contained in a nav container.
+                try:
+                    in_nav = "nav" in [parent.name for parent in links[i].parents]
+                except IndexError:
+                    in_nav = False
+
                 # Skip PDF files.
                 if href[-3:] in ["pdf", "jpg", "png"]:
                     continue
@@ -112,7 +118,7 @@ class SpiderDownloaderMiddleware(object):
                     continue
 
                 # Add the link to the string of bytes to be returned.
-                string_links += href + "*" + text + "*" + str(int(in_list)) + "$"
+                string_links += href + "*" + text + "*" + str(int(in_list)) + '*' + str(int(in_nav)) + "$"
             except StaleElementReferenceException:
                 continue
 
@@ -127,9 +133,9 @@ class SpiderDownloaderMiddleware(object):
         # Decode the bytes string contained in the response body.
         links = response.body.decode(encoding='UTF-8').split("$")
         # Unpack the string in order to read the fields.
-        # FORMAT: href * text * in_list $
+        # FORMAT: href * text * in_list * in_nav $
         links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 3, links))
+        links = list(filter(lambda x: len(x) == 4, links))
 
         num_links = 0
         # Analyze each link found in the page.
@@ -139,6 +145,7 @@ class SpiderDownloaderMiddleware(object):
             url_item["link_text"] = link[1]
             url_item["page_url"] = response.url
             url_item["in_list"] = link[2]
+            url_item["in_nav"] = link[3]
             # We save the link in the DB only if it belongs to the domain.
             if get_domain(response.url) in link[0]:
                 num_links += 1

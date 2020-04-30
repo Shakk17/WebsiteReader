@@ -32,4 +32,5 @@ class Link(Base):
     x_position = Column('x_position', Integer)
     y_position = Column('y_position', Integer)
     in_list = Column('in_list', Integer)
+    in_nav = Column('in_nav', Integer)
 
