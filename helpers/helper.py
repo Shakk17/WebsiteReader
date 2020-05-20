@@ -47,9 +47,10 @@ def show_element(element, idx_start, num_choices):
 
     # Format of display -> option n: text
     #                      option n+1: text
-    text_response = "You can choose between: \n"
+    num_1 = min(idx_start + num_choices, len(element))
+    num_2 = len(element)
+    text_response = f"{num_choices} of the {num_2} items found are: \n"
     for i, string in enumerate(strings, start=1):
         text_response += f"{idx_start + i}: {string}. \n"
-    text_response += f"\n{min(idx_start + num_choices, len(element))} out of {len(element)} option(s) read."
 
     return text_response

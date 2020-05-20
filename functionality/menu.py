@@ -47,4 +47,7 @@ def get_menu(url):
         threshold = 0.00
         menu = list(filter(lambda x: x[0] > highest_freq * threshold, menu))
 
+    # Cap the amount of results to 30
+    menu = menu[:30]
+
     return menu

@@ -1,20 +1,20 @@
 def assign_context(name, context):
-    if name == "bookmarks":
-        return BookmarksContext(context)
-    elif name == "googlesearch":
-        return GoogleSearchContext(context)
-    elif name == "form":
-        return FormContext(context)
-    elif name == "functionality":
-        return FunctionalityContext(context)
-    elif name == "links_all":
-        return LinksAllContext(context)
-    elif name == "links_article":
-        return LinksArticleContext(context)
-    elif name == "maintext":
-        return MainTextContext(context)
-    elif name == "menu":
-        return MenuContext(context)
+    if "bookmarks" in name:
+        return "bookmarks", BookmarksContext(context)
+    elif "googlesearch" in name:
+        return "googlesearch", GoogleSearchContext(context)
+    elif "form" in name:
+        return "form", FormContext(context)
+    elif "functionality" in name:
+        return "functionality", FunctionalityContext(context)
+    elif "links_all" in name:
+        return "links_all", LinksAllContext(context)
+    elif "links_article" in name:
+        return "links_article", LinksArticleContext(context)
+    elif "maintext" in name:
+        return "maintext", MainTextContext(context)
+    elif "menu" in name:
+        return "menu", MenuContext(context)
 
 
 class Context:

@@ -4,7 +4,7 @@ from helpers.utility import get_time
 import requests
 
 # defining the api-endpoint 
-API_ENDPOINT = "https://829ed32e.ngrok.io/webhook"
+API_ENDPOINT = "https://263b9e40.ngrok.io/webhook"
 
 action = "VisitPage"
 
@@ -31,10 +31,8 @@ def get_data(url):
 
 
 domains = [
-    "nytimes.com",
-    "washingtonpost.com",
-    "usatoday.com",
-    "nypost.com"
+    "floriandaniel.it",
+    "polimi.it"
 ]
 
 for domain in domains:
@@ -43,4 +41,4 @@ for domain in domains:
         print(f"{get_time()} Requested: {domain}")
     except ConnectionError:
         print(f"{get_time()} Connection error: {domain}")
-    time.sleep(120)
+    time.sleep(180)

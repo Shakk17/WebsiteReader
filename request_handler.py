@@ -28,6 +28,7 @@ class RequestHandler:
     """
     cursor = None
     dict_contexts = dict()
+    navigation = None
 
     def __init__(self):
         # Queue set up to hold threads responses.
@@ -80,13 +81,18 @@ class RequestHandler:
 
         # Get all active contexts.
         contexts = request.get("queryResult").get("outputContexts")
+        self.dict_contexts = {}
         # Get Navigation context. If not present, create it.
         navigation_context = next((x for x in contexts if "navigation" in x.get("name")), None)
         self.navigation = NavigationContext(navigation_context)
         # Get the other contexts, if present.
         for context in contexts:
             name = context.get("name").split('/')[-1]
-            self.dict_contexts[name] = assign_context(name, context)
+            
+            # I keep only the contexts I care about.
+            if assign_context(name, context) is not None:
+                new_name, context = assign_context(name, context)
+                self.dict_contexts[new_name] = context
 
         text_response = "Action not recognized by the server."
 
@@ -180,7 +186,8 @@ class RequestHandler:
                                              idx_start=self.dict_contexts["bookmarks"].index,
                                              num_choices=num_choices)
         elif command == "add":
-            text_response = insert_bookmark(url=self.navigation.url, name=self.dict_contexts["bookmarks"].name)
+            name = self.dict_contexts["bookmarks"].name
+            text_response = insert_bookmark(url=self.navigation.url, name=name)
         
         return text_response
 
