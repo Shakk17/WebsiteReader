@@ -5,7 +5,7 @@ from helpers.utility import get_domain, strip_html_tags
 
 def get_menu(url):
     """
-    This method returns all the links belonging to the menu of a web page.
+    This method returns all the links belonging to the navigation menu of a web page.
     :param url: A string containing the URL of the web page.
     :return: An array of tuples (number, link_text, link_url, avg_x, avg_y) ordered by number DESC.
     """
@@ -26,7 +26,6 @@ def get_menu(url):
     # Remove elements of the menu with empty texts.
     domain_links = list(filter(lambda link: len(link[1]) > 0, domain_links))
 
-    menu = []
     # Apply bonus and malus to each link score.
     for link in domain_links:
         # If text is too long, penalize.

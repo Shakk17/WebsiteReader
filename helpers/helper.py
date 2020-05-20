@@ -36,20 +36,19 @@ def update_cursor_index(action, old_idx, step, size):
     return new_idx
 
 
-def show_element(element, idx_start, num_choices):
+def show_element(strings, idx_start, num_choices):
     # Get the indexes of the options to be shown to the user
-    if idx_start >= len(element):
+    if idx_start >= len(strings):
         idx_start = 0
     idx_end = idx_start + num_choices
 
-    # Get the options that will be shown to the user in the text response.
-    strings = [tup[1] for tup in element[idx_start:idx_end]]
+    strings = strings[idx_start:idx_end]
 
     # Format of display -> option n: text
     #                      option n+1: text
-    num_1 = min(idx_start + num_choices, len(element))
-    num_2 = len(element)
-    text_response = f"{num_choices} of the {num_2} items found are: \n"
+    num_1 = min(idx_start + num_choices, len(strings))
+    num_2 = len(strings)
+    text_response = f"{num_choices} of {num_2} items found are: \n"
     for i, string in enumerate(strings, start=1):
         text_response += f"{idx_start + i}: {string}. \n"
 

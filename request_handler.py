@@ -88,7 +88,7 @@ class RequestHandler:
         # Get the other contexts, if present.
         for context in contexts:
             name = context.get("name").split('/')[-1]
-            
+
             # I keep only the contexts I care about.
             if assign_context(name, context) is not None:
                 new_name, context = assign_context(name, context)
@@ -131,14 +131,6 @@ class RequestHandler:
         return self.build_response(text_response=text_response)
 
     def google_search(self, action):
-        """
-        This method:
-            - if the user has performed a search, it returns one of the results of the Google search;
-            - if the user has requested a specific URL, it returns info about the website reachable at that URL.
-        :param query_results: A list containing the results of the Google search.
-        :param action: a string containing "previous", "next" or "reset".
-        :return: A string containing info about one result of the Google search or info about a web page.
-        """
         try:
             query_results = get_urls_from_google(query=self.dict_contexts["googlesearch"].query)
         except Exception:
@@ -192,13 +184,6 @@ class RequestHandler:
         return text_response
 
     def visit_page(self):
-        """
-        This method:
-        - save the action performed in the database;
-        - extracts information about the web page;
-        - checks if the domain has been already crawled. If not, it starts a new crawl.
-        :return: A text response containing information to show to the user about the web page.
-        """
         # Save, if new, the action performed by the user into the history table of the database.
         try:
             old_action, old_url = db_get_last_action("shakk")
@@ -221,19 +206,11 @@ class RequestHandler:
         return text_response
 
     def homepage(self):
-        """
-        This method visits the homepage of the current website.
-        :return:
-        """
         self.navigation.url = add_scheme(get_domain(self.navigation.url))
         text_response = self.visit_page()
         return text_response
 
     def get_info(self):
-        """
-        This method returns info about the web page currently visited to the user.
-        :return: A text response containing info about the web page currently visited.
-        """
         # Get info about the web page.
         text_response = get_info(url=self.navigation.url)
         return text_response
@@ -248,8 +225,9 @@ class RequestHandler:
                                                            size=len(menu))
             # Number of choices that will get displayed to the user at once.
             num_choices = 10
+            strings = [item[1] for item in menu]
             # Get text response containing voices to show.
-            text_response = show_element(element=menu, idx_start=self.dict_contexts["menu"].index, num_choices=num_choices)
+            text_response = show_element(strings=strings, idx_start=self.dict_contexts["menu"].index, num_choices=num_choices)
         elif command == "open":
             # Get all the URLs of the menu links.
             menu_anchors = [tup[2] for tup in menu]
