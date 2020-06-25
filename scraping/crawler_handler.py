@@ -23,6 +23,3 @@ class Crawler:
         homepage_url = add_scheme(f"{self.start_url}")
         command = f"scrapy crawl links -s url={homepage_url}"
         subprocess.call(command, cwd=path, shell=True)
-
-
-

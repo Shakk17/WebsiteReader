@@ -5,15 +5,9 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from bs4 import BeautifulSoup
 from scrapy import signals
-from scrapy.http import HtmlResponse
-from urllib.parse import urljoin
 
-from helpers.browser import StaleElementReferenceException, get_quick_html
 from helpers.printer import magenta
-from helpers.utility import get_time, get_domain, strip_html_tags, add_scheme
-from scraping.spider.items import UrlItem
 
 
 class SpiderSpiderMiddleware(object):
@@ -79,85 +73,11 @@ class SpiderDownloaderMiddleware(object):
     def process_request(self, request, spider):
         # Called for each request that goes through the downloader middleware.
 
-        spider.visited_links.append(request.url)
-        print(magenta(f"{get_time()} ({len(spider.visited_links)}) Scraping {request.url}"))
-
-        body = get_quick_html(request.url)
-
-        # Extract all links from the page.
-        links = BeautifulSoup(body, "lxml").find_all("a")
-        links = list(filter(lambda x: x.get("href") is not None, links))
-
-        # Create a string containing all the links in the page, with location.
-        # FORMAT: href * text * x_position * y_position $
-        string_links = ""
-
-        for i, link in enumerate(links):
-            try:
-                href = add_scheme(urljoin(request.url, link.get("href")))
-                text = strip_html_tags(link.text)
-                # True if the element is contained in a list container.
-                try:
-                    in_list = "li" in [parent.name for parent in links[i].parents]
-                except IndexError:
-                    in_list = False
-
-                # True if the element is contained in a nav container.
-                try:
-                    in_nav = "nav" in [parent.name for parent in links[i].parents]
-                except IndexError:
-                    in_nav = False
-
-                # Skip PDF files.
-                if href[-3:] in ["pdf", "jpg", "png"]:
-                    continue
-
-                # If the link links to the same page, discard it.
-                hash_position = href.find("/#")
-                if href[:hash_position] == add_scheme(request.url):
-                    continue
-
-                # Add the link to the string of bytes to be returned.
-                string_links += href + "*" + text + "*" + str(int(in_list)) + '*' + str(int(in_nav)) + "$"
-            except StaleElementReferenceException:
-                continue
-
-        # Transform the string to binary code in order to be passed as a parameter.
-        bytes_links = string_links.encode(encoding='UTF-8')
-
-        return HtmlResponse(request.url, body=bytes_links, encoding='utf-8', request=request)
+        return None
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
 
-        # Decode the bytes string contained in the response body.
-        links = response.body.decode(encoding='UTF-8').split("$")
-        # Unpack the string in order to read the fields.
-        # FORMAT: href * text * in_list * in_nav $
-        links = [link.split("*") for link in links]
-        links = list(filter(lambda x: len(x) == 4, links))
-
-        num_links = 0
-        # Analyze each link found in the page.
-        for (i, link) in enumerate(links):
-            url_item = UrlItem()
-            url_item["link_url"] = link[0]
-            url_item["link_text"] = link[1]
-            url_item["page_url"] = response.url
-            url_item["in_list"] = link[2]
-            url_item["in_nav"] = link[3]
-            # We save the link in the DB only if it belongs to the domain.
-            if get_domain(response.url) in link[0]:
-                num_links += 1
-                # Call pipeline.
-                pipeline = spider.crawler.engine.scraper.itemproc
-                pipeline.process_item(url_item, self)
-
-        # Order the pipeline to perform a bulk insertion.
-        pipeline = spider.crawler.engine.scraper.itemproc
-        pipeline.process_item("Bulk insertion.", self)
-
-        print(f"({get_domain(request.url)} - {len(spider.visited_links)}) {num_links} links saved.")
         return response
 
     def process_exception(self, request, exception, spider):
