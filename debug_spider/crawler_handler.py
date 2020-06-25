@@ -2,8 +2,8 @@ import os
 import subprocess
 from pathlib import Path
 
-from databases.database_handler import Database
-from helper import get_domain
+from databases.handlers.websites_handler import db_insert_website
+from debug_spider.helpers.utility import get_domain
 
 
 class Crawler:
@@ -13,7 +13,7 @@ class Crawler:
     def run(self):
         # Insert domain into the website database.
         domain = get_domain(self.start_url)
-        Database().insert_website(domain=domain)
+        db_insert_website(domain=domain)
         print(f"Inserted {domain} in websites database.")
 
         # Open a shell in the scrapy directory and start crawling in a new subprocess.

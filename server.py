@@ -1,12 +1,11 @@
+import logging
+
+from colorama import Fore, Style
 from flask import Flask, request, make_response, jsonify
 
-from databases.database_handler import Database
+from databases.models import create_tables
 from helpers.utility import get_time
-
 from request_handler import RequestHandler
-from colorama import Fore, Style
-
-import logging
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -43,7 +42,8 @@ def webhook():
 
 
 # run the app
-Database().start()
 if __name__ == '__main__':
+    create_tables()
+    # Database().start()
     app.run()
 

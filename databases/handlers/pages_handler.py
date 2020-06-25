@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from databases.database_handler import Database
+from sqlalchemy.exc import IntegrityError
+
+from databases.models import Page, db_session, engine
 from helpers.utility import remove_scheme
 
 
@@ -9,31 +11,34 @@ def db_insert_page(url, simple_html):
     This method inserts a web page in the pages table of the database.
     """
     url = remove_scheme(url)
-    sql = """INSERT INTO pages (url, simple_html, last_visit, parsed_html) 
-                VALUES (?, ?, ?, ?)"""
-    cur = Database().conn.cursor()
-    cur.execute(sql, (url, simple_html, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "In progress."))
+    page = Page(url=url, simple_html=simple_html,
+                last_visit=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), parsed_html="In progress.")
+    session = db_session()
+    try:
+        session.add(page)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+    finally:
+        session.close()
 
 
 def db_add_parsed_html_to_page(url, parsed_html):
     url = remove_scheme(url)
-    sql = "UPDATE pages SET parsed_html=? WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (parsed_html, url))
+    sql = "UPDATE pages SET parsed_html=:parsed_html WHERE url LIKE :url"
+    engine.connect().execute(sql, parsed_html=parsed_html, url=url)
 
 
 def db_add_topic_to_page(url, topic):
     url = remove_scheme(url)
-    sql = "UPDATE pages SET topic=? WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (topic, url))
+    sql = "UPDATE pages SET topic=:topic WHERE url LIKE :url"
+    engine.connect().execute(sql, topic=topic, url=url)
 
 
 def db_add_language_to_page(url, language):
     url = remove_scheme(url)
-    sql = "UPDATE pages SET language=? WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (language, url))
+    sql = "UPDATE pages SET language=:language WHERE url LIKE :url"
+    engine.connect().execute(sql, language=language, url=url)
 
 
 def db_add_clean_text_to_page(url, clean_text):
@@ -43,9 +48,8 @@ def db_add_clean_text_to_page(url, clean_text):
     :param clean_text: A string representing the clear main text of the web page to insert.
     """
     url = remove_scheme(url)
-    sql = "UPDATE pages SET clean_text=? WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (clean_text, url))
+    sql = "UPDATE pages SET clean_text=:clean_text WHERE url LIKE :url"
+    engine.connect().execute(sql, clean_text=clean_text, url=url)
 
 
 def db_delete_page(url):
@@ -55,9 +59,8 @@ def db_delete_page(url):
     :return: None
     """
     url = remove_scheme(url)
-    sql = "DELETE FROM pages WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (url,))
+    sql = "DELETE FROM pages WHERE url LIKE :url"
+    engine.connect().execute(sql, url=url)
 
 
 def db_get_page(url):
@@ -67,8 +70,6 @@ def db_get_page(url):
     :return: A tuple (url, topic, summary, language, simple_html, parsed_html, clear_text, last_visit) or None.
     """
     url = remove_scheme(url)
-    sql = "SELECT * FROM pages WHERE url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (url,))
-    result = cur.fetchone()
+    sql = "SELECT * FROM pages WHERE url LIKE :url"
+    result = engine.connect().execute(sql, url=url).fetchone()
     return result

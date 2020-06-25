@@ -1,6 +1,8 @@
 from datetime import datetime
 
-from databases.database_handler import Database
+from sqlalchemy import text
+
+from databases.models import History, db_session, engine
 from helpers.utility import remove_scheme
 
 
@@ -11,19 +13,16 @@ def db_insert_action(action, url):
     :param url: The url of the web page related to the action performed by the user.
     """
     url = remove_scheme(url)
-    sql = '''INSERT INTO history (user, action, url, timestamp)
-                VALUES (?, ?, ?, ?) '''
-    cur = Database().conn.cursor()
-    record = ("shakk", action, url, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    cur.execute(sql, record)
-    cur.close()
+    session = db_session()
+    history = History(user="shakk", action=action, url=url, timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    session.add(history)
+    session.commit()
+    session.close()
 
 
 def db_delete_last_action(user):
-    sql = "DELETE FROM history WHERE id = (SELECT MAX(id) FROM history) and user LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (user,))
-    cur.close()
+    sql = "DELETE FROM history WHERE id = (SELECT MAX(id) FROM history) and user LIKE :user"
+    engine.connect().execute(sql, user=user)
 
 
 def db_get_last_action(user):
@@ -33,10 +32,6 @@ def db_get_last_action(user):
     :param user: A string that represents the user name.
     :return: A tuple (action, url) containing the second to last action performed by the user.
     """
-    # First, get the second to last action performed.
-    sql = "SELECT action, url FROM history WHERE user LIKE ? ORDER BY id DESC"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (user,))
-    result = cur.fetchone()
-    cur.close()
+    sql = text("SELECT action, url FROM history WHERE user LIKE :user ORDER BY id DESC")
+    result = engine.connect().execute(sql, user=user).fetchone()
     return result

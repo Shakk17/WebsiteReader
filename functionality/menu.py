@@ -1,5 +1,4 @@
-from databases.database_handler import get_links_in_list
-from databases.handlers.page_links_handler import db_get_page_links
+from databases.handlers.page_links_handler import db_get_page_links, get_links_in_list
 from helpers.utility import get_domain, strip_html_tags
 
 

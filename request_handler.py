@@ -187,7 +187,7 @@ class RequestHandler:
         # Save, if new, the action performed by the user into the history table of the database.
         try:
             old_action, old_url = db_get_last_action("shakk")
-        except TypeError:
+        except Exception:
             old_url = ""
         if old_url != self.navigation.url:
             db_insert_action("VisitPage", self.navigation.url)

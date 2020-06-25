@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from databases.database_handler import Database
+from databases.models import Website, db_session, engine
 
 
 def db_insert_website(domain):
@@ -8,17 +8,17 @@ def db_insert_website(domain):
     This method inserts a website into the websites table of the database.
     :param domain: The domain of the website to insert in the database.
     """
-    sql = "INSERT INTO websites (domain, last_crawled_on) VALUES (?, ?)"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (domain, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    cur.close()
+    website = Website(domain=domain, last_crawled_on=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    session = db_session()
+    session.add(website)
+    session.commit()
+    session.close()
 
 
 def db_delete_website(domain):
-    sql = "DELETE FROM websites WHERE domain LIKE ?;"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (f"%{domain}",))
-    cur.close()
+    domain = f"%{domain}"
+    sql = "DELETE FROM websites WHERE domain LIKE :domain;"
+    engine.connect().execute(sql, domain=domain)
 
 
 def db_last_time_crawled(domain):
@@ -27,11 +27,8 @@ def db_last_time_crawled(domain):
     :param domain: A string representing the domain of the website to search.
     :return: The timestamp of the last crawl (if it has been crawled), None otherwise.
     """
-    sql = "SELECT * FROM websites WHERE domain LIKE ? LIMIT 1"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (domain,))
-    rows = cur.fetchone()
-    cur.close()
+    sql = "SELECT * FROM websites WHERE domain LIKE :domain LIMIT 1"
+    rows = engine.connect().execute(sql, domain=domain).fetchone()
     # Returns True is it has been crawled, False otherwise.
     if rows is not None:
         return rows[1]

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 
 from helpers.utility import remove_scheme
-from scraping.spider.models import db_connect, create_table, Link
+from databases.models import PageLink, db_session
 
 
 # -*- coding: utf-8 -*-
@@ -15,13 +15,7 @@ from scraping.spider.models import db_connect, create_table, Link
 class SpiderPipeline(object):
 
     def __init__(self):
-        """
-        Initializes database connection and sessionmaker
-        Creates tables
-        """
-        engine = db_connect()
-        create_table(engine)
-        self.Session = sessionmaker(bind=engine)
+        self.Session = db_session
         self.links = []
 
     def process_item(self, item, spider):
@@ -32,7 +26,7 @@ class SpiderPipeline(object):
 
         try:
             if len(item) == 5:
-                link = Link()
+                link = PageLink()
                 link.page_url = remove_scheme(item["page_url"])
                 link.link_url = remove_scheme(item["link_url"])
                 link.link_text = item["link_text"]

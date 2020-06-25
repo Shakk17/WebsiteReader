@@ -1,3 +1,6 @@
+import os
+import pathlib
+
 import requests
 from bs4 import BeautifulSoup
 from selenium.common.exceptions import StaleElementReferenceException
@@ -5,20 +8,22 @@ from selenium.webdriver.common.by import By
 from seleniumwire import webdriver
 
 from databases.handlers.page_links_handler import db_insert_page_link, db_delete_all_page_links
-from helpers.printer import magenta, red
+from helpers.printer import red
 from helpers.utility import strip_html_tags, get_time, add_scheme
+
+dir_path = pathlib.Path(__file__).parent.absolute()
 
 
 def get_firefox_profile():
     profile = webdriver.FirefoxProfile()
     # AdBlockPlus extension.
-    profile.add_extension("firefox_extensions/{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi")
+    profile.add_extension(f"{dir_path}/firefox_extensions/d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d.xpi")
     profile.set_preference("extensions.adblockplus.currentVersion", "3.8")
     # uBlock Origin extension.
     # profile.add_extension("firefox_extensions/uBlock0@raymondhill.net.xpi")
     # profile.set_preference("extensions.ublock0.currentVersion", "1.25.2")
     # I don't care about cookies extension.
-    profile.add_extension("firefox_extensions/jid1-KKzOGWgsW3Ao4Q@jetpack.xpi")
+    profile.add_extension(f"{dir_path}/firefox_extensions/jid1-KKzOGWgsW3Ao4Q@jetpack.xpi")
     profile.set_preference("extensions.idontcareaboutcookies.currentVersion", "3.1.3")
     return profile
 
@@ -73,7 +78,10 @@ def scrape_page(url):
     :return: None.
     """
     print(f"{get_time()} [SELENIUM] Page rendering started.")
-    browser = webdriver.Firefox(options=get_firefox_options(), firefox_profile=get_firefox_profile())
+    browser = webdriver.Firefox(executable_path=f"{dir_path}/geckodriver.exe",
+                                options=get_firefox_options(),
+                                firefox_profile=get_firefox_profile(),
+                                service_log_path=os.devnull)
     try:
         browser.get(url)
         body = browser.page_source

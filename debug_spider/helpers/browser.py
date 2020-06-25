@@ -7,7 +7,7 @@ from helpers.utility import get_time
 def get_firefox_profile():
     profile = webdriver.FirefoxProfile()
     # AdBlockPlus extension.
-    profile.add_extension("firefox_extensions/{d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d}.xpi")
+    profile.add_extension("firefox_extensions/d10d0bf8-f5b5-c8b4-a8b2-2b9879e08c5d.xpi")
     profile.set_preference("extensions.adblockplus.currentVersion", "3.8")
     # uBlock Origin extension.
     profile.add_extension("firefox_extensions/uBlock0@raymondhill.net.xpi")

@@ -52,7 +52,7 @@ def analyze_page(url):
     result = db_get_page(url=url)
 
     # Delete, if present, an obsolete version of the page.
-    if result is not None and not helper.is_action_recent(timestamp=result[6], days=1, minutes=40):
+    if result is not None and not helper.is_action_recent(timestamp=result[6], days=0, minutes=1):
         db_delete_page(url=url)
         db_delete_text_links(url=url)
         get_new_page = True
@@ -108,7 +108,7 @@ def analyze_domain(url):
     last_crawling = db_last_time_crawled(domain)
 
     # Delete, if present, an obsolete crawling.
-    if last_crawling is not None and not is_action_recent(timestamp=last_crawling, days=1, minutes=40):
+    if last_crawling is not None and not is_action_recent(timestamp=last_crawling, days=0, minutes=1):
         db_delete_all_domain_links(domain)
         db_delete_website(domain)
         to_crawl = True

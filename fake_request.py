@@ -4,7 +4,7 @@ from helpers.utility import get_time
 import requests
 
 # defining the api-endpoint 
-API_ENDPOINT = "https://263b9e40.ngrok.io/webhook"
+API_ENDPOINT = "https://8025bec19c3e.ngrok.io/webhook"
 
 action = "VisitPage"
 
@@ -31,8 +31,7 @@ def get_data(url):
 
 
 domains = [
-    "floriandaniel.it",
-    "polimi.it"
+    "floriandaniel.it"
 ]
 
 for domain in domains:

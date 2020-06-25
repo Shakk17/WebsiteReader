@@ -1,4 +1,4 @@
-from databases.database_handler import Database
+from databases.models import TextLink, db_session, engine
 from helpers.utility import remove_scheme
 
 
@@ -11,10 +11,11 @@ def db_insert_text_link(page_url, link_num, link):
     :return: None.
     """
     page_url = remove_scheme(page_url)
-    sql = "INSERT INTO text_links (page_url, link_num, position, link_text, link_url) VALUES (?, ?, ?, ?, ?)"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (page_url, link_num, link[0], link[1], link[2]))
-    cur.close()
+    text_link = TextLink(page_url=page_url, link_num=link_num, position=link[0], link_text=link[1], link_url=link[2])
+    session = db_session()
+    session.add(text_link)
+    session.commit()
+    session.close()
 
 
 def db_get_text_link(page_url, link_num):
@@ -25,11 +26,8 @@ def db_get_text_link(page_url, link_num):
     :return: A tuple (link_url) containing the URL of the link requested or None.
     """
     page_url = remove_scheme(page_url)
-    sql = "SELECT link_url FROM text_links WHERE page_url LIKE ? AND link_num = ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (page_url, link_num))
-    result = cur.fetchone()
-    cur.close()
+    sql = "SELECT link_url FROM text_links WHERE page_url LIKE :page_url AND link_num = :link_num"
+    result = engine.connect().execute(sql, page_url=page_url, link_num=link_num).fetchone()
     return result
 
 
@@ -40,11 +38,8 @@ def db_get_text_links(page_url):
     :return: An array containing tuples (position, link_text) with all the info about the links of the web page.
     """
     page_url = remove_scheme(page_url)
-    sql = "SELECT position, link_text FROM text_links WHERE page_url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (page_url,))
-    result = cur.fetchall()
-    cur.close()
+    sql = "SELECT position, link_text FROM text_links WHERE page_url LIKE :page_url"
+    result = engine.connect().execute(sql, page_url=page_url).fetchall()
     return result
 
 
@@ -55,7 +50,5 @@ def db_delete_text_links(url):
     :return: None
     """
     url = remove_scheme(url)
-    sql = "DELETE FROM text_links WHERE page_url LIKE ?"
-    cur = Database().conn.cursor()
-    cur.execute(sql, (url,))
-    cur.close()
+    sql = "DELETE FROM text_links WHERE page_url LIKE :url"
+    engine.connect().execute(sql, url=url)
