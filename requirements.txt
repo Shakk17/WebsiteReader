@@ -41,7 +41,7 @@ python-dateutil==2.8.1
 queuelib==1.5.0
 requests==2.23.0
 requests-file==1.4.3
-rsa==4.0
+rsa==4.1
 Scrapy==1.8.0
 Scrapy-UserAgents==0.0.1
 selenium==3.141.0
